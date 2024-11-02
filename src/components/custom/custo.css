@@ -1,0 +1,84 @@
+.typing-effect {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  border-left: .10em solid black; /* Default cursor for Arabic (RTL) */
+  white-space: nowrap;
+  animation: typing 3.5s steps(30, end), blink .75s step-end infinite;
+  
+
+}
+
+.typing-effect.ltr {
+  border-right: .10em solid black; /* Cursor for LTR */
+  border-left: none; /* Remove left border for LTR */
+  direction: ltr; /* Ensure text flows from left to right */
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+
+.blur-background {
+  filter: blur(5px);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10; /* To ensure it's above other content */
+}
+
+
+.close-modal-btn {
+  /* Adjust these styles as needed */
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 10px; /* Add some space from the corners */
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Add this to your global.css or any other CSS file imported in _app.js */
+
+/* Checked state for the menu icon */
+#menuToggle:checked + .menu-icon .space-y-1 > span:nth-child(1) {
+  transform: rotate(45deg) translateY(8px) translateX(7px);
+}
+
+#menuToggle:checked + .menu-icon .space-y-1 > span:nth-child(2) {
+  opacity: 0;
+}
+
+#menuToggle:checked + .menu-icon .space-y-1 > span:nth-child(3) {
+  transform: rotate(-45deg) ;
+}
+
+/* Control the display of the menu items */
+#menuToggle:checked ~ .menu-items {
+  display: block;
+}
+
+
+/* .crisp-client .cc-tlyw {
+  right: 0 !important;
+  left: auto !important;
+  background-color: black !important ;
+  display: none;
+} */

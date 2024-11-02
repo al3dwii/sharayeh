@@ -1,0 +1,497 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 
+R (0)
+G (110)
+B (255 */
+
+@layer base {
+  :root {
+    --background: 216 100% 98.04%;
+    --foreground: 213.6 100% 4.9%;
+
+    --primary: 214.12 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --card: 216 100% 98.04%;
+    --card-foreground: 213.6 100% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 213.6 100% 4.9%;
+
+    --secondary: 214.74 100% 92.55%;
+    --secondary-foreground: 216 100% 0.98%;
+
+    --muted: 213.6 100% 95.1%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 213.6 100% 95.1%;
+    --accent-foreground: 214.12 100% 50%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 0% 90.2%;
+    --input: 0 0% 90.2%;
+    --ring: 214.12 100% 50%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Name: custom color palette
+       Author: Ilias Ism
+       URL: https://gradient.page */
+
+    /* CSS: .bg-gradient { background: var(--gradient) } */
+    --gradient: linear-gradient(to top left, #007adf, #00ecbc);
+
+    --background: 220 65% 3.52%;
+    --foreground: 220 10% 97.2%;
+
+    --muted: 220 50% 13.2%;
+    --muted-foreground: 220 10% 54.4%;
+
+    --popover: 220 45% 5.72%;
+    --popover-foreground: 220 10% 97.2%;
+
+    --card: 220 45% 5.72%;
+    --card-foreground: 220 10% 97.2%;
+
+    --border: 220 50% 13.2%;
+    --input: 220 50% 13.2%;
+
+    --primary: 220 100% 44%;
+    --primary-foreground: 220 10% 97.2%;
+
+    --secondary: 220 50% 13.2%;
+    --secondary-foreground: 220 10% 97.2%;
+
+    --accent: 220 50% 13.2%;
+    --accent-foreground: 220 10% 97.2%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 220 10% 97.2%;
+
+    --ring: 220 100% 44%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+:root {
+
+
+/* purple O  */ 
+  --primary-bg: #2b2154; 
+  --secondary-bg: #46397d; 
+  --button-primary-bg: #5d4f9d; 
+  --button-secondary-bg: #7e71b6; 
+  --footer-bg: #1d1738; 
+  --accent-color: #d1322b; 
+  
+
+
+  /* 
+  --primary-bg: #024747; 
+  --secondary-bg: #749CB5; 
+  --button-primary-bg: #F3C331; 
+  --button-secondary-bg: #F9F9F8; 
+  --footer-bg: #B73B52; 
+  --accent-color: #F3C331; 
+  */
+
+/* 
+  --primary-bg: #024747; 
+  --secondary-bg: #606868; 
+  --button-primary-bg: #95A1A1; 
+  --button-secondary-bg: #CBD7D1; 
+  --footer-bg: #1D1E1E; 
+  --accent-color: #1D1E1E; 
+  
+ */
+
+ 
+
+   /* green   
+  --primary-bg: #2E8B57; 
+  --secondary-bg: #98FB98; 
+  --button-primary-bg: #006400; 
+  --button-secondary-bg: #32CD32; 
+  --footer-bg: #556B2F; 
+  
+*/
+
+
+/* Define distinct colors for each section 
+--primary-bg: #335c3b; 
+--secondary-bg: #8aac9d; 
+--button-primary-bg: #6f823c; 
+--button-secondary-bg: #85a772 ; 
+--footer-bg: #1b3f2f; 
+--accent-color: #d1322b; 
+
+*/
+
+
+/* 
+--primary-bg: #c7ddc1; 
+--secondary-bg: #8daa88  ; 
+--button-primary-bg: #c9d602; 
+--button-secondary-bg: #acbfac ; 
+--footer-bg: #1b3f2f; 
+--accent-color: #d1322b; 
+
+*/
+
+
+/* 
+
+background-color: var(--plum--100);
+background-image: url(https://cdn.prod.website-files.com/63ca068…/666a90f…_cake-slice-17.png), url(https://cdn.prod.website-files.com/63ca068…/666016f…_cake-slice-5.png), linear-gradient(151deg, var(--white), transparent);
+background-position: 480px 200px, 0 0, 0 0;
+background-repeat: no-repeat, no-repeat, repeat;
+background-size: 1100px, 1200px, auto;
+padding-top: 4em;
+*/
+
+/* 
+--primary-bg: #5f58cc; 
+  --secondary-bg: #918cff; 
+  --button-primary-bg: #7e78ff; 
+  --button-secondary-bg: #a09aff; 
+  --footer-bg: #4c46b3; 
+  --accent-color: #ff786f; 
+  
+*/
+/* 
+    --primary-bg: #749CB5; 
+    --secondary-bg: #F3C331; 
+    --button-primary-bg: #B73B52; 
+    --button-secondary-bg: #F9F9F8; 
+    --footer-bg: #46397d; 
+    --accent-color: #FF786F; 
+  */
+
+  /* 
+    --primary-bg: #F3C331; 
+    --secondary-bg: #749CB5; 
+    --button-primary-bg: #F9F9F8; 
+    --button-secondary-bg: #B73B52; 
+    --footer-bg: #FF786F; 
+    --accent-color: #46397d; 
+*/
+
+/* 
+    --primary-bg: #F3C331; 
+  --secondary-bg: #749CB5; 
+  --button-primary-bg: #F9F9F8; 
+  --button-secondary-bg: #B73B52; 
+  --footer-bg: #FF786F; 
+  --accent-color: #46397d; 
+*/
+  /* 
+  --primary-bg: #1d3557; 
+  --secondary-bg: #457b9d; 
+  --button-primary-bg: #a8dadc; 
+  --button-secondary-bg: #f1faee; 
+  --footer-bg: #1b2838; 
+  --accent-color: #e63946; 
+
+*/
+
+
+/* 
+--primary-bg: #efd23d; 
+--secondary-bg: #d9ddda; 
+--button-primary-bg: #848c84; 
+--button-secondary-bg: #848c84 ; 
+--footer-bg: #373630; 
+--accent-color: #d1322b; 
+*/
+
+
+
+/* 
+--primary-bg: #434442; 
+--secondary-bg: #74746c; 
+--button-primary-bg: #cac2b2; 
+--button-secondary-bg: #242c2b ; 
+--footer-bg: #131312; 
+--accent-color: #d1322b; 
+
+ */
+
+
+
+/* 
+--primary-bg: #048eca; 
+--secondary-bg: #049cd4; 
+--button-primary-bg: #d4d7de; 
+--button-secondary-bg: #048eca; 
+--footer-bg: #045c9c; 
+
+*/
+
+  /* blue 
+  --primary-bg: #1E90FF; 
+  --secondary-bg: #87CEFA; 
+  --button-primary-bg: #00008B; 
+  --button-secondary-bg: #4682B4; 
+  --footer-bg: #27408B; 
+*/
+  
+
+  /* gray
+  --primary-bg: #A9A9A9; 
+  --secondary-bg: #D3D3D3; 
+  --button-primary-bg: #696969; 
+  --button-secondary-bg: #808080; 
+  --footer-bg: #2F4F4F; 
+   */
+
+
+   /* 
+  --primary-bg: #FFE5B4; 
+  --secondary-bg: #FFDAB9; 
+  --button-primary-bg: #FFB07C; 
+  --button-secondary-bg: #FF7F50; 
+  --footer-bg: #CD5C5C; 
+   */
+
+}
+
+
+.dotPattern {
+  background-image: radial-gradient(rgb(35, 40, 68) 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+
+.use-automation-zoom-in {
+  animation: automation-zoom-in 0.5s;
+}
+
+@keyframes automation-zoom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+}
+
+.bg-gradient-primary {
+  background-image: linear-gradient(to bottom, var(--primary-bg), transparent);
+}
+
+
+/* Primary and Secondary Background Classes */
+.bg-primary {
+  background-color: var(--primary-bg);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-bg);
+}
+
+/* Button Primary and Secondary */
+.button-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--primary-foreground);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.button-primary:hover {
+  background-color: #acbfac ; /* Darkened button-primary-bg */
+}
+
+.button-secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--secondary-foreground);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  background-color: #acbfac; /* Darkened button-secondary-bg */
+}
+
+/* Footer */
+footer {
+  background-color: var(--footer-bg);
+  padding: 2rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.bg__image {
+  background-image: url('/bgim.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeleton {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  width: 100%;
+  height: 20px;
+}
+
+.skeleton-rect {
+  height: 200px;
+}
+
+
+/* Mobile-friendly progress bar */
+.responsive-progress-bar {
+  appearance: none;
+  width: 100%; /* Full width on mobile */
+  max-width: 400px; /* Set a reasonable max width for larger screens */
+  height: 20px; /* Consistent height */
+  border-radius: 10px; /* Rounded edges */
+  background-color: #f0f0f0; /* Background of progress bar */
+  overflow: hidden;
+}
+
+.responsive-progress-bar::-webkit-progress-bar {
+  background-color: #f0f0f0;
+}
+
+.responsive-progress-bar::-webkit-progress-value {
+  background-color: #0000FF; /* Color of the progress bar fill */
+  transition: width 0.2s ease; /* Smooth transition */
+}
+
+.responsive-progress-bar::-moz-progress-bar {
+  background-color: #0000FF;
+}
+
+
+.privacy-policy {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 900px;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.privacy-policy__title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+}
+
+.privacy-policy__section {
+  margin-bottom: 2rem;
+}
+
+.privacy-policy__section-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.privacy-policy__text {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.privacy-policy__list {
+  list-style-type: disc;
+  padding-left: 2rem;
+}
+
+.privacy-policy__list-item {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.social-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+
+.banner-notification {
+  position: fixed;
+  top: 15%;
+  left: 20%;
+  width: 50%;
+  z-index: 50;
+}
+
+
