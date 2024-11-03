@@ -64,6 +64,7 @@
     "date-fns": "^3.0.6",
     "embla-carousel-react": "^8.0.0-rc17",
     "framer-motion": "^11.11.9",
+    "googleapis": "^144.0.0",
     "gray-matter": "^4.0.3",
     "heroicons": "^2.1.5",
     "lucide-react": "^0.303.0",
