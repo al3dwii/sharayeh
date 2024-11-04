@@ -17,7 +17,7 @@ const Navigation = () => {
             <div className="relative h-10 w-10 ml-2 animate-spin">
               <Image fill alt="Logo" src="/logo.png" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Shraih</h1>
+            <h1 className="text-2xl font-bold text-white">Sharayh</h1>
           </Link>
 
           <nav className="hidden md:flex">

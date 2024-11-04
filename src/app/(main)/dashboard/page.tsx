@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import ServiceCard from '@/components/custom/ServiceCard';
 import HeroSection from '@/components/custom/HeroSection';
 import { Download, ImageIcon } from "lucide-react";
-import OcrClientWrapper from '@/components/custom/OcrClientWrapper';
+import CreatePresentation from '@/components/custom/CpClientWrapper';
 import { BilandPages } from '@/components/custom/BilandPages';
 import { FileTableWithPagination } from '@/components/custom/FileTableWithPagination';
 import { getUserFiles } from '@/lib/queries';
@@ -69,7 +69,7 @@ const DashboardPage = async () => {
             </div>
           </div>
           
-          <OcrClientWrapper />
+          <CreatePresentation />
           
           <div>
             <h2 className="justify-center text-ml m-4">ملفاتك</h2>

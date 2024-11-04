@@ -27,7 +27,7 @@ export const Footer = () => {
             />
 
     </Link>
-    <div className="text-xl  font-semibold">shraih.com</div>
+    <div className="text-xl  font-semibold">sharayh.com</div>
 
 </div>                    <p className={'text-white'}>
                         تحويل الجداول إلى وورد قابل للتعديل
@@ -82,7 +82,7 @@ export const Footer = () => {
             </div>
             <div className={' bg-[#000]  justify-center p-2 text-[#ccc] text-[16px]   items-center'}>
         <div >
-        © {year} shraih.com 
+        © {year} sharayh.com 
     </div>
     </div>
             
