@@ -5,8 +5,13 @@ import { useUser, useAuth } from '@clerk/nextjs';
 import { useStore } from '@/store/useStore';
 import Modal from '@/components/custom/ocrModal';
 import Loading from '@/components/global/loading';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import TemplateModal from './TemplateModal';
+
+type Template = {
+  id: string;
+  name: string;
+};
 
 const CreatePresentation: React.FC = () => {
   const { user } = useUser();
@@ -18,22 +23,19 @@ const CreatePresentation: React.FC = () => {
   const credits = useStore((state) => state.credits);
   const usedCredits = useStore((state) => state.usedCredits);
 
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
-  const [requestId, setRequestId] = useState(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState(null);
-  const [pollingIntervalId, setPollingIntervalId] = useState(null);
-
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [topicValue, setTopicValue] = useState('');
-  const [documentFile, setDocumentFile] = useState(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
 
-  // جلب بيانات المستخدم وتحديث الرصيد
+  // Fetch user data and update credits
   useEffect(() => {
     if (user) {
       getToken().then((token) => {
@@ -52,7 +54,7 @@ const CreatePresentation: React.FC = () => {
     }
   }, [user, getToken, setCredits, setUsedCredits]);
 
-  // تحديث الرصيد بعد الاستخدام
+  // Update credits after usage
   const handleUpdateCredits = useCallback(
     async (pointsUsed: number) => {
       if (user) {
@@ -62,7 +64,7 @@ const CreatePresentation: React.FC = () => {
             pointsUsed,
           });
 
-          // تحديث الحالة المحلية بعد تأكيد التحديث من الخادم
+          // Update local state after confirming server update
           const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
           const updatedCredits = (credits || 0) - pointsUsed;
 
@@ -76,26 +78,24 @@ const CreatePresentation: React.FC = () => {
     [user, credits, usedCredits, setCredits, setUsedCredits]
   );
 
-  // التعامل مع تغيير حقل الموضوع
-  const handleTopicChange = (e) => {
+  const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTopicValue(e.target.value);
     if (e.target.value !== '') {
-      setDocumentFile(null); // تفريغ الملف المختار
+      setDocumentFile(null);
     }
   };
 
-  // التعامل مع تغيير حقل الملف
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
       setDocumentFile(e.target.files[0]);
-      setTopicValue(''); // تفريغ حقل الموضوع
+      setTopicValue('');
     } else {
       setDocumentFile(null);
     }
   };
 
-  // إرسال النموذج
-  const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!user) {
@@ -103,7 +103,7 @@ const CreatePresentation: React.FC = () => {
       return;
     }
 
-    // التحقق من أن أحد الحقول على الأقل تم ملؤه
+    // Ensure at least one field is filled
     if (!topicValue && !documentFile) {
       setSubmissionStatus('empty');
       return;
@@ -118,11 +118,11 @@ const CreatePresentation: React.FC = () => {
     setSubmissionStatus('');
 
     try {
-      // خصم نقطة واحدة
+      // Deduct one point
       await handleUpdateCredits(1);
 
-      let data;
-      let headers = {};
+      let data: any;
+      let headers: { [key: string]: string } = {};
 
       if (topicValue) {
         data = {
@@ -138,23 +138,23 @@ const CreatePresentation: React.FC = () => {
         headers['Content-Type'] = 'multipart/form-data';
       }
 
-      // إرسال البيانات إلى webhook الخاص بـ Make.com
+      // Send data to the webhook
       const res = await axios.post(
         'https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o',
         data,
         { headers }
       );
 
-      const requestId = res.data.requestId; // نفترض أن webhook يعيد requestId
+      const requestId = res.data.requestId; // Assuming the webhook returns requestId
       setRequestId(requestId);
 
       setSubmissionStatus('success');
-      // إعادة تعيين النموذج
+      // Reset form
       setTopicValue('');
       setDocumentFile(null);
       setSelectedTemplate(null);
 
-      // بدء الاستطلاع لمعرفة ما إذا كان الملف جاهزًا
+      // Start polling to check if the file is ready
       startPolling(requestId);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -164,29 +164,31 @@ const CreatePresentation: React.FC = () => {
     }
   };
 
-  // وظيفة الاستطلاع
-  const startPolling = (requestId) => {
+  // Polling function
+  const startPolling = (requestId: string) => {
     setIsLoading(true);
 
-    const intervalId = setInterval(async () => {
+    const intervalId = window.setInterval(async () => {
       try {
         const res = await axios.get(`/api/check-status?requestId=${requestId}`);
 
         if (res.data && res.data.status === 'COMPLETED') {
           setIsLoading(false);
           setDownloadUrl(res.data.downloadUrl);
-          clearInterval(intervalId);
-          setPollingIntervalId(null);
+          if (pollingIntervalId) {
+            clearInterval(pollingIntervalId);
+            setPollingIntervalId(null);
+          }
         }
       } catch (error) {
         console.error('Error checking status:', error);
       }
-    }, 5000); // الاستطلاع كل 5 ثوانٍ
+    }, 5000); // Poll every 5 seconds
 
     setPollingIntervalId(intervalId);
   };
 
-  // تنظيف الاستطلاع عند إلغاء التثبيت
+  // Clean up polling on unmount
   useEffect(() => {
     return () => {
       if (pollingIntervalId) {
@@ -197,7 +199,7 @@ const CreatePresentation: React.FC = () => {
 
   return (
     <>
-      {/* النوافذ المنبثقة */}
+      {/* Modals */}
       <Modal
         isOpen={showInsufficientCreditsModal}
         onClose={() => setShowInsufficientCreditsModal(false)}
@@ -209,19 +211,20 @@ const CreatePresentation: React.FC = () => {
 
       <div className="max-w-6xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6">
         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
-          <h1>بوربوينت بالذكاء الصناعي </h1>
+          <h1>بوربوينت بالذكاء الصناعي</h1>
         </div>
         <div className="flex flex-col items-center justify-center text-slate-600 pb-6 gap-4">
-        <p>اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لانشاء بوربوينت بالذكاء الصناعي قابل للتعديل</p>
+          <p>
+            اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <Card>
-            <CardHeader>
-            </CardHeader>
+            <CardHeader></CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row justify-between">
-                  {/* حقل الموضوع */}
+                  {/* Topic Field */}
                   <div className="mb-4 flex-1 lg:mr-2">
                     <input
                       type="text"
@@ -235,7 +238,7 @@ const CreatePresentation: React.FC = () => {
                     />
                   </div>
 
-                  {/* حقل الملف */}
+                  {/* File Field */}
                   <div className="mb-4 flex-1 lg:ml-2">
                     <input
                       type="file"
@@ -249,7 +252,7 @@ const CreatePresentation: React.FC = () => {
                   </div>
                 </div>
 
-                {/* اختيار القالب */}
+                {/* Template Selection */}
                 <div className="mb-4">
                   <button
                     type="button"
@@ -262,19 +265,19 @@ const CreatePresentation: React.FC = () => {
                   </button>
                 </div>
 
-                {/* زر الإرسال */}
+                {/* Submit Button */}
                 <div className="flex items-center justify-between">
                   <button
                     type="submit"
                     className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'جاري الإرسال...' : 'ارسال'}
+                    {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
                   </button>
                 </div>
               </form>
 
-              {/* رسائل حالة الإرسال */}
+              {/* Submission Status Messages */}
               {submissionStatus === 'success' && (
                 <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
               )}
@@ -282,15 +285,13 @@ const CreatePresentation: React.FC = () => {
                 <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
               )}
               {submissionStatus === 'empty' && (
-                <p className="text-yellow-500 mt-4">
-                  الرجاء إدخال الموضوع أو اختيار ملف.
-                </p>
+                <p className="text-yellow-500 mt-4">الرجاء إدخال الموضوع أو اختيار ملف.</p>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* التحميل والتنزيل */}
+        {/* Loading and Download */}
         {isLoading && (
           <div className="w-full flex justify-center mt-4">
             <Loading />
@@ -308,7 +309,7 @@ const CreatePresentation: React.FC = () => {
           </div>
         )}
 
-        {/* نافذة اختيار القالب */}
+        {/* Template Modal */}
         {isModalOpen && (
           <TemplateModal
             isOpen={isModalOpen}
@@ -322,6 +323,340 @@ const CreatePresentation: React.FC = () => {
 };
 
 export default CreatePresentation;
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useStore } from '@/store/useStore';
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+
+// type Template = {
+//   id: string;
+//   name: string;
+// };
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+
+//   const setCredits = useStore((state) => state.setCredits);
+//   const setUsedCredits = useStore((state) => state.setUsedCredits);
+//   const credits = useStore((state) => state.credits);
+//   const usedCredits = useStore((state) => state.usedCredits);
+
+//   // const [selectedTemplate, setSelectedTemplate] = useState(null);
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+
+//   const [submissionStatus, setSubmissionStatus] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+//   const [requestId, setRequestId] = useState(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [downloadUrl, setDownloadUrl] = useState(null);
+//   const [pollingIntervalId, setPollingIntervalId] = useState(null);
+
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+
+//   const [topicValue, setTopicValue] = useState('');
+//   const [documentFile, setDocumentFile] = useState(null);
+
+//   // جلب بيانات المستخدم وتحديث الرصيد
+//   useEffect(() => {
+//     if (user) {
+//       getToken().then((token) => {
+//         axios
+//           .get('/api/user-data', {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           })
+//           .then(({ data }) => {
+//             setCredits(data.credits);
+//             setUsedCredits(data.usedCredits);
+//           })
+//           .catch((error) => console.error('Error fetching user data:', error));
+//       });
+//     }
+//   }, [user, getToken, setCredits, setUsedCredits]);
+
+//   // تحديث الرصيد بعد الاستخدام
+//   const handleUpdateCredits = useCallback(
+//     async (pointsUsed: number) => {
+//       if (user) {
+//         try {
+//           await axios.patch('/api/update-credits', {
+//             userId: user.id,
+//             pointsUsed,
+//           });
+
+//           // تحديث الحالة المحلية بعد تأكيد التحديث من الخادم
+//           const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
+//           const updatedCredits = (credits || 0) - pointsUsed;
+
+//           setUsedCredits(updatedUsedCredits);
+//           setCredits(updatedCredits);
+//         } catch (error) {
+//           console.error('Error updating credits:', error);
+//         }
+//       }
+//     },
+//     [user, credits, usedCredits, setCredits, setUsedCredits]
+//   );
+
+//   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     setTopicValue(e.target.value);
+//     if (e.target.value !== '') {
+//       setDocumentFile(null);
+//     }
+//   };
+  
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       setDocumentFile(e.target.files[0]);
+//       setTopicValue('');
+//     } else {
+//       setDocumentFile(null);
+//     }
+//   };
+  
+
+//   // إرسال النموذج
+//   const handleSubmit = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//     e.preventDefault();
+
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+
+//     // التحقق من أن أحد الحقول على الأقل تم ملؤه
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+
+//     try {
+//       // خصم نقطة واحدة
+//       await handleUpdateCredits(1);
+
+//       let data;
+//       let headers: { [key: string]: string } = {};
+
+
+//       if (topicValue) {
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate ? selectedTemplate.id : '',
+//           userId: user.id,
+//         };
+//       } else if (documentFile) {
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//         data.append('userId', user.id);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+
+//       // إرسال البيانات إلى webhook الخاص بـ Make.com
+//       const res = await axios.post(
+//         'https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o',
+//         data,
+//         { headers }
+//       );
+
+//       const requestId = res.data.requestId; // نفترض أن webhook يعيد requestId
+//       setRequestId(requestId);
+
+//       setSubmissionStatus('success');
+//       // إعادة تعيين النموذج
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+
+//       // بدء الاستطلاع لمعرفة ما إذا كان الملف جاهزًا
+//       startPolling(requestId);
+//     } catch (error) {
+//       console.error('Error submitting form:', error);
+//       setSubmissionStatus('error');
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   // وظيفة الاستطلاع
+//   const startPolling = (requestId: string) => {
+//     setIsLoading(true);
+
+//     const intervalId = setInterval(async () => {
+//       try {
+//         const res = await axios.get(`/api/check-status?requestId=${requestId}`);
+
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+//           setDownloadUrl(res.data.downloadUrl);
+//           clearInterval(intervalId);
+//           setPollingIntervalId(null);
+//         }
+//       } catch (error) {
+//         console.error('Error checking status:', error);
+//       }
+//     }, 5000); // الاستطلاع كل 5 ثوانٍ
+
+//     setPollingIntervalId(intervalId);
+//   };
+
+//   // تنظيف الاستطلاع عند إلغاء التثبيت
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalId) {
+//         clearInterval(pollingIntervalId);
+//       }
+//     };
+//   }, [pollingIntervalId]);
+
+//   return (
+//     <>
+//       {/* النوافذ المنبثقة */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي </h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-6 gap-4">
+//         <p>اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لانشاء بوربوينت بالذكاء الصناعي قابل للتعديل</p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-6">
+//           <Card>
+//             <CardHeader>
+//             </CardHeader>
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex flex-col lg:flex-row justify-between">
+//                   {/* حقل الموضوع */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+
+//                   {/* حقل الملف */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* اختيار القالب */}
+//                 <div className="mb-4">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* زر الإرسال */}
+//                 <div className="flex items-center justify-between">
+//                   <button
+//                     type="submit"
+//                     className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'ارسال'}
+//                   </button>
+//                 </div>
+//               </form>
+
+//               {/* رسائل حالة الإرسال */}
+//               {submissionStatus === 'success' && (
+//                 <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
+//               )}
+//               {submissionStatus === 'error' && (
+//                 <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
+//               )}
+//               {submissionStatus === 'empty' && (
+//                 <p className="text-yellow-500 mt-4">
+//                   الرجاء إدخال الموضوع أو اختيار ملف.
+//                 </p>
+//               )}
+//             </CardContent>
+//           </Card>
+//         </div>
+
+//         {/* التحميل والتنزيل */}
+//         {isLoading && (
+//           <div className="w-full flex justify-center mt-4">
+//             <Loading />
+//           </div>
+//         )}
+
+//         {downloadUrl && (
+//           <div className="w-full flex justify-center mt-4">
+//             <a
+//               href={downloadUrl}
+//               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//             >
+//               تحميل الملف
+//             </a>
+//           </div>
+//         )}
+
+//         {/* نافذة اختيار القالب */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
 
 
 
