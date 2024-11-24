@@ -8,10 +8,15 @@ import Loading from '@/components/global/loading';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import TemplateModal from './TemplateModal';
 
-type Template = {
+
+
+interface Template {
   id: string;
   name: string;
-};
+  preview: string;
+  category: string; // Add this line
+}
+
 
 const CreatePresentation: React.FC = () => {
   const { user } = useUser();
@@ -34,6 +39,23 @@ const CreatePresentation: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [topicValue, setTopicValue] = useState('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    const fetchFile = async () => {
+      try {
+        const res = await axios.get('/api/getfilemake'); // Ensure this matches your server route
+        if (res.data && res.data.downloadUrl) {
+          setDownloadUrl(res.data.downloadUrl);
+        }
+      } catch (error) {
+        console.error('Error fetching file:', error);
+      }
+    };
+  
+    fetchFile();
+  }, []);
+  
+
 
   // Fetch user data and update credits
   useEffect(() => {
@@ -94,67 +116,82 @@ const CreatePresentation: React.FC = () => {
     }
   };
 
-  // Handle form submission
+  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     if (!user) {
       router.push('/sign-in');
       return;
     }
-
+  
     // Ensure at least one field is filled
     if (!topicValue && !documentFile) {
       setSubmissionStatus('empty');
       return;
     }
-
+  
     if (credits === null || credits < 1) {
       setShowInsufficientCreditsModal(true);
       return;
     }
-
+  
     setIsSubmitting(true);
     setSubmissionStatus('');
-
+  
     try {
       // Deduct one point
       await handleUpdateCredits(1);
-
+  
+      // Create a new File record
+      const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+      const response = await axios.post('/api/files', {
+        userId: user.id,
+        fileName,
+        type: 'PRESENTATION',
+      });
+  
+      const requestId = response.data.id;
+      setRequestId(requestId);
+  
+      // Prepare data for the webhook
       let data: any;
       let headers: { [key: string]: string } = {};
-
+  
       if (topicValue) {
         data = {
           topic: topicValue,
           templateId: selectedTemplate ? selectedTemplate.id : '',
+          categoryId: selectedTemplate ? selectedTemplate.category : '',
           userId: user.id,
+          requestId,
         };
       } else if (documentFile) {
         data = new FormData();
         data.append('document', documentFile);
         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+        data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
         data.append('userId', user.id);
+        data.append('requestId', requestId);
         headers['Content-Type'] = 'multipart/form-data';
       }
-
+  
       // Send data to the webhook
-      const res = await axios.post(
-        'https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o',
-        data,
+      await axios.post(
+        'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
+  data,
         { headers }
       );
-
-      const requestId = res.data.requestId; // Assuming the webhook returns requestId
-      setRequestId(requestId);
-
+  
       setSubmissionStatus('success');
-      // Reset form
+  
+      // Reset form fields
       setTopicValue('');
       setDocumentFile(null);
       setSelectedTemplate(null);
-
-      // Start polling to check if the file is ready
+  
+      // Start polling
       startPolling(requestId);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -163,18 +200,105 @@ const CreatePresentation: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+  
 
-  // Polling function
-  const startPolling = (requestId: string) => {
+
+  // // Handle form submission
+  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+
+  //   if (!user) {
+  //     router.push('/sign-in');
+  //     return;
+  //   }
+
+  //   // Ensure at least one field is filled
+  //   if (!topicValue && !documentFile) {
+  //     setSubmissionStatus('empty');
+  //     return;
+  //   }
+
+  //   if (credits === null || credits < 1) {
+  //     setShowInsufficientCreditsModal(true);
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  //   setSubmissionStatus('');
+
+  //   try {
+  //     // Deduct one point
+  //     await handleUpdateCredits(1);
+
+  //     let data: any;
+  //     let headers: { [key: string]: string } = {};
+
+  //     if (topicValue) {
+  //       data = {
+  //         topic: topicValue,
+  //         templateId: selectedTemplate ? selectedTemplate.id : '',
+  //         categoryId: selectedTemplate ? selectedTemplate.category : '', // Add this line
+
+  //         userId: user.id,
+  //       };
+  //     } else if (documentFile) {
+  //       data = new FormData();
+  //       data.append('document', documentFile);
+  //       data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+  //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : ''); // Added line
+  //       data.append('userId', user.id);
+  //       headers['Content-Type'] = 'multipart/form-data';
+  //     }
+
+  //     // Send data to the webhook
+  //     const res = await axios.post(
+  //       'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
+  //       data,
+  //       { headers }
+  //     );
+
+
+  //     // https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o
+
+  //     const requestId = res.data.requestId; // Assuming the webhook returns requestId
+  //     setRequestId(requestId);
+
+  //     setSubmissionStatus('success');
+  //     // Reset form
+  //     setTopicValue('');
+  //     setDocumentFile(null);
+  //     setSelectedTemplate(null);
+
+  //     // Start polling to check if the file is ready
+  //     startPolling(requestId);
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     setSubmissionStatus('error');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+
+  const startPolling = (requestId: number) => {
     setIsLoading(true);
-
+  
     const intervalId = window.setInterval(async () => {
       try {
-        const res = await axios.get(`/api/check-status?requestId=${requestId}`);
-
+        const res = await axios.get('/api/getfilemake', {
+          params: { requestId },
+        });
+  
         if (res.data && res.data.status === 'COMPLETED') {
           setIsLoading(false);
           setDownloadUrl(res.data.downloadUrl);
+          if (pollingIntervalId) {
+            clearInterval(pollingIntervalId);
+            setPollingIntervalId(null);
+          }
+        } else if (res.data.status === 'FAILED') {
+          setIsLoading(false);
+          setSubmissionStatus('error');
           if (pollingIntervalId) {
             clearInterval(pollingIntervalId);
             setPollingIntervalId(null);
@@ -184,9 +308,35 @@ const CreatePresentation: React.FC = () => {
         console.error('Error checking status:', error);
       }
     }, 5000); // Poll every 5 seconds
-
+  
     setPollingIntervalId(intervalId);
   };
+  
+
+
+  // // Polling function
+  // const startPolling = (requestId: string) => {
+  //   setIsLoading(true);
+
+  //   const intervalId = window.setInterval(async () => {
+  //     try {
+  //       const res = await axios.get('/api/getfilemake');
+
+  //       if (res.data && res.data.status === 'COMPLETED') {
+  //         setIsLoading(false);
+  //         setDownloadUrl(res.data.downloadUrl);
+  //         if (pollingIntervalId) {
+  //           clearInterval(pollingIntervalId);
+  //           setPollingIntervalId(null);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error checking status:', error);
+  //     }
+  //   }, 5000); // Poll every 5 seconds
+
+  //   setPollingIntervalId(intervalId);
+  // };
 
   // Clean up polling on unmount
   useEffect(() => {
@@ -218,9 +368,44 @@ const CreatePresentation: React.FC = () => {
             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-2">
           <Card>
             <CardHeader></CardHeader>
+             {/* Submission Status Messages */}
+             <div className="bg-gray-50 rounded-lg shadow pb-8 mb-8 p-6">
+             {submissionStatus === 'success' && (
+                <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
+              )}
+              {submissionStatus === 'error' && (
+                <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
+              )}
+              {submissionStatus === 'empty' && (
+                <p className="text-yellow-500 mt-4">الرجاء إدخال الموضوع أو اختيار ملف.</p>
+              )}
+             {/* Loading and Download */}
+        {isLoading && (
+          <div className="w-full flex justify-center mt-4">
+            <Loading />
+          </div>
+        )}
+
+{downloadUrl ? (
+  <div className="w-full flex justify-center mt-4">
+    <a
+      href={downloadUrl}
+      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      تحميل الملف
+    </a>
+  </div>
+) : (
+  <div className="text-gray-500 mt-4 text-center">
+    لم يتم تجهيز الملف بعد. الرجاء الانتظار.
+  </div>
+)}
+</div>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row justify-between">
@@ -257,7 +442,7 @@ const CreatePresentation: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                    className="w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                   >
                     {selectedTemplate
                       ? `تم اختيار القالب: ${selectedTemplate.name}`
@@ -269,7 +454,7 @@ const CreatePresentation: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <button
                     type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+                    className="w-1/4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
@@ -277,27 +462,14 @@ const CreatePresentation: React.FC = () => {
                 </div>
               </form>
 
-              {/* Submission Status Messages */}
-              {submissionStatus === 'success' && (
-                <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
-              )}
-              {submissionStatus === 'error' && (
-                <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
-              )}
-              {submissionStatus === 'empty' && (
-                <p className="text-yellow-500 mt-4">الرجاء إدخال الموضوع أو اختيار ملف.</p>
-              )}
+             
             </CardContent>
           </Card>
         </div>
 
-        {/* Loading and Download */}
-        {isLoading && (
-          <div className="w-full flex justify-center mt-4">
-            <Loading />
-          </div>
-        )}
+       
 
+{/* 
         {downloadUrl && (
           <div className="w-full flex justify-center mt-4">
             <a
@@ -307,7 +479,7 @@ const CreatePresentation: React.FC = () => {
               تحميل الملف
             </a>
           </div>
-        )}
+        )} */}
 
         {/* Template Modal */}
         {isModalOpen && (

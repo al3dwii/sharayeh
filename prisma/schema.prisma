@@ -36,8 +36,8 @@ model File {
   id           Int        @id @default(autoincrement())
   userId       String     @map("user_id")
   createdAt    DateTime   @default(now()) @map("created_at")
-  fileKey      String     @unique @map("file_key")
-  fileUrl      String     @map("file_url")
+  fileKey      String?     @unique @map("file_key")
+  fileUrl      String?     @map("file_url")
   fileName     String     @map("file_name")
   type         String
   resultedFile String?    @map("resulted_file")

@@ -21,6 +21,7 @@ import {Button, buttonVariants} from "@/components/ui/custom-button";
 import { Hero } from "@/components/gadawel/hero";
 import Hvideo from "@/components/gadawel/homevid";
 import { Faqs } from "@/components/gadawel/faqs";
+import { auth } from '@clerk/nextjs';
 
 
 export default async function Home() {
@@ -28,6 +29,18 @@ export default async function Home() {
     product: process.env.NEXT_PLURA_PRODUCT_ID,
     active: true,
   })
+
+  const { userId } = auth();
+
+
+  // if (userId) {
+  //   return {
+  //     redirect: [
+  //       destination: "/dashboard",
+  //       permanent: false,
+  //     ],
+  //   };
+  // }
 
   return (
     <>
