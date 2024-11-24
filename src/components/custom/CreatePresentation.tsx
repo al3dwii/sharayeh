@@ -116,8 +116,6 @@ const CreatePresentation: React.FC = () => {
     }
   };
 
-  
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
@@ -155,11 +153,14 @@ const CreatePresentation: React.FC = () => {
       const requestId = response.data.id;
       setRequestId(requestId);
   
-      // Prepare data for the webhook
+      // Prepare data for the appropriate webhook
       let data: any;
       let headers: { [key: string]: string } = {};
+      let webhookUrl = '';
   
       if (topicValue) {
+        // Topic-specific webhook
+        webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
         data = {
           topic: topicValue,
           templateId: selectedTemplate ? selectedTemplate.id : '',
@@ -168,6 +169,8 @@ const CreatePresentation: React.FC = () => {
           requestId,
         };
       } else if (documentFile) {
+        // File-specific webhook
+        webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
         data = new FormData();
         data.append('document', documentFile);
         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
@@ -177,12 +180,8 @@ const CreatePresentation: React.FC = () => {
         headers['Content-Type'] = 'multipart/form-data';
       }
   
-      // Send data to the webhook
-      await axios.post(
-        'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
-  data,
-        { headers }
-      );
+      // Send data to the appropriate webhook
+      await axios.post(webhookUrl, data, { headers });
   
       setSubmissionStatus('success');
   
@@ -202,74 +201,80 @@ const CreatePresentation: React.FC = () => {
   };
   
 
-
-  // // Handle form submission
   // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   //   e.preventDefault();
-
+  
   //   if (!user) {
   //     router.push('/sign-in');
   //     return;
   //   }
-
+  
   //   // Ensure at least one field is filled
   //   if (!topicValue && !documentFile) {
   //     setSubmissionStatus('empty');
   //     return;
   //   }
-
+  
   //   if (credits === null || credits < 1) {
   //     setShowInsufficientCreditsModal(true);
   //     return;
   //   }
-
+  
   //   setIsSubmitting(true);
   //   setSubmissionStatus('');
-
+  
   //   try {
   //     // Deduct one point
   //     await handleUpdateCredits(1);
-
+  
+  //     // Create a new File record
+  //     const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+  //     const response = await axios.post('/api/files', {
+  //       userId: user.id,
+  //       fileName,
+  //       type: 'PRESENTATION',
+  //     });
+  
+  //     const requestId = response.data.id;
+  //     setRequestId(requestId);
+  
+  //     // Prepare data for the webhook
   //     let data: any;
   //     let headers: { [key: string]: string } = {};
-
+  
   //     if (topicValue) {
   //       data = {
   //         topic: topicValue,
   //         templateId: selectedTemplate ? selectedTemplate.id : '',
-  //         categoryId: selectedTemplate ? selectedTemplate.category : '', // Add this line
-
+  //         categoryId: selectedTemplate ? selectedTemplate.category : '',
   //         userId: user.id,
+  //         requestId,
   //       };
   //     } else if (documentFile) {
   //       data = new FormData();
   //       data.append('document', documentFile);
   //       data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
-  //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : ''); // Added line
+  //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
   //       data.append('userId', user.id);
+  //       data.append('requestId', requestId);
   //       headers['Content-Type'] = 'multipart/form-data';
   //     }
-
+  
   //     // Send data to the webhook
-  //     const res = await axios.post(
+  //     await axios.post(
   //       'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
-  //       data,
+  // data,
   //       { headers }
   //     );
-
-
-  //     // https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o
-
-  //     const requestId = res.data.requestId; // Assuming the webhook returns requestId
-  //     setRequestId(requestId);
-
+  
   //     setSubmissionStatus('success');
-  //     // Reset form
+  
+  //     // Reset form fields
   //     setTopicValue('');
   //     setDocumentFile(null);
   //     setSelectedTemplate(null);
-
-  //     // Start polling to check if the file is ready
+  
+  //     // Start polling
   //     startPolling(requestId);
   //   } catch (error) {
   //     console.error('Error submitting form:', error);
@@ -278,7 +283,6 @@ const CreatePresentation: React.FC = () => {
   //     setIsSubmitting(false);
   //   }
   // };
-
 
   const startPolling = (requestId: number) => {
     setIsLoading(true);
@@ -312,32 +316,6 @@ const CreatePresentation: React.FC = () => {
     setPollingIntervalId(intervalId);
   };
   
-
-
-  // // Polling function
-  // const startPolling = (requestId: string) => {
-  //   setIsLoading(true);
-
-  //   const intervalId = window.setInterval(async () => {
-  //     try {
-  //       const res = await axios.get('/api/getfilemake');
-
-  //       if (res.data && res.data.status === 'COMPLETED') {
-  //         setIsLoading(false);
-  //         setDownloadUrl(res.data.downloadUrl);
-  //         if (pollingIntervalId) {
-  //           clearInterval(pollingIntervalId);
-  //           setPollingIntervalId(null);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error checking status:', error);
-  //     }
-  //   }, 5000); // Poll every 5 seconds
-
-  //   setPollingIntervalId(intervalId);
-  // };
-
   // Clean up polling on unmount
   useEffect(() => {
     return () => {
@@ -467,20 +445,6 @@ const CreatePresentation: React.FC = () => {
           </Card>
         </div>
 
-       
-
-{/* 
-        {downloadUrl && (
-          <div className="w-full flex justify-center mt-4">
-            <a
-              href={downloadUrl}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              تحميل الملف
-            </a>
-          </div>
-        )} */}
-
         {/* Template Modal */}
         {isModalOpen && (
           <TemplateModal
@@ -495,6 +459,513 @@ const CreatePresentation: React.FC = () => {
 };
 
 export default CreatePresentation;
+
+
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useStore } from '@/store/useStore';
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+
+
+// interface Template {
+//   id: string;
+//   name: string;
+//   preview: string;
+//   category: string; // Add this line
+// }
+
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+
+//   const setCredits = useStore((state) => state.setCredits);
+//   const setUsedCredits = useStore((state) => state.setUsedCredits);
+//   const credits = useStore((state) => state.credits);
+//   const usedCredits = useStore((state) => state.usedCredits);
+
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+//   const [submissionStatus, setSubmissionStatus] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+//   const [requestId, setRequestId] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+//   const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [topicValue, setTopicValue] = useState('');
+//   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+//   useEffect(() => {
+//     const fetchFile = async () => {
+//       try {
+//         const res = await axios.get('/api/getfilemake'); // Ensure this matches your server route
+//         if (res.data && res.data.downloadUrl) {
+//           setDownloadUrl(res.data.downloadUrl);
+//         }
+//       } catch (error) {
+//         console.error('Error fetching file:', error);
+//       }
+//     };
+  
+//     fetchFile();
+//   }, []);
+  
+
+
+//   // Fetch user data and update credits
+//   useEffect(() => {
+//     if (user) {
+//       getToken().then((token) => {
+//         axios
+//           .get('/api/user-data', {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           })
+//           .then(({ data }) => {
+//             setCredits(data.credits);
+//             setUsedCredits(data.usedCredits);
+//           })
+//           .catch((error) => console.error('Error fetching user data:', error));
+//       });
+//     }
+//   }, [user, getToken, setCredits, setUsedCredits]);
+
+//   // Update credits after usage
+//   const handleUpdateCredits = useCallback(
+//     async (pointsUsed: number) => {
+//       if (user) {
+//         try {
+//           await axios.patch('/api/update-credits', {
+//             userId: user.id,
+//             pointsUsed,
+//           });
+
+//           // Update local state after confirming server update
+//           const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
+//           const updatedCredits = (credits || 0) - pointsUsed;
+
+//           setUsedCredits(updatedUsedCredits);
+//           setCredits(updatedCredits);
+//         } catch (error) {
+//           console.error('Error updating credits:', error);
+//         }
+//       }
+//     },
+//     [user, credits, usedCredits, setCredits, setUsedCredits]
+//   );
+
+//   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     setTopicValue(e.target.value);
+//     if (e.target.value !== '') {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       setDocumentFile(e.target.files[0]);
+//       setTopicValue('');
+//     } else {
+//       setDocumentFile(null);
+//     }
+//   };
+
+  
+
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+  
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+  
+//     // Ensure at least one field is filled
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+  
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+  
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+  
+//     try {
+//       // Deduct one point
+//       await handleUpdateCredits(1);
+  
+//       // Create a new File record
+//       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//       const response = await axios.post('/api/files', {
+//         userId: user.id,
+//         fileName,
+//         type: 'PRESENTATION',
+//       });
+  
+//       const requestId = response.data.id;
+//       setRequestId(requestId);
+  
+//       // Prepare data for the webhook
+//       let data: any;
+//       let headers: { [key: string]: string } = {};
+  
+//       if (topicValue) {
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate ? selectedTemplate.id : '',
+//           categoryId: selectedTemplate ? selectedTemplate.category : '',
+//           userId: user.id,
+//           requestId,
+//         };
+//       } else if (documentFile) {
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//         data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
+//         data.append('userId', user.id);
+//         data.append('requestId', requestId);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+  
+//       // Send data to the webhook
+//       await axios.post(
+//         'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
+//   data,
+//         { headers }
+//       );
+  
+//       setSubmissionStatus('success');
+  
+//       // Reset form fields
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+  
+//       // Start polling
+//       startPolling(requestId);
+//     } catch (error) {
+//       console.error('Error submitting form:', error);
+//       setSubmissionStatus('error');
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+  
+
+
+//   // // Handle form submission
+//   // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//   //   e.preventDefault();
+
+//   //   if (!user) {
+//   //     router.push('/sign-in');
+//   //     return;
+//   //   }
+
+//   //   // Ensure at least one field is filled
+//   //   if (!topicValue && !documentFile) {
+//   //     setSubmissionStatus('empty');
+//   //     return;
+//   //   }
+
+//   //   if (credits === null || credits < 1) {
+//   //     setShowInsufficientCreditsModal(true);
+//   //     return;
+//   //   }
+
+//   //   setIsSubmitting(true);
+//   //   setSubmissionStatus('');
+
+//   //   try {
+//   //     // Deduct one point
+//   //     await handleUpdateCredits(1);
+
+//   //     let data: any;
+//   //     let headers: { [key: string]: string } = {};
+
+//   //     if (topicValue) {
+//   //       data = {
+//   //         topic: topicValue,
+//   //         templateId: selectedTemplate ? selectedTemplate.id : '',
+//   //         categoryId: selectedTemplate ? selectedTemplate.category : '', // Add this line
+
+//   //         userId: user.id,
+//   //       };
+//   //     } else if (documentFile) {
+//   //       data = new FormData();
+//   //       data.append('document', documentFile);
+//   //       data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//   //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : ''); // Added line
+//   //       data.append('userId', user.id);
+//   //       headers['Content-Type'] = 'multipart/form-data';
+//   //     }
+
+//   //     // Send data to the webhook
+//   //     const res = await axios.post(
+//   //       'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
+//   //       data,
+//   //       { headers }
+//   //     );
+
+
+//   //     // https://hook.eu2.make.com/qrtqbz6n3r74w3bg8enbnck7lci2w96o
+
+//   //     const requestId = res.data.requestId; // Assuming the webhook returns requestId
+//   //     setRequestId(requestId);
+
+//   //     setSubmissionStatus('success');
+//   //     // Reset form
+//   //     setTopicValue('');
+//   //     setDocumentFile(null);
+//   //     setSelectedTemplate(null);
+
+//   //     // Start polling to check if the file is ready
+//   //     startPolling(requestId);
+//   //   } catch (error) {
+//   //     console.error('Error submitting form:', error);
+//   //     setSubmissionStatus('error');
+//   //   } finally {
+//   //     setIsSubmitting(false);
+//   //   }
+//   // };
+
+
+//   const startPolling = (requestId: number) => {
+//     setIsLoading(true);
+  
+//     const intervalId = window.setInterval(async () => {
+//       try {
+//         const res = await axios.get('/api/getfilemake', {
+//           params: { requestId },
+//         });
+  
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+//           setDownloadUrl(res.data.downloadUrl);
+//           if (pollingIntervalId) {
+//             clearInterval(pollingIntervalId);
+//             setPollingIntervalId(null);
+//           }
+//         } else if (res.data.status === 'FAILED') {
+//           setIsLoading(false);
+//           setSubmissionStatus('error');
+//           if (pollingIntervalId) {
+//             clearInterval(pollingIntervalId);
+//             setPollingIntervalId(null);
+//           }
+//         }
+//       } catch (error) {
+//         console.error('Error checking status:', error);
+//       }
+//     }, 5000); // Poll every 5 seconds
+  
+//     setPollingIntervalId(intervalId);
+//   };
+  
+
+
+//   // // Polling function
+//   // const startPolling = (requestId: string) => {
+//   //   setIsLoading(true);
+
+//   //   const intervalId = window.setInterval(async () => {
+//   //     try {
+//   //       const res = await axios.get('/api/getfilemake');
+
+//   //       if (res.data && res.data.status === 'COMPLETED') {
+//   //         setIsLoading(false);
+//   //         setDownloadUrl(res.data.downloadUrl);
+//   //         if (pollingIntervalId) {
+//   //           clearInterval(pollingIntervalId);
+//   //           setPollingIntervalId(null);
+//   //         }
+//   //       }
+//   //     } catch (error) {
+//   //       console.error('Error checking status:', error);
+//   //     }
+//   //   }, 5000); // Poll every 5 seconds
+
+//   //   setPollingIntervalId(intervalId);
+//   // };
+
+//   // Clean up polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalId) {
+//         clearInterval(pollingIntervalId);
+//       }
+//     };
+//   }, [pollingIntervalId]);
+
+//   return (
+//     <>
+//       {/* Modals */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي</h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-6 gap-4">
+//           <p>
+//             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+//           </p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-2">
+//           <Card>
+//             <CardHeader></CardHeader>
+//              {/* Submission Status Messages */}
+//              <div className="bg-gray-50 rounded-lg shadow pb-8 mb-8 p-6">
+//              {submissionStatus === 'success' && (
+//                 <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
+//               )}
+//               {submissionStatus === 'error' && (
+//                 <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
+//               )}
+//               {submissionStatus === 'empty' && (
+//                 <p className="text-yellow-500 mt-4">الرجاء إدخال الموضوع أو اختيار ملف.</p>
+//               )}
+//              {/* Loading and Download */}
+//         {isLoading && (
+//           <div className="w-full flex justify-center mt-4">
+//             <Loading />
+//           </div>
+//         )}
+
+// {downloadUrl ? (
+//   <div className="w-full flex justify-center mt-4">
+//     <a
+//       href={downloadUrl}
+//       className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//       target="_blank"
+//       rel="noopener noreferrer"
+//     >
+//       تحميل الملف
+//     </a>
+//   </div>
+// ) : (
+//   <div className="text-gray-500 mt-4 text-center">
+//     لم يتم تجهيز الملف بعد. الرجاء الانتظار.
+//   </div>
+// )}
+// </div>
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex flex-col lg:flex-row justify-between">
+//                   {/* Topic Field */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+
+//                   {/* File Field */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Template Selection */}
+//                 <div className="mb-4">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* Submit Button */}
+//                 <div className="flex items-center justify-between">
+//                   <button
+//                     type="submit"
+//                     className="w-1/4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+//                   </button>
+//                 </div>
+//               </form>
+
+             
+//             </CardContent>
+//           </Card>
+//         </div>
+
+       
+
+// {/* 
+//         {downloadUrl && (
+//           <div className="w-full flex justify-center mt-4">
+//             <a
+//               href={downloadUrl}
+//               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//             >
+//               تحميل الملف
+//             </a>
+//           </div>
+//         )} */}
+
+//         {/* Template Modal */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
+
+
+
+
+
+
 
 
 // import React, { useState, useEffect, useCallback } from 'react';
