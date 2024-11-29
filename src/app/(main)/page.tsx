@@ -51,7 +51,7 @@ export default async function Home() {
       <section className="bg-secondary w-full flex flex-col md:flex-row justify-around items-center gap-2 p-20 relative">
         <div className="bg-gradient-primary h-full w-full absolute top-0 left-0 z-10" />
         <div className="max-w-[500px] z-[20]">
-          <h3 className="text-white capitalize text-[28px] m-0 font-[600] w-[400px]">
+          <h3 className="text-white capitalize text-[20px] m-0 font-[600] w-[300px]">
             استخدام الذكاء الصناعي في تحويل الملفات الممسوحة ضوئياً والصور
           </h3>
           <p className="text-slate-300 text-[16px] w-full my-5">
