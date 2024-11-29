@@ -13,9 +13,9 @@ export const Hero = () => {
             <button
                 className={"flex mt-10 items-center p-2 text-white justify-center z-20 text-[14px] rounded-full bg-[#3e3469]"}
             >
-                    بدقة عالية تصل إلى 95 %  <ArrowRight/>
+                    بوربوينت جاهز بدقة عالية في دقائق <ArrowRight/>
             </button>
-            <h1 className={'text-white capitalize text-center text-6xl md:text-[70px] z-20 px-10 font-[700] leading-[40px] md:leading-[60px]  sm:text-center'}>
+            <h1 className={'text-white capitalize text-center text-4xl md:text-[60px] z-20 px-10 font-[700] leading-[50px] md:leading-[60px]  sm:text-center'}>
 عروض بوربوينت بالذكاء الصناعي                         </h1>
                         <p className={'text-slate-300 text-[16px] md:text-[18px] z-20 px-10 text-justify max-w-[920px]'}>       
 انشاء عروص بوربوينت كاملة باسخدام الذكاء الصناعي باللغة العربية في دقائق            </p>

@@ -380,8 +380,9 @@ const CreatePresentation: React.FC = () => {
   </div>
 ) : (
   <div className="text-gray-500 mt-4 text-center">
-    لم يتم تجهيز الملف بعد. الرجاء الانتظار.
-  </div>
+            
+          </div>
+  
 )}
 </div>
             <CardContent>
@@ -420,7 +421,7 @@ const CreatePresentation: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(true)}
-                    className="w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                    className="w-full bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                   >
                     {selectedTemplate
                       ? `تم اختيار القالب: ${selectedTemplate.name}`
@@ -432,7 +433,7 @@ const CreatePresentation: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <button
                     type="submit"
-                    className="w-1/4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+                    className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}

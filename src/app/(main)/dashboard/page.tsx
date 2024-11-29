@@ -59,7 +59,7 @@ const DashboardPage = async () => {
   return (
     <div className="md:mr-60 p-2 mt-2">
       <DashboardShell>
-        <div className="mr-12 ml-12">
+        <div className="mr-4 ml-4">
           <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
             <div className="flex-1">
               <FreeCounter isPro={isPro} />

@@ -35,7 +35,7 @@ const Navigation = () => {
         <div className="flex items-center gap-8 space-x-4">
           {isSignedIn ? (
             <>
-              <Link href="/dashboard" className="bg-[#7d63ff] mr-8 text-white py-2 px-3 rounded-md hover:bg-[#7d63ff]/80">
+              <Link href="/dashboard" className="bg-[#7d63ff] text-[14px] w-[100px] mr-8 text-white py-2 px-3 rounded-md hover:bg-[#7d63ff]/80">
                 لوحة التحكم
               </Link>
               <div className="ml-8">
