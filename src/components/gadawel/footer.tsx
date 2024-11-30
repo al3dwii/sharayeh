@@ -23,7 +23,7 @@ export const Footer = () => {
                 alt="Logo" 
                 width={50} // Specify width as needed
                 height={50} // Specify height as needed
-                layout="fixed" // Optional, depends on your design
+                
             />
 
     </Link>

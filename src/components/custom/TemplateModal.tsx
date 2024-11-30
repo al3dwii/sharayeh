@@ -117,8 +117,9 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
                       <Image
                         src={template.preview}
                         alt={template.name}
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'contain' }}
                         onError={(e) => {
                           e.currentTarget.src = '/logo.png'; // Replace with your fallback image
                         }}

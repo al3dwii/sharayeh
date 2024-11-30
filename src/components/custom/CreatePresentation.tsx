@@ -40,21 +40,8 @@ const CreatePresentation: React.FC = () => {
   const [topicValue, setTopicValue] = useState('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    const fetchFile = async () => {
-      try {
-        const res = await axios.get('/api/getfilemake'); // Ensure this matches your server route
-        if (res.data && res.data.downloadUrl) {
-          setDownloadUrl(res.data.downloadUrl);
-        }
-      } catch (error) {
-        console.error('Error fetching file:', error);
-      }
-    };
-  
-    fetchFile();
-  }, []);
-  
+
+
 
 
   // Fetch user data and update credits

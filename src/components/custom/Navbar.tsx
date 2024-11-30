@@ -15,7 +15,12 @@ const Navigation = () => {
         <div className="flex items-center gap-6 space-x-reverse">
           <Link href="/" className="flex items-center ">
             <div className="relative h-10 w-10 ml-2 animate-spin">
-              <Image fill alt="Logo" src="/logo.png" />
+              <Image 
+              fill alt="Logo" 
+              src="/logo.png" 
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+
+              />
             </div>
             <h1 className="text-2xl font-bold text-white">Sharayh</h1>
           </Link>

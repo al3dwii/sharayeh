@@ -60,12 +60,12 @@ const DashboardPage = async () => {
     <div className="md:mr-60 p-2 mt-2">
       <DashboardShell>
         <div className="mr-4 ml-4">
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-            <div className="flex-1">
+          <div className="  w-full md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            <div className="">
               <FreeCounter isPro={isPro} />
             </div>
             <div className="flex-1">
-              <Subsicription isPro={isPro} />
+              {/* <Subsicription isPro={isPro} /> */}
             </div>
           </div>
           
