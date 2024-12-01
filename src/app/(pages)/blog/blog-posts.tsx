@@ -1,15 +1,16 @@
-// // apps/nextjs/src/components/blog/blog-posts.tsx
-
-// ./blog-posts.tsx
+// src/app/(pages)/blog/blog-posts.tsx
 import Link from 'next/link';
+import styles from './blog-posts.module.css'; // We'll create this CSS module next
+
+interface BlogPost {
+  title: string;
+  date: string;
+  slug: string;
+  excerpt: string;
+}
 
 interface BlogPostsProps {
-  posts: {
-    title: string;
-    date: string;
-    slug: string;
-    content: string;
-  }[];
+  posts: BlogPost[];
 }
 
 export function BlogPosts({ posts }: BlogPostsProps) {
@@ -18,40 +19,19 @@ export function BlogPosts({ posts }: BlogPostsProps) {
   }
 
   return (
-    <section>
+    <section className={styles.postsContainer}>
       {posts.map((post) => (
-        <article key={post.slug}>
-          <h2>{post.title}</h2>
-          <time dateTime={post.date}>{post.date}</time>
-          <p>{post.content.slice(0, 100)}...</p>
-          <Link href={`/blog/${post.slug}`}>Read more</Link>
+        <article key={post.slug} className={styles.postCard}>
+          <h2 className={styles.postTitle}>{post.title}</h2>
+          <time dateTime={post.date} className={styles.postDate}>
+            {new Date(post.date).toLocaleDateString()}
+          </time>
+          <p className={styles.postExcerpt}>{post.excerpt}...</p>
+          <Link href={`/blog/${post.slug}`} className={styles.readMoreLink}>
+            Read more
+          </Link>
         </article>
       ))}
     </section>
   );
 }
-
-// import Link from 'next/link';
-
-// interface BlogPostsProps {
-//   posts: {
-//     title: string;
-//     date: string;
-//     content: string;
-//   }[];
-// }
-
-// export function BlogPosts({ posts }: BlogPostsProps) {
-//   return (
-//     <section>
-//       {posts.map((post, index) => (
-//         <article key={index}>
-//           <h2>{post.title}</h2>
-//           <time dateTime={post.date}>{post.date}</time>
-//           <p>{post.content.slice(0, 100)}...</p>
-//           <Link href={`/blog/${index}`}>Read more</Link>
-//         </article>
-//       ))}
-//     </section>
-//   );
-// }

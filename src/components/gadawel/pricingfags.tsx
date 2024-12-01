@@ -1,11 +1,11 @@
 
 
 'use client'
-import { faqs } from "./mock-data";
+import { pricingfaqs } from "./mock-data";
 import { XIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 
-export const Faqs = () => {
+export const PricingFaqs = () => {
     const [active, setActive] = useState<number[]>([])
 
     const toggle = useCallback((id: number) => {
@@ -19,7 +19,7 @@ export const Faqs = () => {
                 <h1 className={'text-white text-2xl font-[800]'}>الأسئلة المتكررة</h1>
                 
                 <div>
-                    {faqs.map(faq => (
+                    {pricingfaqs.map(faq => (
                         <div onClick={() => toggle(faq.id)} key={faq.id}
                              className={'py-3 text-white group cursor-pointer'}>
                             <div className={'flex justify-between items-center border-b-white border-b-[1px] pb-3'}>

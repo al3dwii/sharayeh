@@ -19,10 +19,10 @@ export function PricingFaq() {
     <section className="container max-w-3xl py-2">
       <div className="mb-14 space-y-6 text-center">
         <h1 className="font-heading text-center text-3xl md:text-5xl">
-          <Balancer>FAQ</Balancer>
+          <Balancer>اجابات الأسئلة المتكررة</Balancer>
         </h1>
         <p className="text-md text-muted-foreground">
-          <Balancer>Details about our pricing and services.</Balancer>
+          <Balancer>تفاصيل عن الخدمات والاشتراك</Balancer>
         </p>
       </div>
       <Accordion type="single" collapsible className="w-full">

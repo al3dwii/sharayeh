@@ -348,11 +348,11 @@ const CreatePresentation: React.FC = () => {
         actionLink="/pricing"
       />
 
-      <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-6">
-        <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
+      <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-4">
+        <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-4 gap-4">
           <h1>بوربوينت بالذكاء الصناعي</h1>
         </div>
-        <div className="flex flex-col items-center justify-center text-slate-600 pb-6 gap-4">
+        <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
           <p>
             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
           </p>
@@ -362,7 +362,7 @@ const CreatePresentation: React.FC = () => {
             <CardHeader></CardHeader>
 
             {submissionStatus || isLoading || downloadUrl ? (
-  <div className="rounded-lg pb-8 mb-8 p-6">
+  <div className="rounded-lg pb-4 mb-4 p-4">
     
     {/* Loading and Download */}
     {isLoading && (
@@ -394,7 +394,7 @@ const CreatePresentation: React.FC = () => {
 
             <CardContent>
               <form onSubmit={handleSubmit}>
-                <div className="flex flex-col lg:flex-row justify-between">
+                <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
                   {/* Topic Field */}
                   <div className="mb-4 flex-1 lg:mr-2">
                     <input
@@ -408,7 +408,7 @@ const CreatePresentation: React.FC = () => {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     />
                   </div>
-                  <div className="px-4 text-xl py-2"> أو </div>
+                  <div className="flex justify-center px-4 text-xl py-2"> أو </div>
 
                   {/* File Field */}
                   <div className="mb-4 flex-1 lg:ml-2">

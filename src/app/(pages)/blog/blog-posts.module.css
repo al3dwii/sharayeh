@@ -1,0 +1,43 @@
+/* src/app/(pages)/blog/blog-posts.module.css */
+
+.postsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 30px
+  }
+  
+  .postCard {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: calc(33.333% - 20px);
+  }
+  
+  .postTitle {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .postDate {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+  }
+  
+  .postExcerpt {
+    font-size: 1em;
+    margin-bottom: 20px;
+  }
+  
+  .readMoreLink {
+    color: #0070f3;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .readMoreLink:hover {
+    text-decoration: underline;
+  }
+  

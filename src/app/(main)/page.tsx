@@ -24,6 +24,8 @@ import { Faqs } from "@/components/gadawel/faqs";
 import { auth } from '@clerk/nextjs';
 
 
+
+
 export default async function Home() {
   const prices = await stripe.prices.list({
     product: process.env.NEXT_PLURA_PRODUCT_ID,

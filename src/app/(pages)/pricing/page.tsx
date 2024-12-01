@@ -5,6 +5,8 @@ import { PricingCards } from "@/components/gadawel/pricing-cards";
 import { PricingFaq } from "@/components/gadawel/pricing-faq";
 import { Footer } from "@/components/gadawel/footer";
 import Navigation from '@/components/site/navigation';
+import { PricingFaqs } from "@/components/gadawel/pricingfags";
+
 
 export const metadata = {
   title: "Pricing",
@@ -34,7 +36,9 @@ export default async function PricingPage() {
       <div className="flex w-full flex-col gap-16 py-8 md:py-8">
         <PricingCards userId={user?.id ?? null} isPro={isPro} />
         <hr className="container" />
-        <PricingFaq />
+        <PricingFaqs /> 
+
+        {/* <PricingFaq /> */}
       </div>
       <Footer />
     </>
