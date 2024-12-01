@@ -77,8 +77,8 @@ export const FreeCounter = ({
 
   if (isLoading) {
     return (
-      <div className="px-3">
-        <Card className="bg-blue-200 border-0">
+      <div className="px-3  ">
+        <Card className="bg-blue-200  border-0">
           <CardContent className="py-6">
           <Loading></Loading>
 
@@ -102,7 +102,7 @@ export const FreeCounter = ({
 
   return (
     
-<div className="px-3 ">
+<div className=" m-auto px-3 max-w-[800px] ">
 <Card className="bg-blue-100 border-0">
         <CardContent className="py-6 ">
           <div className="text-center text-sm text-black mb-4 space-y-2">
@@ -128,10 +128,12 @@ export const FreeCounter = ({
             <Progress className="h-3" value={(usedCredits / (credits + usedCredits)) * 100} />
           </div> */}
           {!isPro && (
-            <Button onClick={proModal.onOpen} className="w-40 bg-blue-500">
-              Upgrade
-              <Zap className="w-4 h-4 ml-2 fill-white" />
+            <div className="flex justify-center">
+            <Button onClick={proModal.onOpen} className="w-40  bg-blue-500">
+              ترقية الباقة
+              <Zap className="w-4 h-4 mr-4 fill-white" />
             </Button>
+            </div>
           )}
           
         </CardContent>

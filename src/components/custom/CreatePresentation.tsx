@@ -8,7 +8,9 @@ import Loading from '@/components/global/loading';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import TemplateModal from './TemplateModal';
 
+import { toast } from 'sonner';
 
+import { FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi'; // Icons from react-icons
 
 interface Template {
   id: string;
@@ -39,10 +41,6 @@ const CreatePresentation: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [topicValue, setTopicValue] = useState('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
-
-
-
-
 
   // Fetch user data and update credits
   useEffect(() => {
@@ -116,6 +114,13 @@ const CreatePresentation: React.FC = () => {
       setSubmissionStatus('empty');
       return;
     }
+
+    
+    // Ensure a template is selected
+  if (!selectedTemplate) {
+    setSubmissionStatus('templateRequired');
+    return;
+  }
   
     if (credits === null || credits < 1) {
       setShowInsufficientCreditsModal(true);
@@ -127,7 +132,6 @@ const CreatePresentation: React.FC = () => {
   
     try {
       // Deduct one point
-      await handleUpdateCredits(1);
   
       // Create a new File record
       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
@@ -186,90 +190,7 @@ const CreatePresentation: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-  
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  
-  //   if (!user) {
-  //     router.push('/sign-in');
-  //     return;
-  //   }
-  
-  //   // Ensure at least one field is filled
-  //   if (!topicValue && !documentFile) {
-  //     setSubmissionStatus('empty');
-  //     return;
-  //   }
-  
-  //   if (credits === null || credits < 1) {
-  //     setShowInsufficientCreditsModal(true);
-  //     return;
-  //   }
-  
-  //   setIsSubmitting(true);
-  //   setSubmissionStatus('');
-  
-  //   try {
-  //     // Deduct one point
-  //     await handleUpdateCredits(1);
-  
-  //     // Create a new File record
-  //     const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
-  //     const response = await axios.post('/api/files', {
-  //       userId: user.id,
-  //       fileName,
-  //       type: 'PRESENTATION',
-  //     });
-  
-  //     const requestId = response.data.id;
-  //     setRequestId(requestId);
-  
-  //     // Prepare data for the webhook
-  //     let data: any;
-  //     let headers: { [key: string]: string } = {};
-  
-  //     if (topicValue) {
-  //       data = {
-  //         topic: topicValue,
-  //         templateId: selectedTemplate ? selectedTemplate.id : '',
-  //         categoryId: selectedTemplate ? selectedTemplate.category : '',
-  //         userId: user.id,
-  //         requestId,
-  //       };
-  //     } else if (documentFile) {
-  //       data = new FormData();
-  //       data.append('document', documentFile);
-  //       data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
-  //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
-  //       data.append('userId', user.id);
-  //       data.append('requestId', requestId);
-  //       headers['Content-Type'] = 'multipart/form-data';
-  //     }
-  
-  //     // Send data to the webhook
-  //     await axios.post(
-  //       'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
-  // data,
-  //       { headers }
-  //     );
-  
-  //     setSubmissionStatus('success');
-  
-  //     // Reset form fields
-  //     setTopicValue('');
-  //     setDocumentFile(null);
-  //     setSelectedTemplate(null);
-  
-  //     // Start polling
-  //     startPolling(requestId);
-  //   } catch (error) {
-  //     console.error('Error submitting form:', error);
-  //     setSubmissionStatus('error');
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const startPolling = (requestId: number) => {
     setIsLoading(true);
@@ -283,6 +204,9 @@ const CreatePresentation: React.FC = () => {
         if (res.data && res.data.status === 'COMPLETED') {
           setIsLoading(false);
           setDownloadUrl(res.data.downloadUrl);
+
+          await handleUpdateCredits(1);
+
           if (pollingIntervalId) {
             clearInterval(pollingIntervalId);
             setPollingIntervalId(null);
@@ -312,6 +236,106 @@ const CreatePresentation: React.FC = () => {
     };
   }, [pollingIntervalId]);
 
+  const handleSubmissionStatus = (status: string) => {
+
+    if (status === 'success') {
+      toast.success(
+        <div className="flex text-xl justify-between items-center">
+          <span>تم الإرسال بنجاح!</span>
+          <button
+            onClick={() => toast.dismiss()}
+            className="mr-8 text-green-800 hover:text-green-900"
+          >
+            X
+          </button>
+        </div>,
+        {
+          position: 'top-center',
+          duration: 30000,
+          style: {
+            backgroundColor: '#D4EDDA', // Success green background
+            color: '#155724', // Success text color
+            border: '1px solid #C3E6CB', // Success border color
+          },
+          icon: <FiCheckCircle color="#155724" size={24} />,
+        }
+      );
+    } else if (status === 'error') {
+      toast.error(
+        <div className="flex justify-between items-center">
+          <span>حدث خطأ أثناء الإرسال.</span>
+          <button
+            onClick={() => toast.dismiss()}
+            className="ml-4 text-red-800 hover:text-red-900"
+          >
+        X
+          </button>
+        </div>,
+        {
+          position: 'top-center',
+          duration: 30000,
+          style: {
+            backgroundColor: '#F8D7DA', // Error red background
+            color: '#721C24', // Error text color
+            border: '1px solid #F5C6CB', // Error border color
+          },
+          icon: <FiAlertCircle color="#721C24" size={24} />,
+        }
+      );
+    } else if (status === 'empty') {
+      toast.warning(
+        <div className="flex text-[18px] justify-between items-center">
+          <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+          <button
+            onClick={() => toast.dismiss()}
+            className=" mr-20 text-yellow-800 hover:text-yellow-900"
+          >
+           X
+          </button>
+        </div>,
+        {
+          position: 'top-center',
+          duration: 30000,
+          style: {
+            backgroundColor: '#FFF3CD', // Warning yellow background
+            color: '#856404', // Warning text color
+            border: '1px solid #FFEEBA', // Warning border color
+          },
+          icon: <FiInfo color="#856404" size={24} />,
+        }
+      );
+    } else if (status === 'templateRequired') {
+    toast.warning(
+      <div className="flex text-[18px] justify-between items-center">
+        <span>يرجى اختيار قالب قبل الإرسال.</span>
+        <button
+          onClick={() => toast.dismiss()}
+          className=" mr-20 text-yellow-800 hover:text-yellow-900"
+        >
+          X
+        </button>
+      </div>,
+      {
+        position: 'top-center',
+        duration: 30000,
+        style: {
+          backgroundColor: '#FFF3CD', // Warning yellow background
+          color: '#856404', // Warning text color
+          border: '1px solid #FFEEBA', // Warning border color
+        },
+        icon: <FiInfo color="#856404" size={24} />,
+      }
+    );
+  }
+};
+
+  // Call this function when `submissionStatus` changes
+  useEffect(() => {
+    if (submissionStatus) {
+      handleSubmissionStatus(submissionStatus);
+    }
+  }, [submissionStatus]);
+
   return (
     <>
       {/* Modals */}
@@ -324,7 +348,7 @@ const CreatePresentation: React.FC = () => {
         actionLink="/pricing"
       />
 
-      <div className="max-w-6xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6">
+      <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-6">
         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
           <h1>بوربوينت بالذكاء الصناعي</h1>
         </div>
@@ -336,42 +360,38 @@ const CreatePresentation: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-2">
           <Card>
             <CardHeader></CardHeader>
-             {/* Submission Status Messages */}
-             <div className="bg-gray-50 rounded-lg shadow pb-8 mb-8 p-6">
-             {submissionStatus === 'success' && (
-                <p className="text-green-500 mt-4">تم الإرسال بنجاح!</p>
-              )}
-              {submissionStatus === 'error' && (
-                <p className="text-red-500 mt-4">حدث خطأ أثناء الإرسال.</p>
-              )}
-              {submissionStatus === 'empty' && (
-                <p className="text-yellow-500 mt-4">الرجاء إدخال الموضوع أو اختيار ملف.</p>
-              )}
-             {/* Loading and Download */}
-        {isLoading && (
-          <div className="w-full flex justify-center mt-4">
-            <Loading />
-          </div>
-        )}
 
-{downloadUrl ? (
-  <div className="w-full flex justify-center mt-4">
-    <a
-      href={downloadUrl}
-      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      تحميل الملف
-    </a>
+            {submissionStatus || isLoading || downloadUrl ? (
+  <div className="rounded-lg pb-8 mb-8 p-6">
+    
+    {/* Loading and Download */}
+    {isLoading && (
+      <div className="w-full flex justify-center mt-4">
+        <Loading />
+        
+        <div className="w-full flex justify-center p-4 mt-4">
+          يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+        </div>
+      </div>
+     
+    )}
+    {downloadUrl ? (
+      <div className="w-full flex justify-center mt-4">
+        <a
+          href={downloadUrl}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          تحميل الملف
+        </a>
+      </div>
+    ) : (
+      <div className="text-gray-500 mt-4 text-center"></div>
+    )}
   </div>
-) : (
-  <div className="text-gray-500 mt-4 text-center">
-            
-          </div>
-  
-)}
-</div>
+) : null}
+
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row justify-between">
@@ -388,6 +408,7 @@ const CreatePresentation: React.FC = () => {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     />
                   </div>
+                  <div className="px-4 text-xl py-2"> أو </div>
 
                   {/* File Field */}
                   <div className="mb-4 flex-1 lg:ml-2">
@@ -404,11 +425,11 @@ const CreatePresentation: React.FC = () => {
                 </div>
 
                 {/* Template Selection */}
-                <div className="mb-4">
+                <div className="mb-4 flex justify-center">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(true)}
-                    className="w-full bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                    className="md:w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                   >
                     {selectedTemplate
                       ? `تم اختيار القالب: ${selectedTemplate.name}`
@@ -417,10 +438,10 @@ const CreatePresentation: React.FC = () => {
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex items-center justify-between">
+                <div className="flex justify-center">
                   <button
                     type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+                    className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
@@ -447,6 +468,528 @@ const CreatePresentation: React.FC = () => {
 };
 
 export default CreatePresentation;
+
+
+
+
+
+  //   if (status === 'success') {
+  //     toast.success('تم الإرسال بنجاح!', {
+  //       position: 'top-center',
+  //       duration: Infinity,
+  //       style: {
+  //         backgroundColor: '#D4EDDA', // Success green background
+  //         color: '#155724', // Success text color
+  //         border: '1px solid #C3E6CB', // Success border color
+  //       },
+  //       icon: <FiCheckCircle color="#155724" size={24} />, // Success icon
+  //       action: {
+  //         text: 'إغلاق',
+  //         onClick: () => toast.dismiss(),
+  //       },
+  //     });
+  //   } else if (status === 'error') {
+  //     toast.error('حدث خطأ أثناء الإرسال.', {
+  //       position: 'top-center',
+  //       duration: Infinity,
+  //       style: {
+  //         backgroundColor: '#F8D7DA', // Error red background
+  //         color: '#721C24', // Error text color
+  //         border: '1px solid #F5C6CB', // Error border color
+  //       },
+  //       icon: <FiAlertCircle color="#721C24" size={24} />, // Error icon
+  //       action: {
+  //         text: 'إغلاق',
+  //         onClick: () => toast.dismiss(),
+  //       },
+  //     });
+  //   } else if (status === 'empty') {
+  //     toast.warning('الرجاء إدخال الموضوع أو اختيار ملف.', {
+  //       position: 'top-center',
+  //       duration: Infinity,
+  //       style: {
+  //         backgroundColor: '#FFF3CD', // Warning yellow background
+  //         color: '#856404', // Warning text color
+  //         border: '1px solid #FFEEBA', // Warning border color
+  //       },
+  //       icon: <FiInfo color="#856404" size={24} />, // Warning icon
+  //       action: {
+  //         text: 'إغلاق',
+  //         onClick: () => toast.dismiss(),
+  //       },
+  //     });
+  //   }
+  // };
+  //   if (status === 'success') {
+  //     toast.success('تم الإرسال بنجاح!');
+  //   } else if (status === 'error') {
+  //     toast.error('حدث خطأ أثناء الإرسال.');
+  //   } else if (status === 'empty') {
+  //     toast.warning('الرجاء إدخال الموضوع أو اختيار ملف.');
+  //   }
+  // };
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useStore } from '@/store/useStore';
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+// import { toast } from 'sonner';
+
+
+// interface Template {
+//   id: string;
+//   name: string;
+//   preview: string;
+//   category: string; // Add this line
+// }
+
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+
+//   const setCredits = useStore((state) => state.setCredits);
+//   const setUsedCredits = useStore((state) => state.setUsedCredits);
+//   const credits = useStore((state) => state.credits);
+//   const usedCredits = useStore((state) => state.usedCredits);
+
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+//   const [submissionStatus, setSubmissionStatus] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+//   const [requestId, setRequestId] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+//   const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [topicValue, setTopicValue] = useState('');
+//   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+
+
+
+
+//   // Fetch user data and update credits
+//   useEffect(() => {
+//     if (user) {
+//       getToken().then((token) => {
+//         axios
+//           .get('/api/user-data', {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           })
+//           .then(({ data }) => {
+//             setCredits(data.credits);
+//             setUsedCredits(data.usedCredits);
+//           })
+//           .catch((error) => console.error('Error fetching user data:', error));
+//       });
+//     }
+//   }, [user, getToken, setCredits, setUsedCredits]);
+
+//   // Update credits after usage
+//   const handleUpdateCredits = useCallback(
+//     async (pointsUsed: number) => {
+//       if (user) {
+//         try {
+//           await axios.patch('/api/update-credits', {
+//             userId: user.id,
+//             pointsUsed,
+//           });
+
+//           // Update local state after confirming server update
+//           const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
+//           const updatedCredits = (credits || 0) - pointsUsed;
+
+//           setUsedCredits(updatedUsedCredits);
+//           setCredits(updatedCredits);
+//         } catch (error) {
+//           console.error('Error updating credits:', error);
+//         }
+//       }
+//     },
+//     [user, credits, usedCredits, setCredits, setUsedCredits]
+//   );
+
+//   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     setTopicValue(e.target.value);
+//     if (e.target.value !== '') {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       setDocumentFile(e.target.files[0]);
+//       setTopicValue('');
+//     } else {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+  
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+  
+//     // Ensure at least one field is filled
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+  
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+  
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+  
+//     try {
+//       // Deduct one point
+//       await handleUpdateCredits(1);
+  
+//       // Create a new File record
+//       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//       const response = await axios.post('/api/files', {
+//         userId: user.id,
+//         fileName,
+//         type: 'PRESENTATION',
+//       });
+  
+//       const requestId = response.data.id;
+//       setRequestId(requestId);
+  
+//       // Prepare data for the appropriate webhook
+//       let data: any;
+//       let headers: { [key: string]: string } = {};
+//       let webhookUrl = '';
+  
+//       if (topicValue) {
+//         // Topic-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate ? selectedTemplate.id : '',
+//           categoryId: selectedTemplate ? selectedTemplate.category : '',
+//           userId: user.id,
+//           requestId,
+//         };
+//       } else if (documentFile) {
+//         // File-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//         data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
+//         data.append('userId', user.id);
+//         data.append('requestId', requestId);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+  
+//       // Send data to the appropriate webhook
+//       await axios.post(webhookUrl, data, { headers });
+  
+//       setSubmissionStatus('success');
+  
+//       // Reset form fields
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+  
+//       // Start polling
+//       startPolling(requestId);
+//     } catch (error) {
+//       console.error('Error submitting form:', error);
+//       setSubmissionStatus('error');
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+  
+
+//   // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//   //   e.preventDefault();
+  
+//   //   if (!user) {
+//   //     router.push('/sign-in');
+//   //     return;
+//   //   }
+  
+//   //   // Ensure at least one field is filled
+//   //   if (!topicValue && !documentFile) {
+//   //     setSubmissionStatus('empty');
+//   //     return;
+//   //   }
+  
+//   //   if (credits === null || credits < 1) {
+//   //     setShowInsufficientCreditsModal(true);
+//   //     return;
+//   //   }
+  
+//   //   setIsSubmitting(true);
+//   //   setSubmissionStatus('');
+  
+//   //   try {
+//   //     // Deduct one point
+//   //     await handleUpdateCredits(1);
+  
+//   //     // Create a new File record
+//   //     const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//   //     const response = await axios.post('/api/files', {
+//   //       userId: user.id,
+//   //       fileName,
+//   //       type: 'PRESENTATION',
+//   //     });
+  
+//   //     const requestId = response.data.id;
+//   //     setRequestId(requestId);
+  
+//   //     // Prepare data for the webhook
+//   //     let data: any;
+//   //     let headers: { [key: string]: string } = {};
+  
+//   //     if (topicValue) {
+//   //       data = {
+//   //         topic: topicValue,
+//   //         templateId: selectedTemplate ? selectedTemplate.id : '',
+//   //         categoryId: selectedTemplate ? selectedTemplate.category : '',
+//   //         userId: user.id,
+//   //         requestId,
+//   //       };
+//   //     } else if (documentFile) {
+//   //       data = new FormData();
+//   //       data.append('document', documentFile);
+//   //       data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//   //       data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
+//   //       data.append('userId', user.id);
+//   //       data.append('requestId', requestId);
+//   //       headers['Content-Type'] = 'multipart/form-data';
+//   //     }
+  
+//   //     // Send data to the webhook
+//   //     await axios.post(
+//   //       'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x',
+//   // data,
+//   //       { headers }
+//   //     );
+  
+//   //     setSubmissionStatus('success');
+  
+//   //     // Reset form fields
+//   //     setTopicValue('');
+//   //     setDocumentFile(null);
+//   //     setSelectedTemplate(null);
+  
+//   //     // Start polling
+//   //     startPolling(requestId);
+//   //   } catch (error) {
+//   //     console.error('Error submitting form:', error);
+//   //     setSubmissionStatus('error');
+//   //   } finally {
+//   //     setIsSubmitting(false);
+//   //   }
+//   // };
+
+
+
+//   const startPolling = (requestId: number) => {
+//     setIsLoading(true);
+  
+//     const intervalId = window.setInterval(async () => {
+//       try {
+//         const res = await axios.get('/api/getfilemake', {
+//           params: { requestId },
+//         });
+  
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+//           setDownloadUrl(res.data.downloadUrl);
+//           if (pollingIntervalId) {
+//             clearInterval(pollingIntervalId);
+//             setPollingIntervalId(null);
+//           }
+//         } else if (res.data.status === 'FAILED') {
+//           setIsLoading(false);
+//           setSubmissionStatus('error');
+//           if (pollingIntervalId) {
+//             clearInterval(pollingIntervalId);
+//             setPollingIntervalId(null);
+//           }
+//         }
+//       } catch (error) {
+//         console.error('Error checking status:', error);
+//       }
+//     }, 5000); // Poll every 5 seconds
+  
+//     setPollingIntervalId(intervalId);
+//   };
+  
+//   // Clean up polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalId) {
+//         clearInterval(pollingIntervalId);
+//       }
+//     };
+//   }, [pollingIntervalId]);
+
+//   const handleSubmissionStatus = (status: string) => {
+//     if (status === 'success') {
+//       toast.success('تم الإرسال بنجاح!');
+//     } else if (status === 'error') {
+//       toast.error('حدث خطأ أثناء الإرسال.');
+//     } else if (status === 'empty') {
+//       toast.warning('الرجاء إدخال الموضوع أو اختيار ملف.');
+//     }
+//   };
+
+//   // Call this function when `submissionStatus` changes
+//   useEffect(() => {
+//     if (submissionStatus) {
+//       handleSubmissionStatus(submissionStatus);
+//     }
+//   }, [submissionStatus]);
+
+//   return (
+//     <>
+//       {/* Modals */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-6 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي</h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-6 gap-4">
+//           <p>
+//             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+//           </p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-2">
+//           <Card>
+//             <CardHeader></CardHeader>
+
+//             {submissionStatus || isLoading || downloadUrl ? (
+//   <div className="rounded-lg pb-8 mb-8 p-6">
+    
+//     {/* Loading and Download */}
+//     {isLoading && (
+//       <div className="w-full flex justify-center mt-4">
+//         <Loading />
+//       </div>
+//     )}
+//     {downloadUrl ? (
+//       <div className="w-full flex justify-center mt-4">
+//         <a
+//           href={downloadUrl}
+//           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//           target="_blank"
+//           rel="noopener noreferrer"
+//         >
+//           تحميل الملف
+//         </a>
+//       </div>
+//     ) : (
+//       <div className="text-gray-500 mt-4 text-center"></div>
+//     )}
+//   </div>
+// ) : null}
+
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex flex-col lg:flex-row justify-between">
+//                   {/* Topic Field */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+
+//                   {/* File Field */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Template Selection */}
+//                 <div className="mb-4">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="w-full bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* Submit Button */}
+//                 <div className="flex items-center justify-between">
+//                   <button
+//                     type="submit"
+//                     className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+//                   </button>
+//                 </div>
+//               </form>
+
+             
+//             </CardContent>
+//           </Card>
+//         </div>
+
+//         {/* Template Modal */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
 
 
 
