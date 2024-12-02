@@ -15,20 +15,58 @@ interface UserDetailPageProps {
   }
 }
 
+
+
 async function getUserData(userId: string) {
   const [user, userCredits, userSubscription, userFiles] = await Promise.all([
     clerkClient.users.getUser(userId).catch(() => null),
     db.userCredits.findUnique({ where: { userId } }),
     db.userSubscription.findUnique({ where: { userId } }),
     db.file.findMany({ where: { userId } }),
-  ])
+  ]);
 
   if (!user) {
-    notFound()
+    notFound();
   }
 
-  return { user, userCredits, userSubscription, userFiles }
+  return { user, userCredits, userSubscription, userFiles };
 }
+
+// async function getUserData(userId: string) {
+//     const [user, userCredits, userSubscription, userFiles] = await Promise.all([
+//       clerkClient.users.getUser(userId).catch(() => null),
+//       db.userCredits.findUnique({ where: { userId } }),
+//       db.userSubscription.findUnique({ where: { userId } }),
+//       db.file.findMany({ where: { userId } }).then((files) =>
+//         files.map((file) => ({
+//           ...file,
+//           id: file.id.toString(), // Convert number to string
+//         }))
+//       ),
+//     ]);
+  
+//     if (!user) {
+//       notFound();
+//     }
+  
+//     return { user, userCredits, userSubscription, userFiles };
+//   }
+
+  
+// async function getUserData(userId: string) {
+//   const [user, userCredits, userSubscription, userFiles] = await Promise.all([
+//     clerkClient.users.getUser(userId).catch(() => null),
+//     db.userCredits.findUnique({ where: { userId } }),
+//     db.userSubscription.findUnique({ where: { userId } }),
+//     db.file.findMany({ where: { userId } }),
+//   ])
+
+//   if (!user) {
+//     notFound()
+//   }
+
+//   return { user, userCredits, userSubscription, userFiles }
+// }
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   return (
@@ -69,4 +107,5 @@ async function UserData({ userId }: { userId: string }) {
     </main>
   )
 }
+
 
