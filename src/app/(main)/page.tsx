@@ -1,22 +1,22 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { pricingCards } from '@/lib/constants'
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardFooter,
+//   CardHeader,
+//   CardTitle,
+// } from '@/components/ui/card'
+// import { pricingCards } from '@/lib/constants'
 import { stripe } from '@/lib/stripe'
-import clsx from 'clsx'
-import { Check } from 'lucide-react'
-import Image from 'next/image'
+// import clsx from 'clsx'
+// import { Check } from 'lucide-react'
+// import Image from 'next/image'
 import Link from 'next/link'
 import { Footer } from "@/components/gadawel/footer";
 
-import {ArrowRight} from "lucide-react";
-import { cn } from "@/utils/cn";
-import {Button, buttonVariants} from "@/components/ui/custom-button";
+// import {ArrowRight} from "lucide-react";
+// import { cn } from "@/utils/cn";
+import {Button} from "@/components/ui/custom-button";
 
 import { Hero } from "@/components/gadawel/hero";
 import Hvideo from "@/components/gadawel/homevid";

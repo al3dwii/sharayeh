@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "es2020", // Upgrade to ES2020 for better features and compatibility
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -13,15 +17,62 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".", // Explicitly define the base URL for better clarity
+    "paths": {
+      "@/*": [
+        "src/*"
+      ] // Alias for your `src` directory
+    },
+    "forceConsistentCasingInFileNames": true, // Enforce consistent file casing
+    "strictNullChecks": true, // Enable strict null checks for better type safety
+    "noUnusedLocals": true, // Report unused local variables
+    "noUnusedParameters": true, // Report unused parameters
+    "noImplicitReturns": true, // Ensure functions return explicitly
+    "noFallthroughCasesInSwitch": true // Prevent fallthrough cases in switch statements
+    ,
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/(main)/subaccount/[subaccountId]/launchpad"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/(main)/subaccount/[subaccountId]/launchpad"
+  ],
+  "exclude": [
+    "node_modules",
+    ".turbo",
+    "dist"
+  ] // Exclude Turbo and build outputs
 }
+// {
+//   "compilerOptions": {
+//     "target": "es5",
+//     "lib": ["dom", "dom.iterable", "esnext"],
+//     "allowJs": true,
+//     "skipLibCheck": true,
+//     "strict": true,
+//     "noEmit": true,
+//     "esModuleInterop": true,
+//     "module": "esnext",
+//     "moduleResolution": "bundler",
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "jsx": "preserve",
+//     "incremental": true,
+//     "plugins": [
+//       {
+//         "name": "next"
+//       }
+//     ],
+//     "paths": {
+//       "@/*": ["./src/*"]
+//     }
+//   },
+//   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/(main)/subaccount/[subaccountId]/launchpad"],
+//   "exclude": ["node_modules"]
+// }

@@ -2,9 +2,9 @@
 import  prismadb from "@/utils/prismadb";
 import { currentUser } from "@clerk/nextjs";
 import { PricingCards } from "@/components/gadawel/pricing-cards";
-import { PricingFaq } from "@/components/gadawel/pricing-faq";
+// import { PricingFaq } from "@/components/gadawel/pricing-faq";
 import { Footer } from "@/components/gadawel/footer";
-import Navigation from '@/components/site/navigation';
+// import Navigation from '@/components/site/navigation';
 import { PricingFaqs } from "@/components/gadawel/pricingfags";
 
 
@@ -84,11 +84,11 @@ export default async function PricingPage() {
 // }
 
 
-// Example function to fetch user subscription plan; replace with your actual implementation
-async function fetchUserSubscriptionPlan(userId: string) {
-  // Implement your logic here, e.g., fetch from your backend or directly from Stripe
-  return null; // Replace with actual plan data
-}
+// // Example function to fetch user subscription plan; replace with your actual implementation
+// async function fetchUserSubscriptionPlan(userId: string) {
+//   // Implement your logic here, e.g., fetch from your backend or directly from Stripe
+//   return null; // Replace with actual plan data
+// }
 
 
 // import { getCurrentUser } from "@saasfly/auth";

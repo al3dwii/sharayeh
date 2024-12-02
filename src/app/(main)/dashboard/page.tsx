@@ -1,30 +1,30 @@
 // src/app/(main)/dashboard/page.tsx
 
 import React from 'react';
-import dynamic from 'next/dynamic';
-import ServiceCard from '@/components/custom/ServiceCard';
-import HeroSection from '@/components/custom/HeroSection';
-import { Download, ImageIcon } from "lucide-react";
+// import dynamic from 'next/dynamic';
+// import ServiceCard from '@/components/custom/ServiceCard';
+// import HeroSection from '@/components/custom/HeroSection';
+// import { Download, ImageIcon } from "lucide-react";
 import CreatePresentation from '@/components/custom/CpClientWrapper';
-import { BilandPages } from '@/components/custom/BilandPages';
+// import { BilandPages } from '@/components/custom/BilandPages';
 import { FileTableWithPagination } from '@/components/custom/FileTableWithPagination';
 import { getUserFiles } from '@/lib/queries';
 import { auth } from '@clerk/nextjs';
 import { DashboardShell } from '@/components/custom/shell';
 import { Footer } from "@/components/gadawel/footer";
-import { PhotoIcon } from '@heroicons/react/24/outline';
+// import { PhotoIcon } from '@heroicons/react/24/outline';
 import { FreeCounter } from "@/components/custom/free-counter";
-import { Subsicription } from "@/components/custom/Subsicription";
+// import { Subsicription } from "@/components/custom/Subsicription";
 import { checkSubscription } from "@/lib/subscription";
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import ClientToast from "@/components/custom/ClientToast";
 
 // import { UserFile } from '@/types/UserFile'; // Import the UserFile interface
 
 // Dynamically import the C2a component with suspense
-const C2a = dynamic(() => import('@/components/custom/C2a'), {
-  suspense: true,
-});
+// const C2a = dynamic(() => import('@/components/custom/C2a'), {
+//   suspense: true,
+// });
 
 const DashboardPage = async () => {
   const { userId } = auth();
