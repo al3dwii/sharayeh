@@ -1,12 +1,8 @@
 import React from 'react';
 
-interface PrivacyPolicyProps {
-  params: {
-    lang: string;
-  };
-}
 
-const PrivacyPolicy = ({ params: { lang } }: PrivacyPolicyProps) => {
+
+const PrivacyPolicy = ( ) => {
   return (
     <div className="privacy-policy"  dir="ltr">
       <h1 className="privacy-policy__title">Privacy Policy</h1>
