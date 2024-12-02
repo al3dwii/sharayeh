@@ -1,6 +1,6 @@
 // src/app/(pages)/blog/[slug]/page.tsx
 import { notFound } from 'next/navigation';
-import { getAllPosts, Post } from '@/utils/posts';
+import { getAllPosts } from '@/utils/posts';
 import { marked } from 'marked';
 import styles from './post.module.css';
 

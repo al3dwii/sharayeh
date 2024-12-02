@@ -1,7 +1,7 @@
 // /Users/omair/gadawel/src/app/(pages)/blog/page.tsx
 import { compareDesc } from "date-fns";
 import { BlogPosts } from "./blog-posts";
-import { getAllPosts, Post } from "@/utils/posts";
+import { getAllPosts } from "@/utils/posts";
 
 export const metadata = {
   title: "Blog",
