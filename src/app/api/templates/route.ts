@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ interface Template {
   category: string;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const mainFolderId = '1ANhge_SendsF5jKSyEq773TyItk9C6Mn'; // Main folder ID
     console.log('Fetching categories from main folder:', mainFolderId);

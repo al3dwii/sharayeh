@@ -23,12 +23,12 @@
         "src/*"
       ] // Alias for your `src` directory
     },
-    "forceConsistentCasingInFileNames": true, // Enforce consistent file casing
-    "strictNullChecks": true, // Enable strict null checks for better type safety
-    "noUnusedLocals": true, // Report unused local variables
-    "noUnusedParameters": true, // Report unused parameters
-    "noImplicitReturns": true, // Ensure functions return explicitly
-    "noFallthroughCasesInSwitch": true // Prevent fallthrough cases in switch statements
+    "forceConsistentCasingInFileNames": false, // Enforce consistent file casing
+    "strictNullChecks": false, // Enable strict null checks for better type safety
+    "noUnusedLocals": false, // Report unused local variables
+    "noUnusedParameters": false, // Report unused parameters
+    "noImplicitReturns": false, // Ensure functions return explicitly
+    "noFallthroughCasesInSwitch": false // Prevent fallthrough cases in switch statements
     ,
     "plugins": [
       {

@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, {  useState } from 'react';
 import C2aContent from "./C2aContent";
 // import HamburgerMenu  from './Humberger'
 
@@ -8,22 +8,22 @@ import C2aContent from "./C2aContent";
 const C2a = () => {
 
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    emailOrPhone: '',
-    message: ''
-  });
+  // const [formData, setFormData] = useState({
+  //   name: '',
+  //   emailOrPhone: '',
+  //   message: ''
+  // });
 
-  const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
-    setShowModal(false);
-  };
+  // const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   // Handle form submission here
+  //   console.log(formData);
+  //   setShowModal(false);
+  // };
 
   return (
     <>

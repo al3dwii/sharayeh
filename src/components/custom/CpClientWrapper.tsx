@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
 import CreatePresentation from './CreatePresentation';
 
 const CreatePresentationClientWrapper = () => {
-    const [requireProps, setRequireProps] = useState<{ remainingPage: number | null }>({ remainingPage: null });
+    // const [requireProps, setRequireProps] = useState<{ remainingPage: number | null }>({ remainingPage: null });
 
   return (
     <CreatePresentation  />

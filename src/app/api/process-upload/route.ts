@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs'; // Import Clerk's currentUser function
 import { addFile } from '@/utils/addfile';
-import axios from 'axios';
+// import axios from 'axios';
 
 import { db } from '@/lib/db'; // Import your database module
 
