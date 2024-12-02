@@ -7,7 +7,7 @@
 //   CardTitle,
 // } from '@/components/ui/card'
 // import { pricingCards } from '@/lib/constants'
-import { stripe } from '@/lib/stripe'
+// import { stripe } from '@/lib/stripe'
 // import clsx from 'clsx'
 // import { Check } from 'lucide-react'
 // import Image from 'next/image'
@@ -21,18 +21,18 @@ import {Button} from "@/components/ui/custom-button";
 import { Hero } from "@/components/gadawel/hero";
 import Hvideo from "@/components/gadawel/homevid";
 import { Faqs } from "@/components/gadawel/faqs";
-import { auth } from '@clerk/nextjs';
+// import { auth } from '@clerk/nextjs';
 
 
 
 
 export default async function Home() {
-  const prices = await stripe.prices.list({
-    product: process.env.NEXT_PLURA_PRODUCT_ID,
-    active: true,
-  })
+  // const prices = await stripe.prices.list({
+  //   product: process.env.NEXT_PLURA_PRODUCT_ID,
+  //   active: true,
+  // })
 
-  const { userId } = auth();
+  // const { userId } = auth();
 
 
   // if (userId) {
