@@ -35,7 +35,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
       {/* Logo */}
       <Link href="/admin/dashboard" className="flex items-center gap-2 text-lg font-semibold">
         <Package2 className="h-6 w-6" />

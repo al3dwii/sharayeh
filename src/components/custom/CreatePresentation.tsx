@@ -366,13 +366,30 @@ const CreatePresentation: React.FC = () => {
     
     {/* Loading and Download */}
     {isLoading && (
-      <div className="w-full flex justify-center mt-4">
-        <Loading />
-        
-        <div className="w-full flex justify-center p-4 mt-4">
-          يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
-        </div>
+      <div className="w-full flex flex-col items-center mt-4">
+      {/* Loading spinner */}
+      <div className="flex items-center justify-center">
+      <Loading />
+
+        {/* <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500 border-solid"></div> */}
       </div>
+      
+      {/* Text below the spinner */}
+      <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
+        .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+      </div>
+    
+      {/* Horizontal line */}
+      <div className="w-1/2 border-t border-gray-300 mt-2"></div>
+    </div>
+    
+      // <div className="w-full flex justify-center mt-4">
+        // <Loading />
+        
+      //   <div className="w-full flex justify-center p-4 mt-4">
+      //     يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+      //   </div>
+      // </div>
      
     )}
     {downloadUrl ? (

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getAllPosts } from '@/utils/posts';
 import { marked } from 'marked';
 import styles from './post.module.css';
+import { Footer } from "@/components/gadawel/footer";
 
 interface BlogPostProps {
   params: {
@@ -28,6 +29,7 @@ export default function BlogPostPage({ params }: BlogPostProps) {
   const htmlContent = marked(post.content);
 
   return (
+    <>
     <main className={styles.postContainer}>
       <article>
         <h1 className={styles.postTitle}>{post.title}</h1>
@@ -39,6 +41,9 @@ export default function BlogPostPage({ params }: BlogPostProps) {
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         ></div>
       </article>
+
     </main>
+          <Footer />
+          </>
   );
 }

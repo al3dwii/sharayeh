@@ -2,6 +2,7 @@
 import { compareDesc } from "date-fns";
 import { BlogPosts } from "./blog-posts";
 import { getAllPosts } from "@/utils/posts";
+import { Footer } from "@/components/gadawel/footer";
 
 export const metadata = {
   title: "Blog",
@@ -16,7 +17,10 @@ export default function BlogPage() {
   return (
     <main>
       <BlogPosts posts={posts} />
+      <Footer />
+
     </main>
+    
   );
 }
 
