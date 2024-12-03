@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser, useAuth } from '@clerk/nextjs';
@@ -85,21 +85,64 @@ const CreatePresentation: React.FC = () => {
     [user, credits, usedCredits, setCredits, setUsedCredits]
   );
 
-  const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTopicValue(e.target.value);
-    if (e.target.value !== '') {
-      setDocumentFile(null);
-    }
-  };
+  // Define constants for validation at the top of your component or in a separate constants file
+const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
+const ALLOWED_FILE_TYPES = [
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
+];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setDocumentFile(e.target.files[0]);
-      setTopicValue('');
-    } else {
-      setDocumentFile(null);
+// Updated handleTopicChange with validation
+const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  // Check if the topic exceeds the maximum length
+  if (value.length > MAX_TOPIC_LENGTH) {
+    setSubmissionStatus('topic-too-long');
+    return;
+  }
+
+  // Clear any previous submission status
+  if (submissionStatus) {
+    setSubmissionStatus('');
+  }
+
+  setTopicValue(value);
+
+  // If the topic is not empty, clear the document file
+  if (value !== '') {
+    setDocumentFile(null);
+  }
+};
+
+// Updated handleFileChange with validation
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setSubmissionStatus('file-too-large');
+      return;
     }
-  };
+
+    // Validate file type
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      setSubmissionStatus('invalid-file-type');
+      return;
+    }
+
+    // Clear any previous submission status
+    if (submissionStatus) {
+      setSubmissionStatus('');
+    }
+
+    setDocumentFile(file);
+    setTopicValue('');
+  } else {
+    setDocumentFile(null);
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -180,19 +223,52 @@ const CreatePresentation: React.FC = () => {
       setTopicValue('');
       setDocumentFile(null);
       setSelectedTemplate(null);
+
+
   
       // Start polling
       startPolling(requestId);
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmissionStatus('error');
+      if (axios.isAxiosError(error)) {
+        if (!error.response) {
+          // Network error
+          setSubmissionStatus('network-error');
+        } else if (error.response.status >= 500) {
+          // Server error
+          setSubmissionStatus('server-error');
+        } else if (error.response.status >= 400) {
+          // Client error
+          setSubmissionStatus('client-error');
+        } else {
+          // Other errors
+          setSubmissionStatus('unexpected-error');
+        }
+      } else {
+        // Non-Axios error
+        setSubmissionStatus('unexpected-error');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+    
+  //   catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     setSubmissionStatus('error');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  const pollingIntervalIdRef = useRef<number | null>(null);
 
 
   const startPolling = (requestId: number) => {
+    // Clear any existing interval before starting a new one
+    if (pollingIntervalIdRef.current) {
+      clearInterval(pollingIntervalIdRef.current);
+    }
+
     setIsLoading(true);
   
     const intervalId = window.setInterval(async () => {
@@ -207,128 +283,360 @@ const CreatePresentation: React.FC = () => {
 
           await handleUpdateCredits(1);
 
-          if (pollingIntervalId) {
-            clearInterval(pollingIntervalId);
-            setPollingIntervalId(null);
+
+          // Clear the interval
+          if (pollingIntervalIdRef.current) {
+            clearInterval(pollingIntervalIdRef.current);
+            pollingIntervalIdRef.current = null;
           }
         } else if (res.data.status === 'FAILED') {
           setIsLoading(false);
           setSubmissionStatus('error');
-          if (pollingIntervalId) {
-            clearInterval(pollingIntervalId);
-            setPollingIntervalId(null);
+
+          // Clear the interval
+          if (pollingIntervalIdRef.current) {
+            clearInterval(pollingIntervalIdRef.current);
+            pollingIntervalIdRef.current = null;
           }
         }
       } catch (error) {
         console.error('Error checking status:', error);
       }
     }, 5000); // Poll every 5 seconds
-  
-    setPollingIntervalId(intervalId);
+
+    pollingIntervalIdRef.current = intervalId;
   };
+
+  //         if (pollingIntervalId) {
+  //           clearInterval(pollingIntervalId);
+  //           setPollingIntervalId(null);
+  //         }
+  //       } else if (res.data.status === 'FAILED') {
+  //         setIsLoading(false);
+  //         setSubmissionStatus('error');
+  //         if (pollingIntervalId) {
+  //           clearInterval(pollingIntervalId);
+  //           setPollingIntervalId(null);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error checking status:', error);
+  //     }
+  //   }, 5000); // Poll every 5 seconds
   
+  //   setPollingIntervalId(intervalId);
+  // };
+  
+  // // Clean up polling on unmount
+  // useEffect(() => {
+  //   return () => {
+  //     if (pollingIntervalId) {
+  //       clearInterval(pollingIntervalId);
+  //     }
+  //   };
+  // }, [pollingIntervalId]);
+
   // Clean up polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingIntervalId) {
-        clearInterval(pollingIntervalId);
+      if (pollingIntervalIdRef.current) {
+        clearInterval(pollingIntervalIdRef.current);
       }
     };
-  }, [pollingIntervalId]);
+  }, []);
 
   const handleSubmissionStatus = (status: string) => {
-
-    if (status === 'success') {
-      toast.success(
-        <div className="flex text-xl justify-between items-center">
-          <span>تم الإرسال بنجاح!</span>
-          <button
-            onClick={() => toast.dismiss()}
-            className="mr-8 text-green-800 hover:text-green-900"
-          >
-            X
-          </button>
-        </div>,
-        {
-          position: 'top-center',
-          duration: 30000,
-          style: {
-            backgroundColor: '#D4EDDA', // Success green background
-            color: '#155724', // Success text color
-            border: '1px solid #C3E6CB', // Success border color
-          },
-          icon: <FiCheckCircle color="#155724" size={24} />,
-        }
-      );
-    } else if (status === 'error') {
-      toast.error(
-        <div className="flex justify-between items-center">
-          <span>حدث خطأ أثناء الإرسال.</span>
-          <button
-            onClick={() => toast.dismiss()}
-            className="ml-4 text-red-800 hover:text-red-900"
-          >
-        X
-          </button>
-        </div>,
-        {
-          position: 'top-center',
-          duration: 30000,
-          style: {
-            backgroundColor: '#F8D7DA', // Error red background
-            color: '#721C24', // Error text color
-            border: '1px solid #F5C6CB', // Error border color
-          },
-          icon: <FiAlertCircle color="#721C24" size={24} />,
-        }
-      );
-    } else if (status === 'empty') {
-      toast.warning(
-        <div className="flex text-[18px] justify-between items-center">
-          <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
-          <button
-            onClick={() => toast.dismiss()}
-            className=" mr-20 text-yellow-800 hover:text-yellow-900"
-          >
-           X
-          </button>
-        </div>,
-        {
-          position: 'top-center',
-          duration: 30000,
-          style: {
-            backgroundColor: '#FFF3CD', // Warning yellow background
-            color: '#856404', // Warning text color
-            border: '1px solid #FFEEBA', // Warning border color
-          },
-          icon: <FiInfo color="#856404" size={24} />,
-        }
-      );
-    } else if (status === 'templateRequired') {
-    toast.warning(
-      <div className="flex text-[18px] justify-between items-center">
-        <span>يرجى اختيار قالب قبل الإرسال.</span>
-        <button
-          onClick={() => toast.dismiss()}
-          className=" mr-20 text-yellow-800 hover:text-yellow-900"
-        >
-          X
-        </button>
-      </div>,
-      {
-        position: 'top-center',
-        duration: 30000,
-        style: {
-          backgroundColor: '#FFF3CD', // Warning yellow background
-          color: '#856404', // Warning text color
-          border: '1px solid #FFEEBA', // Warning border color
-        },
-        icon: <FiInfo color="#856404" size={24} />,
-      }
-    );
-  }
-};
-
+    switch (status) {
+      case 'success':
+        toast.success(
+          <div className="flex text-xl justify-between items-center">
+            <span>تم الإرسال بنجاح!</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-8 text-green-800 hover:text-green-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#D4EDDA', // Success green background
+              color: '#155724', // Success text color
+              border: '1px solid #C3E6CB', // Success border color
+            },
+            icon: <FiCheckCircle color="#155724" size={24} />,
+          }
+        );
+        break;
+  
+      case 'error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ أثناء الإرسال.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+  
+      case 'empty':
+        toast.warning(
+          <div className="flex text-[18px] justify-between items-center">
+            <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-20 text-yellow-800 hover:text-yellow-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#FFF3CD', // Warning yellow background
+              color: '#856404', // Warning text color
+              border: '1px solid #FFEEBA', // Warning border color
+            },
+            icon: <FiInfo color="#856404" size={24} />,
+          }
+        );
+        break;
+  
+      case 'templateRequired':
+        toast.warning(
+          <div className="flex text-[18px] justify-between items-center">
+            <span>يرجى اختيار قالب قبل الإرسال.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-20 text-yellow-800 hover:text-yellow-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#FFF3CD', // Warning yellow background
+              color: '#856404', // Warning text color
+              border: '1px solid #FFEEBA', // Warning border color
+            },
+            icon: <FiInfo color="#856404" size={24} />,
+          }
+        );
+        break;
+  
+      case 'network-error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ في الشبكة. يرجى التحقق من اتصالك.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+  
+      case 'server-error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقًا.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+  
+      case 'client-error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>فشل الإرسال بسبب إدخال غير صالح.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+  
+      case 'unexpected-error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ غير متوقع.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+  
+      case 'topic-too-long':
+        toast.warning(
+          <div className="flex text-[18px] justify-between items-center">
+            <span>الموضوع طويل جدًا. يرجى تحديده بـ 100 حرف.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-20 text-yellow-800 hover:text-yellow-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#FFF3CD', // Warning yellow background
+              color: '#856404', // Warning text color
+              border: '1px solid #FFEEBA', // Warning border color
+            },
+            icon: <FiInfo color="#856404" size={24} />,
+          }
+        );
+        break;
+  
+      case 'file-too-large':
+        toast.warning(
+          <div className="flex text-[18px] justify-between items-center">
+            <span>الملف كبير جدًا. الحجم الأقصى هو 5 ميجابايت.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-20 text-yellow-800 hover:text-yellow-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#FFF3CD', // Warning yellow background
+              color: '#856404', // Warning text color
+              border: '1px solid #FFEEBA', // Warning border color
+            },
+            icon: <FiInfo color="#856404" size={24} />,
+          }
+        );
+        break;
+  
+      case 'invalid-file-type':
+        toast.warning(
+          <div className="flex text-[18px] justify-between items-center">
+            <span>نوع الملف غير صالح. يرجى تحميل ملف .docx.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="mr-20 text-yellow-800 hover:text-yellow-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#FFF3CD', // Warning yellow background
+              color: '#856404', // Warning text color
+              border: '1px solid #FFEEBA', // Warning border color
+            },
+            icon: <FiInfo color="#856404" size={24} />,
+          }
+        );
+        break;
+  
+      default:
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ غير معروف.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        break;
+    }
+  };
+  
   // Call this function when `submissionStatus` changes
   useEffect(() => {
     if (submissionStatus) {
@@ -383,13 +691,7 @@ const CreatePresentation: React.FC = () => {
       <div className="w-1/2 border-t border-gray-300 mt-2"></div>
     </div>
     
-      // <div className="w-full flex justify-center mt-4">
-        // <Loading />
-        
-      //   <div className="w-full flex justify-center p-4 mt-4">
-      //     يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
-      //   </div>
-      // </div>
+     
      
     )}
     {downloadUrl ? (
@@ -487,7 +789,122 @@ const CreatePresentation: React.FC = () => {
 export default CreatePresentation;
 
 
+ // <div className="w-full flex justify-center mt-4">
+        // <Loading />
+        
+      //   <div className="w-full flex justify-center p-4 mt-4">
+      //     يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+      //   </div>
+      // </div>
 
+//   const handleSubmissionStatus = (status: string) => {
+
+//     if (status === 'success') {
+//       toast.success(
+//         <div className="flex text-xl justify-between items-center">
+//           <span>تم الإرسال بنجاح!</span>
+//           <button
+//             onClick={() => toast.dismiss()}
+//             className="mr-8 text-green-800 hover:text-green-900"
+//           >
+//             X
+//           </button>
+//         </div>,
+//         {
+//           position: 'top-center',
+//           duration: 30000,
+//           style: {
+//             backgroundColor: '#D4EDDA', // Success green background
+//             color: '#155724', // Success text color
+//             border: '1px solid #C3E6CB', // Success border color
+//           },
+//           icon: <FiCheckCircle color="#155724" size={24} />,
+//         }
+//       );
+//     } else if (status === 'error') {
+//       toast.error(
+//         <div className="flex justify-between items-center">
+//           <span>حدث خطأ أثناء الإرسال.</span>
+//           <button
+//             onClick={() => toast.dismiss()}
+//             className="ml-4 text-red-800 hover:text-red-900"
+//           >
+//         X
+//           </button>
+//         </div>,
+//         {
+//           position: 'top-center',
+//           duration: 30000,
+//           style: {
+//             backgroundColor: '#F8D7DA', // Error red background
+//             color: '#721C24', // Error text color
+//             border: '1px solid #F5C6CB', // Error border color
+//           },
+//           icon: <FiAlertCircle color="#721C24" size={24} />,
+//         }
+//       );
+//     } else if (status === 'empty') {
+//       toast.warning(
+//         <div className="flex text-[18px] justify-between items-center">
+//           <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+//           <button
+//             onClick={() => toast.dismiss()}
+//             className=" mr-20 text-yellow-800 hover:text-yellow-900"
+//           >
+//            X
+//           </button>
+//         </div>,
+//         {
+//           position: 'top-center',
+//           duration: 30000,
+//           style: {
+//             backgroundColor: '#FFF3CD', // Warning yellow background
+//             color: '#856404', // Warning text color
+//             border: '1px solid #FFEEBA', // Warning border color
+//           },
+//           icon: <FiInfo color="#856404" size={24} />,
+//         }
+//       );
+//     } else if (status === 'templateRequired') {
+//     toast.warning(
+//       <div className="flex text-[18px] justify-between items-center">
+//         <span>يرجى اختيار قالب قبل الإرسال.</span>
+//         <button
+//           onClick={() => toast.dismiss()}
+//           className=" mr-20 text-yellow-800 hover:text-yellow-900"
+//         >
+//           X
+//         </button>
+//       </div>,
+//       {
+//         position: 'top-center',
+//         duration: 30000,
+//         style: {
+//           backgroundColor: '#FFF3CD', // Warning yellow background
+//           color: '#856404', // Warning text color
+//           border: '1px solid #FFEEBA', // Warning border color
+//         },
+//         icon: <FiInfo color="#856404" size={24} />,
+//       }
+//     );
+//   }
+// };
+
+  // const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setTopicValue(e.target.value);
+  //   if (e.target.value !== '') {
+  //     setDocumentFile(null);
+  //   }
+  // };
+
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     setDocumentFile(e.target.files[0]);
+  //     setTopicValue('');
+  //   } else {
+  //     setDocumentFile(null);
+  //   }
+  // };
 
 
   //   if (status === 'success') {
