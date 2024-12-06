@@ -195,6 +195,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (topicValue) {
         // Topic-specific webhook
         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+
+        // webhookUrl = 'https://hook.eu2.make.com/qel93ksh54cigpbzj6wwgu65zg4k7x1y';
         data = {
           topic: topicValue,
           templateId: selectedTemplate ? selectedTemplate.id : '',
@@ -252,14 +254,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   };
     
-  //   catch (error) {
-  //     console.error('Error submitting form:', error);
-  //     setSubmissionStatus('error');
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const pollingIntervalIdRef = useRef<number | null>(null);
 
 
@@ -276,12 +270,15 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const res = await axios.get('/api/getfilemake', {
           params: { requestId },
         });
-  
+
         if (res.data && res.data.status === 'COMPLETED') {
           setIsLoading(false);
+
+          console.log('Download URL:', res.data.downloadUrl);
+
           setDownloadUrl(res.data.downloadUrl);
 
-          await handleUpdateCredits(1);
+          await handleUpdateCredits(15);
 
 
           // Clear the interval
@@ -306,35 +303,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
     pollingIntervalIdRef.current = intervalId;
   };
-
-  //         if (pollingIntervalId) {
-  //           clearInterval(pollingIntervalId);
-  //           setPollingIntervalId(null);
-  //         }
-  //       } else if (res.data.status === 'FAILED') {
-  //         setIsLoading(false);
-  //         setSubmissionStatus('error');
-  //         if (pollingIntervalId) {
-  //           clearInterval(pollingIntervalId);
-  //           setPollingIntervalId(null);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error checking status:', error);
-  //     }
-  //   }, 5000); // Poll every 5 seconds
-  
-  //   setPollingIntervalId(intervalId);
-  // };
-  
-  // // Clean up polling on unmount
-  // useEffect(() => {
-  //   return () => {
-  //     if (pollingIntervalId) {
-  //       clearInterval(pollingIntervalId);
-  //     }
-  //   };
-  // }, [pollingIntervalId]);
 
   // Clean up polling on unmount
   useEffect(() => {

@@ -41,6 +41,7 @@ model File {
   fileName     String     @map("file_name")
   type         String
   resultedFile String?    @map("resulted_file")
+  resultedFile2 String?    @map("resulted_file2")
   status       FileStatus
   results      Json?
 
