@@ -169,40 +169,40 @@ export async function POST(req: NextRequest) {
 
     // **Step 11 & 12: Upload the File to Aspose Storage and Verify Upload in Parallel**
     console.log('📤 Uploading file to Aspose Storage and verifying upload.');
-    const [uploadResponse, listFilesResponse] = await Promise.all([
-      axiosInstance.put(
-        `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
-        fileData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/octet-stream',
-          },
-        }
-      ),
-      axiosInstance.get(
-        `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
-    ]);
+    // const [uploadResponse, listFilesResponse] = await Promise.all([
+    //   axiosInstance.put(
+    //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+    //     fileData,
+    //     {
+    //       headers: {
+    //         Authorization: `Bearer ${accessToken}`,
+    //         'Content-Type': 'application/octet-stream',
+    //       },
+    //     }
+    //   ),
+    //   axiosInstance.get(
+    //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
+    //     {
+    //       headers: {
+    //         Authorization: `Bearer ${accessToken}`,
+    //       },
+    //     }
+    //   )
+    // ]);
 
-    console.log('✅ File uploaded to Aspose Storage.');
-    console.log('✅ Verified upload by listing files in root folder.');
+    // console.log('✅ File uploaded to Aspose Storage.');
+    // console.log('✅ Verified upload by listing files in root folder.');
 
-    // **Step 13: Check if the File Exists in the Root Folder**
-    const uploadedFiles = listFilesResponse.data.value;
-    const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
+    // // **Step 13: Check if the File Exists in the Root Folder**
+    // const uploadedFiles = listFilesResponse.data.value;
+    // const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
 
-    console.log(`📁 File exists in root folder: ${fileExists}`);
+    // console.log(`📁 File exists in root folder: ${fileExists}`);
 
-    if (!fileExists) {
-      console.error(`❌ File ${originalFileName} was not found in the root folder`);
-      throw new Error(`File ${originalFileName} was not found in the root folder`);
-    }
+    // if (!fileExists) {
+    //   console.error(`❌ File ${originalFileName} was not found in the root folder`);
+    //   throw new Error(`File ${originalFileName} was not found in the root folder`);
+    // }
 
     // **Step 14: Get the Total Number of Slides**
     console.log(`📊 Retrieving slide count for file: ${uploadPath}`);
@@ -220,20 +220,71 @@ export async function POST(req: NextRequest) {
     const slideCount = slideCountResponse.data.slideList.length;
     console.log(`📊 Total number of slides: ${slideCount}`);
 
-    // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+
+
+    // // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+    // console.log('🎨 Applying Morph transitions to all slides in parallel.');
+    // const morphPromises = [];
+    // for (let i = 1; i <= slideCount; i++) {
+    //   morphPromises.push(
+    //     axiosInstance.put(
+    //       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
+    //       {
+    //         slideShowTransition: {
+    //           type: 'Morph',
+    //           morphTransition: {
+    //             morphType: 'ByObject', // Options: 'ByObject', 'ByWord', 'ByChar'
+    //           },
+    //         },
+    //       },
+    //       {
+    //         headers: {
+    //           Authorization: `Bearer ${accessToken}`,
+    //           'Content-Type': 'application/json',
+    //         },
+    //       }
+    //     ).then(() => {
+    //       console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+    //     }).catch((slideError: any) => {
+    //       console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+    //       throw new Error(`Failed to apply Morph transition to slide ${i}.`);
+    //     })
+    //   );
+    // }
+
+    // // Await all morph transition promises
+    // await Promise.all(morphPromises);
+    // console.log('✅ All Morph transitions applied successfully.');
+
+
+
+        // **Step 15: Apply Morph Transition to Each Slide in Parallel**
     console.log('🎨 Applying Morph transitions to all slides in parallel.');
-    const morphPromises = [];
+
+    const processedSlides = [];
+    const failedSlides = [];
+
     for (let i = 1; i <= slideCount; i++) {
-      morphPromises.push(
-        axiosInstance.put(
+      try {
+        await axiosInstance.put(
           `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
           {
+
             slideShowTransition: {
               type: 'Morph',
+              duration: 1000, // Duration in milliseconds
+              easing: 'ease-in-out', // Transition easing function
               morphTransition: {
-                morphType: 'ByObject', // Options: 'ByObject', 'ByWord', 'ByChar'
+                morphType: 'ByWord', // Try 'ByWord' or 'ByChar' instead of 'ByObject'
               },
             },
+
+            // slideShowTransition: {
+            //   type: 'Morph',
+            //   morphTransition: {
+            //     morphType: 'ByObject',  // Options: 'ByObject', 'ByWord', 'ByChar'
+            //   },
+            // },
           },
           {
             headers: {
@@ -241,18 +292,21 @@ export async function POST(req: NextRequest) {
               'Content-Type': 'application/json',
             },
           }
-        ).then(() => {
-          console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
-        }).catch((slideError: any) => {
-          console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
-          throw new Error(`Failed to apply Morph transition to slide ${i}.`);
-        })
-      );
+        );
+        console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+        processedSlides.push(i);
+      } catch (slideError: any) {
+        console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+        failedSlides.push({ slide: i, error: slideError.message });
+      }
     }
 
-    // Await all morph transition promises
-    await Promise.all(morphPromises);
-    console.log('✅ All Morph transitions applied successfully.');
+    // **Log the Results**
+    console.log('✅ Processed slides:', processedSlides);
+    if (failedSlides.length > 0) {
+      console.warn('❌ Failed slides:', failedSlides);
+    }
+
 
     // **Step 16: Download the Modified File from Aspose**
     console.log(`⬇️ Downloading the modified file: ${uploadPath}`);
@@ -304,9 +358,22 @@ export async function POST(req: NextRequest) {
     // **Step 20: Return the Processed File URL to the Frontend**
     console.log('📤 Returning response to frontend.');
     return NextResponse.json(
-      { success: true, processedFileUrl },
+      {
+        success: true,
+        processedFileUrl,
+        processedSlides,
+        failedSlides,
+      },
       { status: 200 }
     );
+
+
+    // // **Step 20: Return the Processed File URL to the Frontend**
+    // console.log('📤 Returning response to frontend.');
+    // return NextResponse.json(
+    //   { success: true, processedFileUrl },
+    //   { status: 200 }
+    // );
 
   } catch (error: any) { // Specify 'any' type for better error property access
     if (axios.isAxiosError(error)) {
