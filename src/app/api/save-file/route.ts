@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db'; // Adjust your db import accordingly
 import { getAuth } from '@clerk/nextjs/server'; // Example Clerk import for authentication
 
+export const runtime = 'nodejs';
+
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
