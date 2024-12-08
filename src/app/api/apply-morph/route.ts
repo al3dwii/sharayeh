@@ -10,18 +10,31 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 export const runtime = 'nodejs'; // Ensure Node.js runtime
 
-// Initialize Axios with retry logic
+// Initialize Axios with retry logic and updated configurations
 const axiosInstance = axios.create({
   timeout: 30000, // 30 seconds
+  maxContentLength: Infinity, // Remove content length limit
+  maxBodyLength: Infinity,    // Remove body length limit
+  responseType: 'arraybuffer', // Default response type
 });
 
+// Configure Axios Retry
 axiosRetry(axiosInstance, {
   retries: 3,
   retryDelay: (retryCount) => {
     return retryCount * 1000; // Exponential backoff
   },
   retryCondition: (error) => {
-    return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response.status === 500;
+    // Retry on network errors or 5xx status codes
+    return axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response && error.response.status >= 500);
+  },
+});
+
+// Separate Axios instance for authentication to isolate configurations
+const axiosAuthInstance = axios.create({
+  timeout: 30000, // 30 seconds
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
   },
 });
 
@@ -140,15 +153,11 @@ export async function POST(req: NextRequest) {
 
     let authResponse;
     try {
-      authResponse = await axiosInstance.post(
+      authResponse = await axiosAuthInstance.post(
         'https://api.aspose.cloud/connect/token',
-        params.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
+        params.toString()
       );
+      console.log('🔑 Aspose Authentication Response:', authResponse.data); // Log the response
     } catch (authError: any) {
       console.error('❌ Aspose authentication failed:', authError.response?.data || authError.message);
       throw new Error('Aspose authentication failed.');
@@ -157,6 +166,11 @@ export async function POST(req: NextRequest) {
     console.log('🔑 Aspose authentication successful. Access Token obtained.');
 
     const accessToken = authResponse.data.access_token;
+
+    if (!accessToken) {
+      console.error('❌ Access token is undefined. Authentication may have failed.');
+      throw new Error('Access token not obtained.');
+    }
 
     // **Step 10: Define uploadPath (File Name Only)**
     const uploadPath = originalFileName; // e.g., 'user_2oXAN2jOiLWJAICsojgKXgO82Az.pptx'
@@ -169,40 +183,44 @@ export async function POST(req: NextRequest) {
 
     // **Step 11 & 12: Upload the File to Aspose Storage and Verify Upload in Parallel**
     console.log('📤 Uploading file to Aspose Storage and verifying upload.');
-    // const [uploadResponse, listFilesResponse] = await Promise.all([
-    //   axiosInstance.put(
-    //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
-    //     fileData,
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${accessToken}`,
-    //         'Content-Type': 'application/octet-stream',
-    //       },
-    //     }
-    //   ),
-    //   axiosInstance.get(
-    //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${accessToken}`,
-    //       },
-    //     }
-    //   )
-    // ]);
+    const [uploadResponse, listFilesResponse] = await Promise.all([
+      axiosInstance.put(
+        `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+        fileData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/octet-stream',
+          },
+        }
+      ),
+      axiosInstance.get(
+        `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            path: '/', // Explicitly specify the root path
+          },
+          responseType: 'json', // Ensure the response is treated as JSON
+        }
+      )
+    ]);
 
-    // console.log('✅ File uploaded to Aspose Storage.');
-    // console.log('✅ Verified upload by listing files in root folder.');
+    console.log('✅ File uploaded to Aspose Storage.');
+    console.log('🔍 Listing files in Aspose Storage Response:', listFilesResponse.data);
 
-    // // **Step 13: Check if the File Exists in the Root Folder**
-    // const uploadedFiles = listFilesResponse.data.value;
-    // const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
+    // **Step 13: Check if the File Exists in the Root Folder**
+    const uploadedFiles = listFilesResponse.data.value;
+    const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
 
-    // console.log(`📁 File exists in root folder: ${fileExists}`);
+    console.log(`📁 File exists in root folder: ${fileExists}`);
 
-    // if (!fileExists) {
-    //   console.error(`❌ File ${originalFileName} was not found in the root folder`);
-    //   throw new Error(`File ${originalFileName} was not found in the root folder`);
-    // }
+    if (!fileExists) {
+      console.error(`❌ File ${originalFileName} was not found in the root folder`);
+      throw new Error(`File ${originalFileName} was not found in the root folder`);
+    }
 
     // **Step 14: Get the Total Number of Slides**
     console.log(`📊 Retrieving slide count for file: ${uploadPath}`);
@@ -212,6 +230,7 @@ export async function POST(req: NextRequest) {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        responseType: 'json', // Ensure the response is treated as JSON
       }
     );
 
@@ -220,56 +239,17 @@ export async function POST(req: NextRequest) {
     const slideCount = slideCountResponse.data.slideList.length;
     console.log(`📊 Total number of slides: ${slideCount}`);
 
+    // **Step 15: Apply Morph Transition to Each Slide Sequentially**
+    console.log('🎨 Applying Morph transitions to all slides sequentially.');
 
-
-    // // **Step 15: Apply Morph Transition to Each Slide in Parallel**
-    // console.log('🎨 Applying Morph transitions to all slides in parallel.');
-    // const morphPromises = [];
-    // for (let i = 1; i <= slideCount; i++) {
-    //   morphPromises.push(
-    //     axiosInstance.put(
-    //       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
-    //       {
-    //         slideShowTransition: {
-    //           type: 'Morph',
-    //           morphTransition: {
-    //             morphType: 'ByObject', // Options: 'ByObject', 'ByWord', 'ByChar'
-    //           },
-    //         },
-    //       },
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer ${accessToken}`,
-    //           'Content-Type': 'application/json',
-    //         },
-    //       }
-    //     ).then(() => {
-    //       console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
-    //     }).catch((slideError: any) => {
-    //       console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
-    //       throw new Error(`Failed to apply Morph transition to slide ${i}.`);
-    //     })
-    //   );
-    // }
-
-    // // Await all morph transition promises
-    // await Promise.all(morphPromises);
-    // console.log('✅ All Morph transitions applied successfully.');
-
-
-
-        // **Step 15: Apply Morph Transition to Each Slide in Parallel**
-    console.log('🎨 Applying Morph transitions to all slides in parallel.');
-
-    const processedSlides = [];
-    const failedSlides = [];
+    const processedSlides: number[] = [];
+    const failedSlides: { slide: number; error: string }[] = [];
 
     for (let i = 1; i <= slideCount; i++) {
       try {
         await axiosInstance.put(
           `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
           {
-
             slideShowTransition: {
               type: 'Morph',
               duration: 1000, // Duration in milliseconds
@@ -278,13 +258,6 @@ export async function POST(req: NextRequest) {
                 morphType: 'ByWord', // Try 'ByWord' or 'ByChar' instead of 'ByObject'
               },
             },
-
-            // slideShowTransition: {
-            //   type: 'Morph',
-            //   morphTransition: {
-            //     morphType: 'ByObject',  // Options: 'ByObject', 'ByWord', 'ByChar'
-            //   },
-            // },
           },
           {
             headers: {
@@ -306,7 +279,6 @@ export async function POST(req: NextRequest) {
     if (failedSlides.length > 0) {
       console.warn('❌ Failed slides:', failedSlides);
     }
-
 
     // **Step 16: Download the Modified File from Aspose**
     console.log(`⬇️ Downloading the modified file: ${uploadPath}`);
@@ -367,14 +339,6 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
 
-
-    // // **Step 20: Return the Processed File URL to the Frontend**
-    // console.log('📤 Returning response to frontend.');
-    // return NextResponse.json(
-    //   { success: true, processedFileUrl },
-    //   { status: 200 }
-    // );
-
   } catch (error: any) { // Specify 'any' type for better error property access
     if (axios.isAxiosError(error)) {
       console.error('⚠️ Axios error:', {
@@ -405,6 +369,1176 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+
+
+
+
+
+// // /app/api/apply-morph/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import axios from 'axios';
+// import axiosRetry from 'axios-retry';
+// import fs from 'fs';
+// import os from 'os';
+// import path from 'path';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+// export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+// // Initialize Axios with retry logic and updated configurations
+// const axiosInstance = axios.create({
+//   timeout: 30000, // 30 seconds
+//   maxContentLength: Infinity, // Remove content length limit
+//   maxBodyLength: Infinity,    // Remove body length limit
+//   responseType: 'arraybuffer', // Default response type
+// });
+
+// // Configure Axios Retry
+// axiosRetry(axiosInstance, {
+//   retries: 3,
+//   retryDelay: (retryCount) => {
+//     return retryCount * 1000; // Exponential backoff
+//   },
+//   retryCondition: (error) => {
+//     // Retry on network errors or 5xx status codes
+//     return axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response && error.response.status >= 500);
+//   },
+// });
+
+// // Separate Axios instance for authentication to isolate configurations
+// const axiosAuthInstance = axios.create({
+//   timeout: 30000, // 30 seconds
+//   headers: {
+//     'Content-Type': 'application/x-www-form-urlencoded',
+//   },
+// });
+
+// export async function POST(req: NextRequest) {
+//   console.log('📥 API handler invoked with method:', req.method);
+
+//   let uploadedFilePath = ''; // Temporary file path
+//   let originalFileName = '';
+
+//   try {
+//     // **Step 1: Retrieve and Validate Environment Variables**
+//     const {
+//       AWS_ACCESS_KEY_ID,
+//       AWS_SECRET_ACCESS_KEY,
+//       AWS_REGION,
+//       ASPOSE_CLIENT_ID,
+//       ASPOSE_CLIENT_SECRET,
+//     } = process.env;
+
+//     if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+//       console.error('❌ Missing AWS environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing AWS credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     if (!ASPOSE_CLIENT_ID || !ASPOSE_CLIENT_SECRET) {
+//       console.error('❌ Missing Aspose environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing Aspose credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     // **Optional Logging (Do Not Log Secrets)**
+//     console.log('🌍 AWS Region:', AWS_REGION);
+//     console.log('🔑 Aspose Client ID:', ASPOSE_CLIENT_ID);
+
+//     // **Step 2: Initialize AWS S3 Client with AWS SDK v3**
+//     const s3 = new S3Client({
+//       region: AWS_REGION, // Europe (Stockholm)
+//       credentials: {
+//         accessKeyId: AWS_ACCESS_KEY_ID,
+//         secretAccessKey: AWS_SECRET_ACCESS_KEY,
+//       },
+//     });
+
+//     // **Step 3: Parse the JSON Body**
+//     console.log('📄 Parsing request body');
+//     const { resultedFile } = await req.json();
+
+//     if (!resultedFile) {
+//       console.error('❌ resultedFile URL is required.');
+//       return NextResponse.json(
+//         { success: false, error: 'resultedFile URL is required.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 4: Validate the resultedFile URL**
+//     const allowedDomains = ['sharayeh.s3.eu-north-1.amazonaws.com'];
+//     let resultedFileUrl: URL;
+//     try {
+//       resultedFileUrl = new URL(resultedFile);
+//     } catch (urlError) {
+//       console.error('❌ Invalid resultedFile URL:', resultedFile);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!allowedDomains.includes(resultedFileUrl.hostname)) {
+//       console.error('❌ Invalid resultedFile domain:', resultedFileUrl.hostname);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL domain.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 5: Download the File from the resultedFile URL**
+//     console.log(`⬇️ Downloading file from URL: ${resultedFile}`);
+//     const downloadResponse = await axiosInstance.get(resultedFile, { responseType: 'arraybuffer' });
+
+//     if (downloadResponse.status !== 200) {
+//       console.error(`❌ Failed to download file. Status code: ${downloadResponse.status}`);
+//       throw new Error(`Failed to download file. Status code: ${downloadResponse.status}`);
+//     }
+
+//     console.log('✅ File downloaded successfully.');
+
+//     // **Step 6: Determine the File Name from the URL**
+//     const urlPath = resultedFileUrl.pathname;
+//     originalFileName = path.basename(urlPath);
+//     const extension = path.extname(originalFileName);
+//     console.log(`📁 Original file name: ${originalFileName}`);
+
+//     // **Step 7: Generate a Unique Temporary File Path**
+//     const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//     const tempDir = os.tmpdir();
+//     uploadedFilePath = path.join(tempDir, `${uniqueId}${extension}`);
+//     console.log(`📂 Temporary file path: ${uploadedFilePath}`);
+
+//     // **Step 8: Save the Downloaded File to the Temporary Path**
+//     console.log('💾 Saving file to temporary path');
+//     await fs.promises.writeFile(uploadedFilePath, downloadResponse.data);
+//     console.log('✅ File saved to temporary path.');
+
+//     // **Step 9: Authenticate with Aspose API**
+//     console.log('🔑 Authenticating with Aspose API');
+//     const params = new URLSearchParams();
+//     params.append('grant_type', 'client_credentials');
+//     params.append('client_id', ASPOSE_CLIENT_ID);
+//     params.append('client_secret', ASPOSE_CLIENT_SECRET);
+
+//     let authResponse;
+//     try {
+//       authResponse = await axiosAuthInstance.post(
+//         'https://api.aspose.cloud/connect/token',
+//         params.toString()
+//       );
+//       console.log('🔑 Aspose Authentication Response:', authResponse.data); // Log the response
+//     } catch (authError: any) {
+//       console.error('❌ Aspose authentication failed:', authError.response?.data || authError.message);
+//       throw new Error('Aspose authentication failed.');
+//     }
+
+//     console.log('🔑 Aspose authentication successful. Access Token obtained.');
+
+//     const accessToken = authResponse.data.access_token;
+
+//     if (!accessToken) {
+//       console.error('❌ Access token is undefined. Authentication may have failed.');
+//       throw new Error('Access token not obtained.');
+//     }
+
+//     // **Step 10: Define uploadPath (File Name Only)**
+//     const uploadPath = originalFileName; // e.g., 'user_2oXAN2jOiLWJAICsojgKXgO82Az.pptx'
+//     console.log(`📤 Uploading file to Aspose Storage with uploadPath: ${uploadPath}`);
+
+//     const fileData = await fs.promises.readFile(uploadedFilePath);
+//     console.log('📄 File data read successfully.');
+
+//     const API_VERSION = 'v3.0'; // Update to 'v4.0' if applicable
+
+//     // **Step 11 & 12: Upload the File to Aspose Storage and Verify Upload in Parallel**
+//     console.log('📤 Uploading file to Aspose Storage and verifying upload.');
+//     const [uploadResponse, listFilesResponse] = await Promise.all([
+//       axiosInstance.put(
+//         `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//         fileData,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//             'Content-Type': 'application/octet-stream',
+//           },
+//         }
+//       ),
+//       axiosInstance.get(
+//         `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//           },
+//           params: {
+//             path: '/', // Explicitly specify the root path
+//           },
+//           responseType: 'json', // Ensure the response is treated as JSON
+//         }
+//       )
+//     ]);
+
+//     console.log('✅ File uploaded to Aspose Storage.');
+//     console.log('🔍 Listing files in Aspose Storage Response:', listFilesResponse.data);
+
+//     // **Step 13: Check if the File Exists in the Root Folder**
+//     const uploadedFiles = listFilesResponse.data.value;
+//     const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
+
+//     console.log(`📁 File exists in root folder: ${fileExists}`);
+
+//     if (!fileExists) {
+//       console.error(`❌ File ${originalFileName} was not found in the root folder`);
+//       throw new Error(`File ${originalFileName} was not found in the root folder`);
+//     }
+
+//     // **Step 14: Get the Total Number of Slides**
+//     console.log(`📊 Retrieving slide count for file: ${uploadPath}`);
+//     const slideCountResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//         responseType: 'json', // Ensure the response is treated as JSON
+//       }
+//     );
+
+//     console.log('✅ Slide count retrieved.');
+
+//     const slideCount = slideCountResponse.data.slideList.length;
+//     console.log(`📊 Total number of slides: ${slideCount}`);
+
+//     // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+//     console.log('🎨 Applying Morph transitions to all slides in parallel.');
+
+//     const processedSlides = [];
+//     const failedSlides = [];
+
+//     // To optimize performance, process slides in parallel using Promise.all
+//     const slidePromises = [];
+
+//     for (let i = 1; i <= slideCount; i++) {
+//       const slidePromise = axiosInstance.put(
+//         `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
+//         {
+//           slideShowTransition: {
+//             type: 'Morph',
+//             duration: 1000, // Duration in milliseconds
+//             easing: 'ease-in-out', // Transition easing function
+//             morphTransition: {
+//               morphType: 'ByWord', // Try 'ByWord' or 'ByChar' instead of 'ByObject'
+//             },
+//           },
+//         },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//             'Content-Type': 'application/json',
+//           },
+//         }
+//       )
+//         .then(() => {
+//           console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+//           processedSlides.push(i);
+//         })
+//         .catch((slideError: any) => {
+//           console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+//           failedSlides.push({ slide: i, error: slideError.message });
+//         });
+
+//       slidePromises.push(slidePromise);
+//     }
+
+//     // Wait for all slide transitions to complete
+//     await Promise.all(slidePromises);
+
+//     // **Log the Results**
+//     console.log('✅ Processed slides:', processedSlides);
+//     if (failedSlides.length > 0) {
+//       console.warn('❌ Failed slides:', failedSlides);
+//     }
+
+//     // **Step 16: Download the Modified File from Aspose**
+//     console.log(`⬇️ Downloading the modified file: ${uploadPath}`);
+//     const modifiedFileResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//         responseType: 'arraybuffer', // Ensure the response is in binary format
+//       }
+//     );
+
+//     if (modifiedFileResponse.status !== 200) {
+//       console.error(`❌ Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//       throw new Error(`Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//     }
+
+//     console.log('✅ Modified file downloaded successfully.');
+
+//     // **Step 17: Upload the Modified File to AWS S3 Using AWS SDK v3**
+//     console.log('📤 Uploading the modified file to AWS S3.');
+
+//     const processedFileName = `processed-${originalFileName}`;
+//     const s3Key = processedFileName; // You can customize the key/path as needed
+
+//     const putObjectCommand = new PutObjectCommand({
+//       Bucket: 'sharayeh', // Your S3 bucket name
+//       Key: s3Key, // File name you want to save as in S3
+//       Body: modifiedFileResponse.data,
+//       ContentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+//       // ACL: 'public-read', // Removed to comply with bucket settings
+//     });
+
+//     const uploadToS3Response = await s3.send(putObjectCommand);
+
+//     console.log('✅ S3 Upload successful.');
+
+//     // **Step 18: Generate the S3 Object URL**
+//     const processedFileUrl = `https://sharayeh.s3.eu-north-1.amazonaws.com/${encodeURIComponent(s3Key)}`;
+//     console.log('🌐 Processed file is available at:', processedFileUrl);
+
+//     // **Step 19: Cleanup - Delete the Temporary Uploaded File**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted:', uploadedFilePath);
+//     }
+
+//     // **Step 20: Return the Processed File URL to the Frontend**
+//     console.log('📤 Returning response to frontend.');
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         processedFileUrl,
+//         processedSlides,
+//         failedSlides,
+//       },
+//       { status: 200 }
+//     );
+
+//   } catch (error: any) { // Specify 'any' type for better error property access
+//     if (axios.isAxiosError(error)) {
+//       console.error('⚠️ Axios error:', {
+//         message: error.message,
+//         response: error.response
+//           ? {
+//               status: error.response.status,
+//               headers: error.response.headers,
+//               data: error.response.data,
+//             }
+//           : 'No response received',
+//         config: error.config,
+//       });
+//     } else {
+//       console.error('⚠️ Unexpected error:', error);
+//     }
+
+//     // **Cleanup uploaded file if it exists**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted due to error:', uploadedFilePath);
+//     }
+
+//     // **Return a JSON Error Response**
+//     return NextResponse.json(
+//       { success: false, error: 'Failed to process file.' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+
+
+
+// // /app/api/apply-morph/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import axios from 'axios';
+// import axiosRetry from 'axios-retry';
+// import fs from 'fs';
+// import os from 'os';
+// import path from 'path';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+// export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+// // Initialize Axios with retry logic
+// const axiosInstance = axios.create({
+//   timeout: 30000, // 30 seconds
+// });
+
+// axiosRetry(axiosInstance, {
+//   retries: 3,
+//   retryDelay: (retryCount) => {
+//     return retryCount * 1000; // Exponential backoff
+//   },
+//   retryCondition: (error) => {
+//     return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response.status === 500;
+//   },
+// });
+
+// export async function POST(req: NextRequest) {
+//   console.log('📥 API handler invoked with method:', req.method);
+
+//   let uploadedFilePath = ''; // Temporary file path
+//   let originalFileName = '';
+
+//   try {
+//     // **Step 1: Retrieve and Validate Environment Variables**
+//     const {
+//       AWS_ACCESS_KEY_ID,
+//       AWS_SECRET_ACCESS_KEY,
+//       AWS_REGION,
+//       ASPOSE_CLIENT_ID,
+//       ASPOSE_CLIENT_SECRET,
+//     } = process.env;
+
+//     if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+//       console.error('❌ Missing AWS environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing AWS credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     if (!ASPOSE_CLIENT_ID || !ASPOSE_CLIENT_SECRET) {
+//       console.error('❌ Missing Aspose environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing Aspose credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     // **Optional Logging (Do Not Log Secrets)**
+//     console.log('🌍 AWS Region:', AWS_REGION);
+//     console.log('🔑 Aspose Client ID:', ASPOSE_CLIENT_ID);
+
+//     // **Step 2: Initialize AWS S3 Client with AWS SDK v3**
+//     const s3 = new S3Client({
+//       region: AWS_REGION, // Europe (Stockholm)
+//       credentials: {
+//         accessKeyId: AWS_ACCESS_KEY_ID,
+//         secretAccessKey: AWS_SECRET_ACCESS_KEY,
+//       },
+//     });
+
+//     // **Step 3: Parse the JSON Body**
+//     console.log('📄 Parsing request body');
+//     const { resultedFile } = await req.json();
+
+//     if (!resultedFile) {
+//       console.error('❌ resultedFile URL is required.');
+//       return NextResponse.json(
+//         { success: false, error: 'resultedFile URL is required.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 4: Validate the resultedFile URL**
+//     const allowedDomains = ['sharayeh.s3.eu-north-1.amazonaws.com'];
+//     let resultedFileUrl: URL;
+//     try {
+//       resultedFileUrl = new URL(resultedFile);
+//     } catch (urlError) {
+//       console.error('❌ Invalid resultedFile URL:', resultedFile);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!allowedDomains.includes(resultedFileUrl.hostname)) {
+//       console.error('❌ Invalid resultedFile domain:', resultedFileUrl.hostname);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL domain.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 5: Download the File from the resultedFile URL**
+//     console.log(`⬇️ Downloading file from URL: ${resultedFile}`);
+//     const downloadResponse = await axiosInstance.get(resultedFile, { responseType: 'arraybuffer' });
+
+//     if (downloadResponse.status !== 200) {
+//       console.error(`❌ Failed to download file. Status code: ${downloadResponse.status}`);
+//       throw new Error(`Failed to download file. Status code: ${downloadResponse.status}`);
+//     }
+
+//     console.log('✅ File downloaded successfully.');
+
+//     // **Step 6: Determine the File Name from the URL**
+//     const urlPath = resultedFileUrl.pathname;
+//     originalFileName = path.basename(urlPath);
+//     const extension = path.extname(originalFileName);
+//     console.log(`📁 Original file name: ${originalFileName}`);
+
+//     // **Step 7: Generate a Unique Temporary File Path**
+//     const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//     const tempDir = os.tmpdir();
+//     uploadedFilePath = path.join(tempDir, `${uniqueId}${extension}`);
+//     console.log(`📂 Temporary file path: ${uploadedFilePath}`);
+
+//     // **Step 8: Save the Downloaded File to the Temporary Path**
+//     console.log('💾 Saving file to temporary path');
+//     await fs.promises.writeFile(uploadedFilePath, downloadResponse.data);
+//     console.log('✅ File saved to temporary path.');
+
+//     // **Step 9: Authenticate with Aspose API**
+//     console.log('🔑 Authenticating with Aspose API');
+//     const params = new URLSearchParams();
+//     params.append('grant_type', 'client_credentials');
+//     params.append('client_id', ASPOSE_CLIENT_ID);
+//     params.append('client_secret', ASPOSE_CLIENT_SECRET);
+
+//     let authResponse;
+//     try {
+//       authResponse = await axiosInstance.post(
+//         'https://api.aspose.cloud/connect/token',
+//         params.toString(),
+//         {
+//           headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//           },
+//         }
+//       );
+//     } catch (authError: any) {
+//       console.error('❌ Aspose authentication failed:', authError.response?.data || authError.message);
+//       throw new Error('Aspose authentication failed.');
+//     }
+
+//     console.log('🔑 Aspose authentication successful. Access Token obtained.');
+
+//     const accessToken = authResponse.data.access_token;
+
+//     // **Step 10: Define uploadPath (File Name Only)**
+//     const uploadPath = originalFileName; // e.g., 'user_2oXAN2jOiLWJAICsojgKXgO82Az.pptx'
+//     console.log(`📤 Uploading file to Aspose Storage with uploadPath: ${uploadPath}`);
+
+//     const fileData = await fs.promises.readFile(uploadedFilePath);
+//     console.log('📄 File data read successfully.');
+
+//     const API_VERSION = 'v3.0'; // Update to 'v4.0' if applicable
+
+//     // **Step 11 & 12: Upload the File to Aspose Storage and Verify Upload in Parallel**
+//     console.log('📤 Uploading file to Aspose Storage and verifying upload.');
+//     const [uploadResponse, listFilesResponse] = await Promise.all([
+//       axiosInstance.put(
+//         `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//         fileData,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//             'Content-Type': 'application/octet-stream',
+//           },
+//         }
+//       ),
+//       axiosInstance.get(
+//         `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//           },
+//         }
+//       )
+//     ]);
+
+//     console.log('✅ File uploaded to Aspose Storage.');
+//     console.log('✅ Verified upload by listing files in root folder.');
+
+//     // **Step 13: Check if the File Exists in the Root Folder**
+//     const uploadedFiles = listFilesResponse.data.value;
+//     const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
+
+//     console.log(`📁 File exists in root folder: ${fileExists}`);
+
+//     if (!fileExists) {
+//       console.error(`❌ File ${originalFileName} was not found in the root folder`);
+//       throw new Error(`File ${originalFileName} was not found in the root folder`);
+//     }
+
+//     // **Step 14: Get the Total Number of Slides**
+//     console.log(`📊 Retrieving slide count for file: ${uploadPath}`);
+//     const slideCountResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       }
+//     );
+
+//     console.log('✅ Slide count retrieved.');
+
+//     const slideCount = slideCountResponse.data.slideList.length;
+//     console.log(`📊 Total number of slides: ${slideCount}`);
+
+
+//         // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+//     console.log('🎨 Applying Morph transitions to all slides in parallel.');
+
+//     const processedSlides = [];
+//     const failedSlides = [];
+
+//     for (let i = 1; i <= slideCount; i++) {
+//       try {
+//         await axiosInstance.put(
+//           `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
+//           {
+
+//             slideShowTransition: {
+//               type: 'Morph',
+//               duration: 1000, // Duration in milliseconds
+//               easing: 'ease-in-out', // Transition easing function
+//               morphTransition: {
+//                 morphType: 'ByWord', // Try 'ByWord' or 'ByChar' instead of 'ByObject'
+//               },
+//             },
+
+//           },
+//           {
+//             headers: {
+//               Authorization: `Bearer ${accessToken}`,
+//               'Content-Type': 'application/json',
+//             },
+//           }
+//         );
+//         console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+//         processedSlides.push(i);
+//       } catch (slideError: any) {
+//         console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+//         failedSlides.push({ slide: i, error: slideError.message });
+//       }
+//     }
+
+//     // **Log the Results**
+//     console.log('✅ Processed slides:', processedSlides);
+//     if (failedSlides.length > 0) {
+//       console.warn('❌ Failed slides:', failedSlides);
+//     }
+
+
+//     // **Step 16: Download the Modified File from Aspose**
+//     console.log(`⬇️ Downloading the modified file: ${uploadPath}`);
+//     const modifiedFileResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//         responseType: 'arraybuffer', // Ensure the response is in binary format
+//       }
+//     );
+
+//     if (modifiedFileResponse.status !== 200) {
+//       console.error(`❌ Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//       throw new Error(`Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//     }
+
+//     console.log('✅ Modified file downloaded successfully.');
+
+//     // **Step 17: Upload the Modified File to AWS S3 Using AWS SDK v3**
+//     console.log('📤 Uploading the modified file to AWS S3.');
+
+//     const processedFileName = `processed-${originalFileName}`;
+//     const s3Key = processedFileName; // You can customize the key/path as needed
+
+//     const putObjectCommand = new PutObjectCommand({
+//       Bucket: 'sharayeh', // Your S3 bucket name
+//       Key: s3Key, // File name you want to save as in S3
+//       Body: modifiedFileResponse.data,
+//       ContentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+//       // ACL: 'public-read', // Removed to comply with bucket settings
+//     });
+
+//     const uploadToS3Response = await s3.send(putObjectCommand);
+
+//     console.log('✅ S3 Upload successful.');
+
+//     // **Step 18: Generate the S3 Object URL**
+//     const processedFileUrl = `https://sharayeh.s3.eu-north-1.amazonaws.com/${encodeURIComponent(s3Key)}`;
+//     console.log('🌐 Processed file is available at:', processedFileUrl);
+
+//     // **Step 19: Cleanup - Delete the Temporary Uploaded File**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted:', uploadedFilePath);
+//     }
+
+//     // **Step 20: Return the Processed File URL to the Frontend**
+//     console.log('📤 Returning response to frontend.');
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         processedFileUrl,
+//         processedSlides,
+//         failedSlides,
+//       },
+//       { status: 200 }
+//     );
+
+//   } catch (error: any) { // Specify 'any' type for better error property access
+//     if (axios.isAxiosError(error)) {
+//       console.error('⚠️ Axios error:', {
+//         message: error.message,
+//         response: error.response
+//           ? {
+//               status: error.response.status,
+//               headers: error.response.headers,
+//               data: error.response.data,
+//             }
+//           : 'No response received',
+//         config: error.config,
+//       });
+//     } else {
+//       console.error('⚠️ Unexpected error:', error);
+//     }
+
+//     // **Cleanup uploaded file if it exists**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted due to error:', uploadedFilePath);
+//     }
+
+//     // **Return a JSON Error Response**
+//     return NextResponse.json(
+//       { success: false, error: 'Failed to process file.' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
+// // /app/api/apply-morph/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import axios from 'axios';
+// import axiosRetry from 'axios-retry';
+// import fs from 'fs';
+// import os from 'os';
+// import path from 'path';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+// export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+// // Initialize Axios with retry logic
+// const axiosInstance = axios.create({
+//   timeout: 30000, // 30 seconds
+// });
+
+// axiosRetry(axiosInstance, {
+//   retries: 3,
+//   retryDelay: (retryCount) => {
+//     return retryCount * 1000; // Exponential backoff
+//   },
+//   retryCondition: (error) => {
+//     return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response.status === 500;
+//   },
+// });
+
+// export async function POST(req: NextRequest) {
+//   console.log('📥 API handler invoked with method:', req.method);
+
+//   let uploadedFilePath = ''; // Temporary file path
+//   let originalFileName = '';
+
+//   try {
+//     // **Step 1: Retrieve and Validate Environment Variables**
+//     const {
+//       AWS_ACCESS_KEY_ID,
+//       AWS_SECRET_ACCESS_KEY,
+//       AWS_REGION,
+//       ASPOSE_CLIENT_ID,
+//       ASPOSE_CLIENT_SECRET,
+//     } = process.env;
+
+//     if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+//       console.error('❌ Missing AWS environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing AWS credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     if (!ASPOSE_CLIENT_ID || !ASPOSE_CLIENT_SECRET) {
+//       console.error('❌ Missing Aspose environment variables');
+//       return NextResponse.json(
+//         { success: false, error: 'Server configuration error: Missing Aspose credentials.' },
+//         { status: 500 }
+//       );
+//     }
+
+//     // **Optional Logging (Do Not Log Secrets)**
+//     console.log('🌍 AWS Region:', AWS_REGION);
+//     console.log('🔑 Aspose Client ID:', ASPOSE_CLIENT_ID);
+
+//     // **Step 2: Initialize AWS S3 Client with AWS SDK v3**
+//     const s3 = new S3Client({
+//       region: AWS_REGION, // Europe (Stockholm)
+//       credentials: {
+//         accessKeyId: AWS_ACCESS_KEY_ID,
+//         secretAccessKey: AWS_SECRET_ACCESS_KEY,
+//       },
+//     });
+
+//     // **Step 3: Parse the JSON Body**
+//     console.log('📄 Parsing request body');
+//     const { resultedFile } = await req.json();
+
+//     if (!resultedFile) {
+//       console.error('❌ resultedFile URL is required.');
+//       return NextResponse.json(
+//         { success: false, error: 'resultedFile URL is required.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 4: Validate the resultedFile URL**
+//     const allowedDomains = ['sharayeh.s3.eu-north-1.amazonaws.com'];
+//     let resultedFileUrl: URL;
+//     try {
+//       resultedFileUrl = new URL(resultedFile);
+//     } catch (urlError) {
+//       console.error('❌ Invalid resultedFile URL:', resultedFile);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!allowedDomains.includes(resultedFileUrl.hostname)) {
+//       console.error('❌ Invalid resultedFile domain:', resultedFileUrl.hostname);
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid resultedFile URL domain.' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // **Step 5: Download the File from the resultedFile URL**
+//     console.log(`⬇️ Downloading file from URL: ${resultedFile}`);
+//     const downloadResponse = await axiosInstance.get(resultedFile, { responseType: 'arraybuffer' });
+
+//     if (downloadResponse.status !== 200) {
+//       console.error(`❌ Failed to download file. Status code: ${downloadResponse.status}`);
+//       throw new Error(`Failed to download file. Status code: ${downloadResponse.status}`);
+//     }
+
+//     console.log('✅ File downloaded successfully.');
+
+//     // **Step 6: Determine the File Name from the URL**
+//     const urlPath = resultedFileUrl.pathname;
+//     originalFileName = path.basename(urlPath);
+//     const extension = path.extname(originalFileName);
+//     console.log(`📁 Original file name: ${originalFileName}`);
+
+//     // **Step 7: Generate a Unique Temporary File Path**
+//     const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//     const tempDir = os.tmpdir();
+//     uploadedFilePath = path.join(tempDir, `${uniqueId}${extension}`);
+//     console.log(`📂 Temporary file path: ${uploadedFilePath}`);
+
+//     // **Step 8: Save the Downloaded File to the Temporary Path**
+//     console.log('💾 Saving file to temporary path');
+//     await fs.promises.writeFile(uploadedFilePath, downloadResponse.data);
+//     console.log('✅ File saved to temporary path.');
+
+//     // **Step 9: Authenticate with Aspose API**
+//     console.log('🔑 Authenticating with Aspose API');
+//     const params = new URLSearchParams();
+//     params.append('grant_type', 'client_credentials');
+//     params.append('client_id', ASPOSE_CLIENT_ID);
+//     params.append('client_secret', ASPOSE_CLIENT_SECRET);
+
+//     let authResponse;
+//     try {
+//       authResponse = await axiosInstance.post(
+//         'https://api.aspose.cloud/connect/token',
+//         params.toString(),
+//         {
+//           headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//           },
+//         }
+//       );
+//     } catch (authError: any) {
+//       console.error('❌ Aspose authentication failed:', authError.response?.data || authError.message);
+//       throw new Error('Aspose authentication failed.');
+//     }
+
+//     console.log('🔑 Aspose authentication successful. Access Token obtained.');
+
+//     const accessToken = authResponse.data.access_token;
+
+//     // **Step 10: Define uploadPath (File Name Only)**
+//     const uploadPath = originalFileName; // e.g., 'user_2oXAN2jOiLWJAICsojgKXgO82Az.pptx'
+//     console.log(`📤 Uploading file to Aspose Storage with uploadPath: ${uploadPath}`);
+
+//     const fileData = await fs.promises.readFile(uploadedFilePath);
+//     console.log('📄 File data read successfully.');
+
+//     const API_VERSION = 'v3.0'; // Update to 'v4.0' if applicable
+
+//     // **Step 11 & 12: Upload the File to Aspose Storage and Verify Upload in Parallel**
+//     console.log('📤 Uploading file to Aspose Storage and verifying upload.');
+//     // const [uploadResponse, listFilesResponse] = await Promise.all([
+//     //   axiosInstance.put(
+//     //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//     //     fileData,
+//     //     {
+//     //       headers: {
+//     //         Authorization: `Bearer ${accessToken}`,
+//     //         'Content-Type': 'application/octet-stream',
+//     //       },
+//     //     }
+//     //   ),
+//     //   axiosInstance.get(
+//     //     `https://api.aspose.cloud/${API_VERSION}/slides/storage/folder/`,
+//     //     {
+//     //       headers: {
+//     //         Authorization: `Bearer ${accessToken}`,
+//     //       },
+//     //     }
+//     //   )
+//     // ]);
+
+//     // console.log('✅ File uploaded to Aspose Storage.');
+//     // console.log('✅ Verified upload by listing files in root folder.');
+
+//     // // **Step 13: Check if the File Exists in the Root Folder**
+//     // const uploadedFiles = listFilesResponse.data.value;
+//     // const fileExists = uploadedFiles.some((file: any) => file.name === originalFileName);
+
+//     // console.log(`📁 File exists in root folder: ${fileExists}`);
+
+//     // if (!fileExists) {
+//     //   console.error(`❌ File ${originalFileName} was not found in the root folder`);
+//     //   throw new Error(`File ${originalFileName} was not found in the root folder`);
+//     // }
+
+//     // **Step 14: Get the Total Number of Slides**
+//     console.log(`📊 Retrieving slide count for file: ${uploadPath}`);
+//     const slideCountResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       }
+//     );
+
+//     console.log('✅ Slide count retrieved.');
+
+//     const slideCount = slideCountResponse.data.slideList.length;
+//     console.log(`📊 Total number of slides: ${slideCount}`);
+
+
+
+//     // // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+//     // console.log('🎨 Applying Morph transitions to all slides in parallel.');
+//     // const morphPromises = [];
+//     // for (let i = 1; i <= slideCount; i++) {
+//     //   morphPromises.push(
+//     //     axiosInstance.put(
+//     //       `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
+//     //       {
+//     //         slideShowTransition: {
+//     //           type: 'Morph',
+//     //           morphTransition: {
+//     //             morphType: 'ByObject', // Options: 'ByObject', 'ByWord', 'ByChar'
+//     //           },
+//     //         },
+//     //       },
+//     //       {
+//     //         headers: {
+//     //           Authorization: `Bearer ${accessToken}`,
+//     //           'Content-Type': 'application/json',
+//     //         },
+//     //       }
+//     //     ).then(() => {
+//     //       console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+//     //     }).catch((slideError: any) => {
+//     //       console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+//     //       throw new Error(`Failed to apply Morph transition to slide ${i}.`);
+//     //     })
+//     //   );
+//     // }
+
+//     // // Await all morph transition promises
+//     // await Promise.all(morphPromises);
+//     // console.log('✅ All Morph transitions applied successfully.');
+
+
+
+//         // **Step 15: Apply Morph Transition to Each Slide in Parallel**
+//     console.log('🎨 Applying Morph transitions to all slides in parallel.');
+
+//     const processedSlides = [];
+//     const failedSlides = [];
+
+//     for (let i = 1; i <= slideCount; i++) {
+//       try {
+//         await axiosInstance.put(
+//           `https://api.aspose.cloud/${API_VERSION}/slides/${encodeURIComponent(uploadPath)}/slides/${i}`,
+//           {
+
+//             slideShowTransition: {
+//               type: 'Morph',
+//               duration: 1000, // Duration in milliseconds
+//               easing: 'ease-in-out', // Transition easing function
+//               morphTransition: {
+//                 morphType: 'ByWord', // Try 'ByWord' or 'ByChar' instead of 'ByObject'
+//               },
+//             },
+
+//             // slideShowTransition: {
+//             //   type: 'Morph',
+//             //   morphTransition: {
+//             //     morphType: 'ByObject',  // Options: 'ByObject', 'ByWord', 'ByChar'
+//             //   },
+//             // },
+//           },
+//           {
+//             headers: {
+//               Authorization: `Bearer ${accessToken}`,
+//               'Content-Type': 'application/json',
+//             },
+//           }
+//         );
+//         console.log(`✅ Successfully applied Morph transition to slide ${i}.`);
+//         processedSlides.push(i);
+//       } catch (slideError: any) {
+//         console.error(`❌ Error applying Morph transition to slide ${i}:`, slideError.response?.data || slideError.message);
+//         failedSlides.push({ slide: i, error: slideError.message });
+//       }
+//     }
+
+//     // **Log the Results**
+//     console.log('✅ Processed slides:', processedSlides);
+//     if (failedSlides.length > 0) {
+//       console.warn('❌ Failed slides:', failedSlides);
+//     }
+
+
+//     // **Step 16: Download the Modified File from Aspose**
+//     console.log(`⬇️ Downloading the modified file: ${uploadPath}`);
+//     const modifiedFileResponse = await axiosInstance.get(
+//       `https://api.aspose.cloud/${API_VERSION}/slides/storage/file/${encodeURIComponent(uploadPath)}`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//         responseType: 'arraybuffer', // Ensure the response is in binary format
+//       }
+//     );
+
+//     if (modifiedFileResponse.status !== 200) {
+//       console.error(`❌ Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//       throw new Error(`Failed to download modified file. Status code: ${modifiedFileResponse.status}`);
+//     }
+
+//     console.log('✅ Modified file downloaded successfully.');
+
+//     // **Step 17: Upload the Modified File to AWS S3 Using AWS SDK v3**
+//     console.log('📤 Uploading the modified file to AWS S3.');
+
+//     const processedFileName = `processed-${originalFileName}`;
+//     const s3Key = processedFileName; // You can customize the key/path as needed
+
+//     const putObjectCommand = new PutObjectCommand({
+//       Bucket: 'sharayeh', // Your S3 bucket name
+//       Key: s3Key, // File name you want to save as in S3
+//       Body: modifiedFileResponse.data,
+//       ContentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+//       // ACL: 'public-read', // Removed to comply with bucket settings
+//     });
+
+//     const uploadToS3Response = await s3.send(putObjectCommand);
+
+//     console.log('✅ S3 Upload successful.');
+
+//     // **Step 18: Generate the S3 Object URL**
+//     const processedFileUrl = `https://sharayeh.s3.eu-north-1.amazonaws.com/${encodeURIComponent(s3Key)}`;
+//     console.log('🌐 Processed file is available at:', processedFileUrl);
+
+//     // **Step 19: Cleanup - Delete the Temporary Uploaded File**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted:', uploadedFilePath);
+//     }
+
+//     // **Step 20: Return the Processed File URL to the Frontend**
+//     console.log('📤 Returning response to frontend.');
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         processedFileUrl,
+//         processedSlides,
+//         failedSlides,
+//       },
+//       { status: 200 }
+//     );
+
+
+//     // // **Step 20: Return the Processed File URL to the Frontend**
+//     // console.log('📤 Returning response to frontend.');
+//     // return NextResponse.json(
+//     //   { success: true, processedFileUrl },
+//     //   { status: 200 }
+//     // );
+
+//   } catch (error: any) { // Specify 'any' type for better error property access
+//     if (axios.isAxiosError(error)) {
+//       console.error('⚠️ Axios error:', {
+//         message: error.message,
+//         response: error.response
+//           ? {
+//               status: error.response.status,
+//               headers: error.response.headers,
+//               data: error.response.data,
+//             }
+//           : 'No response received',
+//         config: error.config,
+//       });
+//     } else {
+//       console.error('⚠️ Unexpected error:', error);
+//     }
+
+//     // **Cleanup uploaded file if it exists**
+//     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+//       await fs.promises.unlink(uploadedFilePath);
+//       console.log('🧹 Temporary file deleted due to error:', uploadedFilePath);
+//     }
+
+//     // **Return a JSON Error Response**
+//     return NextResponse.json(
+//       { success: false, error: 'Failed to process file.' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
 
 
 // // /app/api/apply-morph/route.ts

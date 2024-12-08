@@ -1,14 +1,20 @@
-// /api/update-credits/route.ts
+// app/api/update-credits/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getAuth } from '@clerk/nextjs/server'; // Import Clerk's getAuth
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { userId, pointsUsed } = await req.json();
+    const { userId } = getAuth(req); // Retrieve userId from Clerk's authentication
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!userId || !pointsUsed) {
-      return NextResponse.json({ error: 'Missing userId or pointsUsed' }, { status: 400 });
+    const { pointsUsed } = await req.json();
+
+    if (typeof pointsUsed !== 'number' || pointsUsed <= 0) {
+      return NextResponse.json({ error: 'Invalid pointsUsed' }, { status: 400 });
     }
 
     // Fetch user's current credits
@@ -31,6 +37,16 @@ export async function PATCH(req: NextRequest) {
       data: {
         credits: { decrement: pointsUsed },
         usedCredits: { increment: pointsUsed },
+      },
+    });
+
+    // Log the credit transaction
+    await db.creditTransaction.create({
+      data: {
+        userId,
+        type: 'DEDUCTION', // Use the enum value directly
+        amount: pointsUsed,
+        description: 'Create Presentation',
       },
     });
 

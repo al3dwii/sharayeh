@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+// src/components/CreatePresentation.tsx
+
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser, useAuth } from '@clerk/nextjs';
-import { useStore } from '@/store/useStore';
+import { useCredits } from '@/contexts/CreditContext'; // Using CreditContext
 import Modal from '@/components/custom/ocrModal';
 import Loading from '@/components/global/loading';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -16,230 +18,261 @@ interface Template {
   id: string;
   name: string;
   preview: string;
-  category: string; // Add this line
+  category: string;
 }
-
 
 const CreatePresentation: React.FC = () => {
   const { user } = useUser();
   const router = useRouter();
   const { getToken } = useAuth();
-
-  const setCredits = useStore((state) => state.setCredits);
-  const setUsedCredits = useStore((state) => state.setUsedCredits);
-  const credits = useStore((state) => state.credits);
-  const usedCredits = useStore((state) => state.usedCredits);
+  const { credits, refreshCredits } = useCredits();
 
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [submissionStatus, setSubmissionStatus] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState<boolean>(false);
   const [requestId, setRequestId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [topicValue, setTopicValue] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [topicValue, setTopicValue] = useState<string>('');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
-  // Fetch user data and update credits
-  useEffect(() => {
-    if (user) {
-      getToken().then((token) => {
-        axios
-          .get('/api/user-data', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-          .then(({ data }) => {
-            setCredits(data.credits);
-            setUsedCredits(data.usedCredits);
-          })
-          .catch((error) => console.error('Error fetching user data:', error));
-      });
-    }
-  }, [user, getToken, setCredits, setUsedCredits]);
+  const pollingIntervalIdRef = useRef<number | null>(null);
 
-  // Update credits after usage
-  const handleUpdateCredits = useCallback(
-    async (pointsUsed: number) => {
-      if (user) {
-        try {
-          await axios.patch('/api/update-credits', {
-            userId: user.id,
-            pointsUsed,
-          });
+  // Constants for validation
+  const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
+  const ALLOWED_FILE_TYPES = [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
+  ];
 
-          // Update local state after confirming server update
-          const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
-          const updatedCredits = (credits || 0) - pointsUsed;
+  /**
+   * Handle changes in the topic input field with validation.
+   */
+  const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('📝 Topic input changed:', value);
 
-          setUsedCredits(updatedUsedCredits);
-          setCredits(updatedCredits);
-        } catch (error) {
-          console.error('Error updating credits:', error);
-        }
-      }
-    },
-    [user, credits, usedCredits, setCredits, setUsedCredits]
-  );
-
-  // Define constants for validation at the top of your component or in a separate constants file
-const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
-const ALLOWED_FILE_TYPES = [
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
-];
-
-// Updated handleTopicChange with validation
-const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  // Check if the topic exceeds the maximum length
-  if (value.length > MAX_TOPIC_LENGTH) {
-    setSubmissionStatus('topic-too-long');
-    return;
-  }
-
-  // Clear any previous submission status
-  if (submissionStatus) {
-    setSubmissionStatus('');
-  }
-
-  setTopicValue(value);
-
-  // If the topic is not empty, clear the document file
-  if (value !== '') {
-    setDocumentFile(null);
-  }
-};
-
-// Updated handleFileChange with validation
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0];
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      setSubmissionStatus('file-too-large');
-      return;
-    }
-
-    // Validate file type
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      setSubmissionStatus('invalid-file-type');
+    // Check if the topic exceeds the maximum length
+    if (value.length > MAX_TOPIC_LENGTH) {
+      console.warn('⚠️ Topic length exceeded:', value.length);
+      setSubmissionStatus('topic-too-long');
       return;
     }
 
     // Clear any previous submission status
     if (submissionStatus) {
+      console.log('🔄 Clearing previous submission status:', submissionStatus);
       setSubmissionStatus('');
     }
 
-    setDocumentFile(file);
-    setTopicValue('');
-  } else {
-    setDocumentFile(null);
-  }
-};
+    setTopicValue(value);
 
+    // If the topic is not empty, clear the document file
+    if (value !== '') {
+      console.log('🗑️ Clearing document file due to topic input.');
+      setDocumentFile(null);
+    }
+  };
+
+  /**
+   * Handle changes in the file input field with validation.
+   */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      console.log('📄 File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        console.warn('⚠️ File size exceeded:', file.size);
+        setSubmissionStatus('file-too-large');
+        return;
+      }
+
+      // Validate file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        console.warn('⚠️ Invalid file type:', file.type);
+        setSubmissionStatus('invalid-file-type');
+        return;
+      }
+
+      // Clear any previous submission status
+      if (submissionStatus) {
+        console.log('🔄 Clearing previous submission status:', submissionStatus);
+        setSubmissionStatus('');
+      }
+
+      setDocumentFile(file);
+      setTopicValue('');
+      console.log('✅ File validated and set:', file.name);
+    } else {
+      console.log('📄 No file selected or file cleared.');
+      setDocumentFile(null);
+    }
+  };
+
+  /**
+   * Handle form submission.
+   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+    console.log('🚀 Form submission initiated.');
+
     if (!user) {
+      console.warn('🔒 User not authenticated. Redirecting to sign-in.');
       router.push('/sign-in');
       return;
     }
-  
+
     // Ensure at least one field is filled
     if (!topicValue && !documentFile) {
+      console.warn('⚠️ Both topic and document file are empty.');
       setSubmissionStatus('empty');
       return;
     }
 
-    
     // Ensure a template is selected
-  if (!selectedTemplate) {
-    setSubmissionStatus('templateRequired');
-    return;
-  }
-  
+    if (!selectedTemplate) {
+      console.warn('⚠️ No template selected.');
+      setSubmissionStatus('templateRequired');
+      return;
+    }
+
     if (credits === null || credits < 1) {
+      console.warn('⚠️ Insufficient credits:', credits);
       setShowInsufficientCreditsModal(true);
       return;
     }
-  
+
     setIsSubmitting(true);
     setSubmissionStatus('');
-  
+    console.log('✅ User authenticated. Proceeding with submission.');
+
     try {
-      // Deduct one point
-  
-      // Create a new File record
+      // **Obtain the JWT token from Clerk**
+      console.log('🔑 Obtaining JWT token from Clerk.');
+      const token = await getToken();
+      if (!token) {
+        console.error('❌ Failed to obtain JWT token.');
+        setSubmissionStatus('unauthorized');
+        return;
+      }
+      console.log('🔑 JWT token obtained.');
+
+      // **Deduct one credit on the server with Authorization header**
+      console.log('🔄 Deducting one credit from user account.');
+      await axios.patch(
+        '/api/update-credits',
+        {
+          pointsUsed: 1,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('✅ Credit deducted successfully.');
+
+      // Refresh credits after deduction
+      console.log('🔄 Refreshing user credits.');
+      await refreshCredits();
+      console.log('✅ User credits refreshed.');
+
+      // **Create a new File record with Authorization header**
       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
-      const response = await axios.post('/api/files', {
-        userId: user.id,
-        fileName,
-        type: 'PRESENTATION',
-      });
-  
-      const requestId = response.data.id;
-      setRequestId(requestId);
-  
+      console.log('📂 Creating new file record with name:', fileName);
+      const response = await axios.post(
+        '/api/files',
+        {
+          fileName,
+          type: 'PRESENTATION',
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const newRequestId = response.data.id;
+      setRequestId(newRequestId);
+      console.log('✅ File record created with Request ID:', newRequestId);
+
       // Prepare data for the appropriate webhook
       let data: any;
       let headers: { [key: string]: string } = {};
       let webhookUrl = '';
-  
+
       if (topicValue) {
         // Topic-specific webhook
         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
-
-        // webhookUrl = 'https://hook.eu2.make.com/qel93ksh54cigpbzj6wwgu65zg4k7x1y';
         data = {
           topic: topicValue,
-          templateId: selectedTemplate ? selectedTemplate.id : '',
-          categoryId: selectedTemplate ? selectedTemplate.category : '',
+          templateId: selectedTemplate.id,
+          categoryId: selectedTemplate.category,
           userId: user.id,
-          requestId,
+          requestId: newRequestId,
         };
+        console.log('📡 Preparing data for topic-specific webhook.');
       } else if (documentFile) {
         // File-specific webhook
         webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
         data = new FormData();
         data.append('document', documentFile);
-        data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
-        data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
+        data.append('templateId', selectedTemplate.id);
+        data.append('categoryId', selectedTemplate.category);
         data.append('userId', user.id);
-        data.append('requestId', requestId);
+        data.append('requestId', newRequestId);
         headers['Content-Type'] = 'multipart/form-data';
+        console.log('📡 Preparing data for file-specific webhook.');
       }
-  
-      // Send data to the appropriate webhook
+
+      // **Send data to the appropriate webhook**
+      console.log('📡 Sending data to webhook:', webhookUrl);
       await axios.post(webhookUrl, data, { headers });
-  
+      console.log('✅ Data sent to webhook successfully.');
+
       setSubmissionStatus('success');
-  
+
       // Reset form fields
       setTopicValue('');
       setDocumentFile(null);
       setSelectedTemplate(null);
+      console.log('🧹 Form fields reset.');
 
+      // Start polling for status
+      console.log('⏳ Starting polling for request status.');
+      startPolling(newRequestId);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        console.error('⚠️ Axios error during form submission:', {
+          message: error.message,
+          response: error.response
+            ? {
+                status: error.response.status,
+                headers: error.response.headers,
+                data: error.response.data,
+              }
+            : 'No response received',
+          config: error.config,
+        });
+      } else {
+        console.error('⚠️ Unexpected error during form submission:', error);
+      }
 
-  
-      // Start polling
-      startPolling(requestId);
-    } catch (error) {
+      // **Set appropriate submission status based on error**
       if (axios.isAxiosError(error)) {
         if (!error.response) {
           // Network error
           setSubmissionStatus('network-error');
+        } else if (error.response.status === 400 && error.response.data.error === 'Insufficient credits') {
+          setSubmissionStatus('insufficient-credits');
+        } else if (error.response.status === 401) {
+          // Unauthorized
+          setSubmissionStatus('unauthorized');
         } else if (error.response.status >= 500) {
           // Server error
           setSubmissionStatus('server-error');
         } else if (error.response.status >= 400) {
-          // Client error
+          // Other client errors
           setSubmissionStatus('client-error');
         } else {
           // Other errors
@@ -251,69 +284,115 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       }
     } finally {
       setIsSubmitting(false);
+      console.log('🔄 Form submission process completed.');
     }
   };
-    
-  const pollingIntervalIdRef = useRef<number | null>(null);
 
-
-  const startPolling = (requestId: number) => {
+  /**
+   * Start polling for the request status.
+   * @param requestId - The unique ID of the request to poll.
+   */
+  const startPolling = (requestId: string) => {
     // Clear any existing interval before starting a new one
     if (pollingIntervalIdRef.current) {
+      console.log('⏹️ Clearing existing polling interval.');
       clearInterval(pollingIntervalIdRef.current);
     }
 
     setIsLoading(true);
-  
+    console.log('⏳ Polling started for Request ID:', requestId);
+
     const intervalId = window.setInterval(async () => {
+      console.log('🔄 Polling for status update...');
       try {
+        // **Obtain the JWT token from Clerk for polling**
+        console.log('🔑 Obtaining JWT token for polling.');
+        const token = await getToken();
+        if (!token) {
+          console.error('❌ Failed to obtain JWT token during polling.');
+          setSubmissionStatus('unauthorized');
+          if (pollingIntervalIdRef.current) {
+            clearInterval(pollingIntervalIdRef.current);
+            pollingIntervalIdRef.current = null;
+            console.log('⏹️ Polling stopped due to unauthorized access.');
+          }
+          return;
+        }
+
+        // **Fetch the current status of the request**
+        console.log('📡 Fetching request status from /api/getfilemake.');
         const res = await axios.get('/api/getfilemake', {
           params: { requestId },
+          headers: { Authorization: `Bearer ${token}` },
         });
+        console.log('📈 Current status:', res.data.status);
 
         if (res.data && res.data.status === 'COMPLETED') {
           setIsLoading(false);
-
-          console.log('Download URL:', res.data.downloadUrl);
-
           setDownloadUrl(res.data.downloadUrl);
-
-          await handleUpdateCredits(15);
-
+          console.log('✅ Request completed. Download URL obtained:', res.data.downloadUrl);
 
           // Clear the interval
           if (pollingIntervalIdRef.current) {
             clearInterval(pollingIntervalIdRef.current);
             pollingIntervalIdRef.current = null;
+            console.log('⏹️ Polling stopped as request is completed.');
           }
+
+          // Refresh credits to reflect any additions
+          await refreshCredits();
+          console.log('🔄 Credits refreshed after completion.');
         } else if (res.data.status === 'FAILED') {
           setIsLoading(false);
           setSubmissionStatus('error');
+          console.error('❌ Request failed.');
 
           // Clear the interval
           if (pollingIntervalIdRef.current) {
             clearInterval(pollingIntervalIdRef.current);
             pollingIntervalIdRef.current = null;
+            console.log('⏹️ Polling stopped as request has failed.');
           }
+        } else {
+          console.log('🔄 Request still in progress.');
         }
-      } catch (error) {
-        console.error('Error checking status:', error);
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          if (error.response && error.response.status === 401) {
+            console.error('❌ Unauthorized access during polling.');
+            setSubmissionStatus('unauthorized');
+          } else {
+            console.error('⚠️ Error during polling:', error);
+            // Optionally, handle polling errors
+          }
+        } else {
+          console.error('⚠️ Non-Axios error during polling:', error);
+          // Optionally, handle polling errors
+        }
       }
     }, 5000); // Poll every 5 seconds
 
     pollingIntervalIdRef.current = intervalId;
+    console.log('⏳ Polling interval ID set:', intervalId);
   };
 
-  // Clean up polling on unmount
+  /**
+   * Clean up polling on component unmount.
+   */
   useEffect(() => {
     return () => {
       if (pollingIntervalIdRef.current) {
         clearInterval(pollingIntervalIdRef.current);
+        console.log('🧹 Component unmounted. Polling interval cleared.');
       }
     };
   }, []);
 
+  /**
+   * Handle submission status changes and display appropriate toasts.
+   */
   const handleSubmissionStatus = (status: string) => {
+    console.log('🔔 Handling submission status:', status);
     switch (status) {
       case 'success':
         toast.success(
@@ -337,8 +416,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiCheckCircle color="#155724" size={24} />,
           }
         );
+        console.log('✅ Success toast displayed.');
         break;
-  
+
       case 'error':
         toast.error(
           <div className="flex justify-between items-center">
@@ -361,8 +441,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Error toast displayed.');
         break;
-  
+
       case 'empty':
         toast.warning(
           <div className="flex text-[18px] justify-between items-center">
@@ -385,8 +466,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiInfo color="#856404" size={24} />,
           }
         );
+        console.log('⚠️ Empty submission warning toast displayed.');
         break;
-  
+
       case 'templateRequired':
         toast.warning(
           <div className="flex text-[18px] justify-between items-center">
@@ -409,8 +491,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiInfo color="#856404" size={24} />,
           }
         );
+        console.log('⚠️ Template required warning toast displayed.');
         break;
-  
+
       case 'network-error':
         toast.error(
           <div className="flex justify-between items-center">
@@ -433,8 +516,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Network error toast displayed.');
         break;
-  
+
       case 'server-error':
         toast.error(
           <div className="flex justify-between items-center">
@@ -457,8 +541,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Server error toast displayed.');
         break;
-  
+
       case 'client-error':
         toast.error(
           <div className="flex justify-between items-center">
@@ -481,12 +566,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Client error toast displayed.');
         break;
-  
-      case 'unexpected-error':
+
+      case 'unauthorized':
         toast.error(
           <div className="flex justify-between items-center">
-            <span>حدث خطأ غير متوقع.</span>
+            <span>غير مصرح لك بالوصول. يرجى تسجيل الدخول مرة أخرى.</span>
             <button
               onClick={() => toast.dismiss()}
               className="ml-4 text-red-800 hover:text-red-900"
@@ -505,8 +591,34 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Unauthorized access toast displayed.');
         break;
-  
+
+      case 'unexpected-error':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>حدث خطأ غير معروف.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        console.log('❌ Unexpected error toast displayed.');
+        break;
+
       case 'topic-too-long':
         toast.warning(
           <div className="flex text-[18px] justify-between items-center">
@@ -529,8 +641,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiInfo color="#856404" size={24} />,
           }
         );
+        console.log('⚠️ Topic too long warning toast displayed.');
         break;
-  
+
       case 'file-too-large':
         toast.warning(
           <div className="flex text-[18px] justify-between items-center">
@@ -553,8 +666,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiInfo color="#856404" size={24} />,
           }
         );
+        console.log('⚠️ File too large warning toast displayed.');
         break;
-  
+
       case 'invalid-file-type':
         toast.warning(
           <div className="flex text-[18px] justify-between items-center">
@@ -577,8 +691,34 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiInfo color="#856404" size={24} />,
           }
         );
+        console.log('⚠️ Invalid file type warning toast displayed.');
         break;
-  
+
+      case 'insufficient-credits':
+        toast.error(
+          <div className="flex justify-between items-center">
+            <span>رصيدك غير كافٍ. يرجى ترقية خطتك.</span>
+            <button
+              onClick={() => toast.dismiss()}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              X
+            </button>
+          </div>,
+          {
+            position: 'top-center',
+            duration: 30000,
+            style: {
+              backgroundColor: '#F8D7DA', // Error red background
+              color: '#721C24', // Error text color
+              border: '1px solid #F5C6CB', // Error border color
+            },
+            icon: <FiAlertCircle color="#721C24" size={24} />,
+          }
+        );
+        console.log('❌ Insufficient credits error toast displayed.');
+        break;
+
       default:
         toast.error(
           <div className="flex justify-between items-center">
@@ -601,13 +741,17 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             icon: <FiAlertCircle color="#721C24" size={24} />,
           }
         );
+        console.log('❌ Default unexpected error toast displayed.');
         break;
     }
   };
-  
-  // Call this function when `submissionStatus` changes
+
+  /**
+   * Call this function when `submissionStatus` changes
+   */
   useEffect(() => {
     if (submissionStatus) {
+      console.log('🔄 Submission status changed to:', submissionStatus);
       handleSubmissionStatus(submissionStatus);
     }
   }, [submissionStatus]);
@@ -637,47 +781,41 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <Card>
             <CardHeader></CardHeader>
 
-            {submissionStatus || isLoading || downloadUrl ? (
-  <div className="rounded-lg pb-4 mb-4 p-4">
-    
-    {/* Loading and Download */}
-    {isLoading && (
-      <div className="w-full flex flex-col items-center mt-4">
-      {/* Loading spinner */}
-      <div className="flex items-center justify-center">
-      <Loading />
+            {(submissionStatus || isLoading || downloadUrl) && (
+              <div className="rounded-lg pb-4 mb-4 p-4">
+                {/* Loading and Download */}
+                {isLoading && (
+                  <div className="w-full flex flex-col items-center mt-4">
+                    {/* Loading spinner */}
+                    <div className="flex items-center justify-center">
+                      <Loading />
+                    </div>
 
-        {/* <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500 border-solid"></div> */}
-      </div>
-      
-      {/* Text below the spinner */}
-      <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
-        .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
-      </div>
-    
-      {/* Horizontal line */}
-      <div className="w-1/2 border-t border-gray-300 mt-2"></div>
-    </div>
-    
-     
-     
-    )}
-    {downloadUrl ? (
-      <div className="w-full flex justify-center mt-4">
-        <a
-          href={downloadUrl}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          تحميل الملف
-        </a>
-      </div>
-    ) : (
-      <div className="text-gray-500 mt-4 text-center"></div>
-    )}
-  </div>
-) : null}
+                    {/* Text below the spinner */}
+                    <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
+                      .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+                    </div>
+
+                    {/* Horizontal line */}
+                    <div className="w-1/2 border-t border-gray-300 mt-2"></div>
+                  </div>
+                )}
+                {downloadUrl ? (
+                  <div className="w-full flex justify-center mt-4">
+                    <a
+                      href={downloadUrl}
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      تحميل الملف
+                    </a>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 mt-4 text-center"></div>
+                )}
+              </div>
+            )}
 
             <CardContent>
               <form onSubmit={handleSubmit}>
@@ -715,8 +853,11 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 <div className="mb-4 flex justify-center">
                   <button
                     type="button"
-                    onClick={() => setIsModalOpen(true)}
-                    className="md:w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                    onClick={() => {
+                      console.log('🖼️ Template selection modal opened.');
+                      setIsModalOpen(true);
+                    }}
+                    className="md:w-1/4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                   >
                     {selectedTemplate
                       ? `تم اختيار القالب: ${selectedTemplate.name}`
@@ -735,8 +876,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                   </button>
                 </div>
               </form>
-
-             
             </CardContent>
           </Card>
         </div>
@@ -745,8 +884,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         {isModalOpen && (
           <TemplateModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSelect={(template) => setSelectedTemplate(template)}
+            onClose={() => {
+              console.log('🖼️ Template selection modal closed.');
+              setIsModalOpen(false);
+            }}
+            onSelect={(template) => {
+              console.log('🖼️ Template selected:', template.name);
+              setSelectedTemplate(template);
+            }}
           />
         )}
       </div>
@@ -755,6 +900,2312 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 export default CreatePresentation;
+
+
+// // src/components/CreatePresentation.tsx
+
+// import React, { useState, useEffect, useRef } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useCredits } from '@/contexts/CreditContext'; // Using CreditContext
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+// import { toast } from 'sonner';
+
+// import { FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi'; // Icons from react-icons
+
+// interface Template {
+//   id: string;
+//   name: string;
+//   preview: string;
+//   category: string;
+// }
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+//   const { credits, refreshCredits } = useCredits();
+
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+//   const [submissionStatus, setSubmissionStatus] = useState<string>('');
+//   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState<boolean>(false);
+//   const [requestId, setRequestId] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+//   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+//   const [topicValue, setTopicValue] = useState<string>('');
+//   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+//   const pollingIntervalIdRef = useRef<number | null>(null);
+
+//   // Constants for validation
+//   const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+//   const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
+//   const ALLOWED_FILE_TYPES = [
+//     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
+//   ];
+
+//   // Handle topic change with validation
+//   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value;
+
+//     // Check if the topic exceeds the maximum length
+//     if (value.length > MAX_TOPIC_LENGTH) {
+//       setSubmissionStatus('topic-too-long');
+//       return;
+//     }
+
+//     // Clear any previous submission status
+//     if (submissionStatus) {
+//       setSubmissionStatus('');
+//     }
+
+//     setTopicValue(value);
+
+//     // If the topic is not empty, clear the document file
+//     if (value !== '') {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   // Handle file change with validation
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       const file = e.target.files[0];
+
+//       // Validate file size
+//       if (file.size > MAX_FILE_SIZE) {
+//         setSubmissionStatus('file-too-large');
+//         return;
+//       }
+
+//       // Validate file type
+//       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+//         setSubmissionStatus('invalid-file-type');
+//         return;
+//       }
+
+//       // Clear any previous submission status
+//       if (submissionStatus) {
+//         setSubmissionStatus('');
+//       }
+
+//       setDocumentFile(file);
+//       setTopicValue('');
+//     } else {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   // Handle form submission
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+
+//     // Ensure at least one field is filled
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+
+//     // Ensure a template is selected
+//     if (!selectedTemplate) {
+//       setSubmissionStatus('templateRequired');
+//       return;
+//     }
+
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+
+//     try {
+//       // **Obtain the JWT token from Clerk**
+//       const token = await getToken();
+//       if (!token) {
+//         setSubmissionStatus('unauthorized');
+//         return;
+//       }
+
+//       // **Deduct one credit on the server with Authorization header**
+//       await axios.patch(
+//         '/api/update-credits',
+//         {
+//           pointsUsed: 1,
+//         },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+
+//       // Refresh credits after deduction
+//       await refreshCredits();
+
+//       // **Create a new File record with Authorization header**
+//       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//       const response = await axios.post(
+//         '/api/files',
+//         {
+//           fileName,
+//           type: 'PRESENTATION',
+//         },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+
+//       const newRequestId = response.data.id;
+//       setRequestId(newRequestId);
+
+//       // Prepare data for the appropriate webhook
+//       let data: any;
+//       let headers: { [key: string]: string } = {};
+//       let webhookUrl = '';
+
+//       if (topicValue) {
+//         // Topic-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate.id,
+//           categoryId: selectedTemplate.category,
+//           userId: user.id,
+//           requestId: newRequestId,
+//         };
+//       } else if (documentFile) {
+//         // File-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate.id);
+//         data.append('categoryId', selectedTemplate.category);
+//         data.append('userId', user.id);
+//         data.append('requestId', newRequestId);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+
+//       // **Send data to the appropriate webhook**
+//       await axios.post(webhookUrl, data, { headers });
+
+//       setSubmissionStatus('success');
+
+//       // Reset form fields
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+
+//       // Start polling for status
+//       startPolling(newRequestId);
+//     } catch (error: any) {
+//       if (axios.isAxiosError(error)) {
+//         if (!error.response) {
+//           // Network error
+//           setSubmissionStatus('network-error');
+//         } else if (error.response.status === 400 && error.response.data.error === 'Insufficient credits') {
+//           setSubmissionStatus('insufficient-credits');
+//         } else if (error.response.status === 401) {
+//           // Unauthorized
+//           setSubmissionStatus('unauthorized');
+//         } else if (error.response.status >= 500) {
+//           // Server error
+//           setSubmissionStatus('server-error');
+//         } else if (error.response.status >= 400) {
+//           // Other client errors
+//           setSubmissionStatus('client-error');
+//         } else {
+//           // Other errors
+//           setSubmissionStatus('unexpected-error');
+//         }
+//       } else {
+//         // Non-Axios error
+//         setSubmissionStatus('unexpected-error');
+//       }
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   // Start polling for the request status
+//   const startPolling = (requestId: string) => {
+//     // Clear any existing interval before starting a new one
+//     if (pollingIntervalIdRef.current) {
+//       clearInterval(pollingIntervalIdRef.current);
+//     }
+
+//     setIsLoading(true);
+
+//     const intervalId = window.setInterval(async () => {
+//       try {
+//         // **Obtain the JWT token from Clerk for polling**
+//         const token = await getToken();
+//         if (!token) {
+//           setSubmissionStatus('unauthorized');
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+//           return;
+//         }
+
+//         const res = await axios.get('/api/getfilemake', {
+//           params: { requestId },
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+//           setDownloadUrl(res.data.downloadUrl);
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+
+//           // Refresh credits to reflect any additions
+//           await refreshCredits();
+//         } else if (res.data.status === 'FAILED') {
+//           setIsLoading(false);
+//           setSubmissionStatus('error');
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+//         }
+//       } catch (error: any) {
+//         if (axios.isAxiosError(error)) {
+//           if (error.response && error.response.status === 401) {
+//             setSubmissionStatus('unauthorized');
+//           } else {
+//             console.error('Error checking status:', error);
+//             // Optionally, handle polling errors
+//           }
+//         } else {
+//           console.error('Error checking status:', error);
+//           // Optionally, handle polling errors
+//         }
+//       }
+//     }, 5000); // Poll every 5 seconds
+
+//     pollingIntervalIdRef.current = intervalId;
+//   };
+
+//   // Clean up polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalIdRef.current) {
+//         clearInterval(pollingIntervalIdRef.current);
+//       }
+//     };
+//   }, []);
+
+//   // Handle submission status changes and display appropriate toasts
+//   const handleSubmissionStatus = (status: string) => {
+//     switch (status) {
+//       case 'success':
+//         toast.success(
+//           <div className="flex text-xl justify-between items-center">
+//             <span>تم الإرسال بنجاح!</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-8 text-green-800 hover:text-green-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#D4EDDA', // Success green background
+//               color: '#155724', // Success text color
+//               border: '1px solid #C3E6CB', // Success border color
+//             },
+//             icon: <FiCheckCircle color="#155724" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ أثناء الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'empty':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'templateRequired':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>يرجى اختيار قالب قبل الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'network-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الشبكة. يرجى التحقق من اتصالك.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'server-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقًا.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'client-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>فشل الإرسال بسبب إدخال غير صالح.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'unauthorized':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>غير مصرح لك بالوصول. يرجى تسجيل الدخول مرة أخرى.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'unexpected-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير معروف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'topic-too-long':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الموضوع طويل جدًا. يرجى تحديده بـ 100 حرف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'file-too-large':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الملف كبير جدًا. الحجم الأقصى هو 5 ميجابايت.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'invalid-file-type':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>نوع الملف غير صالح. يرجى تحميل ملف .docx.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'insufficient-credits':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>رصيدك غير كافٍ. يرجى ترقية خطتك.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       default:
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير معروف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+//     }
+//   };
+
+//   // Call this function when `submissionStatus` changes
+//   useEffect(() => {
+//     if (submissionStatus) {
+//       handleSubmissionStatus(submissionStatus);
+//     }
+//   }, [submissionStatus]);
+
+//   return (
+//     <>
+//       {/* Modals */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-4">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-4 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي</h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
+//           <p>
+//             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+//           </p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-2">
+//           <Card>
+//             <CardHeader></CardHeader>
+
+//             {(submissionStatus || isLoading || downloadUrl) && (
+//               <div className="rounded-lg pb-4 mb-4 p-4">
+//                 {/* Loading and Download */}
+//                 {isLoading && (
+//                   <div className="w-full flex flex-col items-center mt-4">
+//                     {/* Loading spinner */}
+//                     <div className="flex items-center justify-center">
+//                       <Loading />
+//                     </div>
+
+//                     {/* Text below the spinner */}
+//                     <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
+//                       .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+//                     </div>
+
+//                     {/* Horizontal line */}
+//                     <div className="w-1/2 border-t border-gray-300 mt-2"></div>
+//                   </div>
+//                 )}
+//                 {downloadUrl ? (
+//                   <div className="w-full flex justify-center mt-4">
+//                     <a
+//                       href={downloadUrl}
+//                       className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//                       target="_blank"
+//                       rel="noopener noreferrer"
+//                     >
+//                       تحميل الملف
+//                     </a>
+//                   </div>
+//                 ) : (
+//                   <div className="text-gray-500 mt-4 text-center"></div>
+//                 )}
+//               </div>
+//             )}
+
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
+//                   {/* Topic Field */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                   <div className="flex justify-center px-4 text-xl py-2"> أو </div>
+
+//                   {/* File Field */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Template Selection */}
+//                 <div className="mb-4 flex justify-center">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="md:w-1/4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* Submit Button */}
+//                 <div className="flex justify-center">
+//                   <button
+//                     type="submit"
+//                     className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+//                   </button>
+//                 </div>
+//               </form>
+//             </CardContent>
+//           </Card>
+//         </div>
+
+//         {/* Template Modal */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
+
+
+
+
+
+// // src/components/CreatePresentation.tsx
+
+// import React, { useState, useEffect, useCallback, useRef } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useCredits } from '@/contexts/CreditContext'; // Using CreditContext
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+// import { toast } from 'sonner';
+
+// import { FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi'; // Icons from react-icons
+
+// interface Template {
+//   id: string;
+//   name: string;
+//   preview: string;
+//   category: string;
+// }
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+//   const { credits, refreshCredits } = useCredits();
+
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+//   const [submissionStatus, setSubmissionStatus] = useState<string>('');
+//   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState<boolean>(false);
+//   const [requestId, setRequestId] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+//   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+//   const [topicValue, setTopicValue] = useState<string>('');
+//   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+//   const pollingIntervalIdRef = useRef<number | null>(null);
+
+//   // Constants for validation
+//   const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+//   const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
+//   const ALLOWED_FILE_TYPES = [
+//     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
+//   ];
+
+//   // Handle topic change with validation
+//   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value;
+
+//     // Check if the topic exceeds the maximum length
+//     if (value.length > MAX_TOPIC_LENGTH) {
+//       setSubmissionStatus('topic-too-long');
+//       return;
+//     }
+
+//     // Clear any previous submission status
+//     if (submissionStatus) {
+//       setSubmissionStatus('');
+//     }
+
+//     setTopicValue(value);
+
+//     // If the topic is not empty, clear the document file
+//     if (value !== '') {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   // Handle file change with validation
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       const file = e.target.files[0];
+
+//       // Validate file size
+//       if (file.size > MAX_FILE_SIZE) {
+//         setSubmissionStatus('file-too-large');
+//         return;
+//       }
+
+//       // Validate file type
+//       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+//         setSubmissionStatus('invalid-file-type');
+//         return;
+//       }
+
+//       // Clear any previous submission status
+//       if (submissionStatus) {
+//         setSubmissionStatus('');
+//       }
+
+//       setDocumentFile(file);
+//       setTopicValue('');
+//     } else {
+//       setDocumentFile(null);
+//     }
+//   };
+
+//   // Handle form submission
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+
+//     // Ensure at least one field is filled
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+
+//     // Ensure a template is selected
+//     if (!selectedTemplate) {
+//       setSubmissionStatus('templateRequired');
+//       return;
+//     }
+
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+
+//     try {
+//       // Deduct one credit on the server
+//       await axios.patch('/api/update-credits', {
+//         pointsUsed: 1,
+//       });
+
+//       // Refresh credits after deduction
+//       await refreshCredits();
+
+//       // Create a new File record
+//       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//       const response = await axios.post('/api/files', {
+//         fileName,
+//         type: 'PRESENTATION',
+//       });
+
+//       const newRequestId = response.data.id;
+//       setRequestId(newRequestId);
+
+//       // Prepare data for the appropriate webhook
+//       let data: any;
+//       let headers: { [key: string]: string } = {};
+//       let webhookUrl = '';
+
+//       if (topicValue) {
+//         // Topic-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate.id,
+//           categoryId: selectedTemplate.category,
+//           userId: user.id,
+//           requestId: newRequestId,
+//         };
+//       } else if (documentFile) {
+//         // File-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate.id);
+//         data.append('categoryId', selectedTemplate.category);
+//         data.append('userId', user.id);
+//         data.append('requestId', newRequestId);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+
+//       // Send data to the appropriate webhook
+//       await axios.post(webhookUrl, data, { headers });
+
+//       setSubmissionStatus('success');
+
+//       // Reset form fields
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+
+//       // Start polling for status
+//       startPolling(newRequestId);
+//     } catch (error: any) {
+//       if (axios.isAxiosError(error)) {
+//         if (!error.response) {
+//           // Network error
+//           setSubmissionStatus('network-error');
+//         } else if (error.response.status === 400 && error.response.data.error === 'Insufficient credits') {
+//           setSubmissionStatus('insufficient-credits');
+//         } else if (error.response.status >= 500) {
+//           // Server error
+//           setSubmissionStatus('server-error');
+//         } else if (error.response.status >= 400) {
+//           // Client error
+//           setSubmissionStatus('client-error');
+//         } else {
+//           // Other errors
+//           setSubmissionStatus('unexpected-error');
+//         }
+//       } else {
+//         // Non-Axios error
+//         setSubmissionStatus('unexpected-error');
+//       }
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   // Start polling for the request status
+//   const startPolling = (requestId: string) => {
+//     // Clear any existing interval before starting a new one
+//     if (pollingIntervalIdRef.current) {
+//       clearInterval(pollingIntervalIdRef.current);
+//     }
+
+//     setIsLoading(true);
+
+//     const intervalId = window.setInterval(async () => {
+//       try {
+//         const res = await axios.get('/api/getfilemake', {
+//           params: { requestId },
+//         });
+
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+//           setDownloadUrl(res.data.downloadUrl);
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+
+//           // Refresh credits to reflect any additions
+//           await refreshCredits();
+//         } else if (res.data.status === 'FAILED') {
+//           setIsLoading(false);
+//           setSubmissionStatus('error');
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+//         }
+//       } catch (error) {
+//         console.error('Error checking status:', error);
+//         // Optionally, handle polling errors
+//       }
+//     }, 5000); // Poll every 5 seconds
+
+//     pollingIntervalIdRef.current = intervalId;
+//   };
+
+//   // Clean up polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalIdRef.current) {
+//         clearInterval(pollingIntervalIdRef.current);
+//       }
+//     };
+//   }, []);
+
+//   // Handle submission status changes and display appropriate toasts
+//   const handleSubmissionStatus = (status: string) => {
+//     switch (status) {
+//       case 'success':
+//         toast.success(
+//           <div className="flex text-xl justify-between items-center">
+//             <span>تم الإرسال بنجاح!</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-8 text-green-800 hover:text-green-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#D4EDDA', // Success green background
+//               color: '#155724', // Success text color
+//               border: '1px solid #C3E6CB', // Success border color
+//             },
+//             icon: <FiCheckCircle color="#155724" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ أثناء الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'empty':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'templateRequired':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>يرجى اختيار قالب قبل الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'network-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الشبكة. يرجى التحقق من اتصالك.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'server-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقًا.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'client-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>فشل الإرسال بسبب إدخال غير صالح.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'unexpected-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير معروف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'topic-too-long':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الموضوع طويل جدًا. يرجى تحديده بـ 100 حرف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'file-too-large':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الملف كبير جدًا. الحجم الأقصى هو 5 ميجابايت.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'invalid-file-type':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>نوع الملف غير صالح. يرجى تحميل ملف .docx.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+
+//       case 'insufficient-credits':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>رصيدك غير كافٍ. يرجى ترقية خطتك.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+
+//       default:
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير معروف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+//     }
+//   };
+
+//   // Call this function when `submissionStatus` changes
+//   useEffect(() => {
+//     if (submissionStatus) {
+//       handleSubmissionStatus(submissionStatus);
+//     }
+//   }, [submissionStatus]);
+
+//   return (
+//     <>
+//       {/* Modals */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-4">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-4 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي</h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
+//           <p>
+//             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+//           </p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-2">
+//           <Card>
+//             <CardHeader></CardHeader>
+
+//             {(submissionStatus || isLoading || downloadUrl) && (
+//               <div className="rounded-lg pb-4 mb-4 p-4">
+//                 {/* Loading and Download */}
+//                 {isLoading && (
+//                   <div className="w-full flex flex-col items-center mt-4">
+//                     {/* Loading spinner */}
+//                     <div className="flex items-center justify-center">
+//                       <Loading />
+//                     </div>
+
+//                     {/* Text below the spinner */}
+//                     <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
+//                       .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+//                     </div>
+
+//                     {/* Horizontal line */}
+//                     <div className="w-1/2 border-t border-gray-300 mt-2"></div>
+//                   </div>
+//                 )}
+//                 {downloadUrl ? (
+//                   <div className="w-full flex justify-center mt-4">
+//                     <a
+//                       href={downloadUrl}
+//                       className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//                       target="_blank"
+//                       rel="noopener noreferrer"
+//                     >
+//                       تحميل الملف
+//                     </a>
+//                   </div>
+//                 ) : (
+//                   <div className="text-gray-500 mt-4 text-center"></div>
+//                 )}
+//               </div>
+//             )}
+
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
+//                   {/* Topic Field */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                   <div className="flex justify-center px-4 text-xl py-2"> أو </div>
+
+//                   {/* File Field */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Template Selection */}
+//                 <div className="mb-4 flex justify-center">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="md:w-1/4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* Submit Button */}
+//                 <div className="flex justify-center">
+//                   <button
+//                     type="submit"
+//                     className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+//                   </button>
+//                 </div>
+//               </form>
+//             </CardContent>
+//           </Card>
+//         </div>
+
+//         {/* Template Modal */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect, useCallback, useRef } from 'react';
+// import axios from 'axios';
+// import { useRouter } from 'next/navigation';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { useStore } from '@/store/useStore';
+// import Modal from '@/components/custom/ocrModal';
+// import Loading from '@/components/global/loading';
+// import { Card, CardHeader, CardContent } from '@/components/ui/card';
+// import TemplateModal from './TemplateModal';
+
+// import { toast } from 'sonner';
+
+// import { FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi'; // Icons from react-icons
+
+// interface Template {
+//   id: string;
+//   name: string;
+//   preview: string;
+//   category: string; // Add this line
+// }
+
+
+// const CreatePresentation: React.FC = () => {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const { getToken } = useAuth();
+
+//   const setCredits = useStore((state) => state.setCredits);
+//   const setUsedCredits = useStore((state) => state.setUsedCredits);
+//   const credits = useStore((state) => state.credits);
+//   const usedCredits = useStore((state) => state.usedCredits);
+
+//   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+//   const [submissionStatus, setSubmissionStatus] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+//   const [requestId, setRequestId] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+//   const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [topicValue, setTopicValue] = useState('');
+//   const [documentFile, setDocumentFile] = useState<File | null>(null);
+
+//   // Fetch user data and update credits
+//   useEffect(() => {
+//     if (user) {
+//       getToken().then((token) => {
+//         axios
+//           .get('/api/user-data', {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           })
+//           .then(({ data }) => {
+//             setCredits(data.credits);
+//             setUsedCredits(data.usedCredits);
+//           })
+//           .catch((error) => console.error('Error fetching user data:', error));
+//       });
+//     }
+//   }, [user, getToken, setCredits, setUsedCredits]);
+
+//   // Update credits after usage
+//   const handleUpdateCredits = useCallback(
+//     async (pointsUsed: number) => {
+//       if (user) {
+//         try {
+//           await axios.patch('/api/update-credits', {
+//             userId: user.id,
+//             pointsUsed,
+//           });
+
+//           // Update local state after confirming server update
+//           const updatedUsedCredits = (usedCredits || 0) + pointsUsed;
+//           const updatedCredits = (credits || 0) - pointsUsed;
+
+//           setUsedCredits(updatedUsedCredits);
+//           setCredits(updatedCredits);
+//         } catch (error) {
+//           console.error('Error updating credits:', error);
+//         }
+//       }
+//     },
+//     [user, credits, usedCredits, setCredits, setUsedCredits]
+//   );
+
+//   // Define constants for validation at the top of your component or in a separate constants file
+// const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+// const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
+// const ALLOWED_FILE_TYPES = [
+//   'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx MIME type
+// ];
+
+// // Updated handleTopicChange with validation
+// const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const value = e.target.value;
+
+//   // Check if the topic exceeds the maximum length
+//   if (value.length > MAX_TOPIC_LENGTH) {
+//     setSubmissionStatus('topic-too-long');
+//     return;
+//   }
+
+//   // Clear any previous submission status
+//   if (submissionStatus) {
+//     setSubmissionStatus('');
+//   }
+
+//   setTopicValue(value);
+
+//   // If the topic is not empty, clear the document file
+//   if (value !== '') {
+//     setDocumentFile(null);
+//   }
+// };
+
+// // Updated handleFileChange with validation
+// const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   if (e.target.files && e.target.files.length > 0) {
+//     const file = e.target.files[0];
+
+//     // Validate file size
+//     if (file.size > MAX_FILE_SIZE) {
+//       setSubmissionStatus('file-too-large');
+//       return;
+//     }
+
+//     // Validate file type
+//     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+//       setSubmissionStatus('invalid-file-type');
+//       return;
+//     }
+
+//     // Clear any previous submission status
+//     if (submissionStatus) {
+//       setSubmissionStatus('');
+//     }
+
+//     setDocumentFile(file);
+//     setTopicValue('');
+//   } else {
+//     setDocumentFile(null);
+//   }
+// };
+
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+  
+//     if (!user) {
+//       router.push('/sign-in');
+//       return;
+//     }
+  
+//     // Ensure at least one field is filled
+//     if (!topicValue && !documentFile) {
+//       setSubmissionStatus('empty');
+//       return;
+//     }
+
+    
+//     // Ensure a template is selected
+//   if (!selectedTemplate) {
+//     setSubmissionStatus('templateRequired');
+//     return;
+//   }
+  
+//     if (credits === null || credits < 1) {
+//       setShowInsufficientCreditsModal(true);
+//       return;
+//     }
+  
+//     setIsSubmitting(true);
+//     setSubmissionStatus('');
+  
+//     try {
+//       // Deduct one point
+  
+//       // Create a new File record
+//       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
+//       const response = await axios.post('/api/files', {
+//         userId: user.id,
+//         fileName,
+//         type: 'PRESENTATION',
+//       });
+  
+//       const requestId = response.data.id;
+//       setRequestId(requestId);
+  
+//       // Prepare data for the appropriate webhook
+//       let data: any;
+//       let headers: { [key: string]: string } = {};
+//       let webhookUrl = '';
+  
+//       if (topicValue) {
+//         // Topic-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+
+//         // webhookUrl = 'https://hook.eu2.make.com/qel93ksh54cigpbzj6wwgu65zg4k7x1y';
+//         data = {
+//           topic: topicValue,
+//           templateId: selectedTemplate ? selectedTemplate.id : '',
+//           categoryId: selectedTemplate ? selectedTemplate.category : '',
+//           userId: user.id,
+//           requestId,
+//         };
+//       } else if (documentFile) {
+//         // File-specific webhook
+//         webhookUrl = 'https://hook.eu2.make.com/8ckct7ngtgyhc4mqn95k6srh97yx2u8x';
+//         data = new FormData();
+//         data.append('document', documentFile);
+//         data.append('templateId', selectedTemplate ? selectedTemplate.id : '');
+//         data.append('categoryId', selectedTemplate ? selectedTemplate.category : '');
+//         data.append('userId', user.id);
+//         data.append('requestId', requestId);
+//         headers['Content-Type'] = 'multipart/form-data';
+//       }
+  
+//       // Send data to the appropriate webhook
+//       await axios.post(webhookUrl, data, { headers });
+  
+//       setSubmissionStatus('success');
+  
+//       // Reset form fields
+//       setTopicValue('');
+//       setDocumentFile(null);
+//       setSelectedTemplate(null);
+
+
+  
+//       // Start polling
+//       startPolling(requestId);
+//     } catch (error) {
+//       if (axios.isAxiosError(error)) {
+//         if (!error.response) {
+//           // Network error
+//           setSubmissionStatus('network-error');
+//         } else if (error.response.status >= 500) {
+//           // Server error
+//           setSubmissionStatus('server-error');
+//         } else if (error.response.status >= 400) {
+//           // Client error
+//           setSubmissionStatus('client-error');
+//         } else {
+//           // Other errors
+//           setSubmissionStatus('unexpected-error');
+//         }
+//       } else {
+//         // Non-Axios error
+//         setSubmissionStatus('unexpected-error');
+//       }
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+    
+//   const pollingIntervalIdRef = useRef<number | null>(null);
+
+
+//   const startPolling = (requestId: number) => {
+//     // Clear any existing interval before starting a new one
+//     if (pollingIntervalIdRef.current) {
+//       clearInterval(pollingIntervalIdRef.current);
+//     }
+
+//     setIsLoading(true);
+  
+//     const intervalId = window.setInterval(async () => {
+//       try {
+//         const res = await axios.get('/api/getfilemake', {
+//           params: { requestId },
+//         });
+
+//         if (res.data && res.data.status === 'COMPLETED') {
+//           setIsLoading(false);
+
+//           console.log('Download URL:', res.data.downloadUrl);
+
+//           setDownloadUrl(res.data.downloadUrl);
+
+//           await handleUpdateCredits(15);
+
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+//         } else if (res.data.status === 'FAILED') {
+//           setIsLoading(false);
+//           setSubmissionStatus('error');
+
+//           // Clear the interval
+//           if (pollingIntervalIdRef.current) {
+//             clearInterval(pollingIntervalIdRef.current);
+//             pollingIntervalIdRef.current = null;
+//           }
+//         }
+//       } catch (error) {
+//         console.error('Error checking status:', error);
+//       }
+//     }, 5000); // Poll every 5 seconds
+
+//     pollingIntervalIdRef.current = intervalId;
+//   };
+
+//   // Clean up polling on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (pollingIntervalIdRef.current) {
+//         clearInterval(pollingIntervalIdRef.current);
+//       }
+//     };
+//   }, []);
+
+//   const handleSubmissionStatus = (status: string) => {
+//     switch (status) {
+//       case 'success':
+//         toast.success(
+//           <div className="flex text-xl justify-between items-center">
+//             <span>تم الإرسال بنجاح!</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-8 text-green-800 hover:text-green-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#D4EDDA', // Success green background
+//               color: '#155724', // Success text color
+//               border: '1px solid #C3E6CB', // Success border color
+//             },
+//             icon: <FiCheckCircle color="#155724" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ أثناء الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'empty':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الرجاء إدخال الموضوع أو اختيار ملف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'templateRequired':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>يرجى اختيار قالب قبل الإرسال.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'network-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الشبكة. يرجى التحقق من اتصالك.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'server-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقًا.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'client-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>فشل الإرسال بسبب إدخال غير صالح.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'unexpected-error':
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير متوقع.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'topic-too-long':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الموضوع طويل جدًا. يرجى تحديده بـ 100 حرف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'file-too-large':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>الملف كبير جدًا. الحجم الأقصى هو 5 ميجابايت.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       case 'invalid-file-type':
+//         toast.warning(
+//           <div className="flex text-[18px] justify-between items-center">
+//             <span>نوع الملف غير صالح. يرجى تحميل ملف .docx.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="mr-20 text-yellow-800 hover:text-yellow-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#FFF3CD', // Warning yellow background
+//               color: '#856404', // Warning text color
+//               border: '1px solid #FFEEBA', // Warning border color
+//             },
+//             icon: <FiInfo color="#856404" size={24} />,
+//           }
+//         );
+//         break;
+  
+//       default:
+//         toast.error(
+//           <div className="flex justify-between items-center">
+//             <span>حدث خطأ غير معروف.</span>
+//             <button
+//               onClick={() => toast.dismiss()}
+//               className="ml-4 text-red-800 hover:text-red-900"
+//             >
+//               X
+//             </button>
+//           </div>,
+//           {
+//             position: 'top-center',
+//             duration: 30000,
+//             style: {
+//               backgroundColor: '#F8D7DA', // Error red background
+//               color: '#721C24', // Error text color
+//               border: '1px solid #F5C6CB', // Error border color
+//             },
+//             icon: <FiAlertCircle color="#721C24" size={24} />,
+//           }
+//         );
+//         break;
+//     }
+//   };
+  
+//   // Call this function when `submissionStatus` changes
+//   useEffect(() => {
+//     if (submissionStatus) {
+//       handleSubmissionStatus(submissionStatus);
+//     }
+//   }, [submissionStatus]);
+
+//   return (
+//     <>
+//       {/* Modals */}
+//       <Modal
+//         isOpen={showInsufficientCreditsModal}
+//         onClose={() => setShowInsufficientCreditsModal(false)}
+//         title="رصيدك غير كافٍ"
+//         message="ليس لديك رصيد كافٍ لإجراء هذه العملية. يرجى ترقية خطتك."
+//         actionText="ترقية الخطة"
+//         actionLink="/pricing"
+//       />
+
+//       <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-4">
+//         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-4 gap-4">
+//           <h1>بوربوينت بالذكاء الصناعي</h1>
+//         </div>
+//         <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
+//           <p>
+//             اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل
+//           </p>
+//         </div>
+//         <div className="bg-white rounded-lg shadow p-2">
+//           <Card>
+//             <CardHeader></CardHeader>
+
+//             {submissionStatus || isLoading || downloadUrl ? (
+//   <div className="rounded-lg pb-4 mb-4 p-4">
+    
+//     {/* Loading and Download */}
+//     {isLoading && (
+//       <div className="w-full flex flex-col items-center mt-4">
+//       {/* Loading spinner */}
+//       <div className="flex items-center justify-center">
+//       <Loading />
+
+//         {/* <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500 border-solid"></div> */}
+//       </div>
+      
+//       {/* Text below the spinner */}
+//       <div className="w-full flex justify-center p-4 mt-4 text-gray-400 text-center">
+//         .....يتم تجهيز ملف العرض الرجاء الانتظار قليلاً
+//       </div>
+    
+//       {/* Horizontal line */}
+//       <div className="w-1/2 border-t border-gray-300 mt-2"></div>
+//     </div>
+    
+     
+     
+//     )}
+//     {downloadUrl ? (
+//       <div className="w-full flex justify-center mt-4">
+//         <a
+//           href={downloadUrl}
+//           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+//           target="_blank"
+//           rel="noopener noreferrer"
+//         >
+//           تحميل الملف
+//         </a>
+//       </div>
+//     ) : (
+//       <div className="text-gray-500 mt-4 text-center"></div>
+//     )}
+//   </div>
+// ) : null}
+
+//             <CardContent>
+//               <form onSubmit={handleSubmit}>
+//                 <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
+//                   {/* Topic Field */}
+//                   <div className="mb-4 flex-1 lg:mr-2">
+//                     <input
+//                       type="text"
+//                       name="topic"
+//                       id="topic"
+//                       placeholder="ادخل الموضوع"
+//                       value={topicValue}
+//                       onChange={handleTopicChange}
+//                       disabled={documentFile !== null}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                   <div className="flex justify-center px-4 text-xl py-2"> أو </div>
+
+//                   {/* File Field */}
+//                   <div className="mb-4 flex-1 lg:ml-2">
+//                     <input
+//                       type="file"
+//                       name="document"
+//                       id="document"
+//                       accept=".docx"
+//                       onChange={handleFileChange}
+//                       disabled={topicValue !== ''}
+//                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Template Selection */}
+//                 <div className="mb-4 flex justify-center">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsModalOpen(true)}
+//                     className="md:w-1/4 bg-gray-200 text-gray-800  py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+//                   >
+//                     {selectedTemplate
+//                       ? `تم اختيار القالب: ${selectedTemplate.name}`
+//                       : 'اختر القالب'}
+//                   </button>
+//                 </div>
+
+//                 {/* Submit Button */}
+//                 <div className="flex justify-center">
+//                   <button
+//                     type="submit"
+//                     className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+//                     disabled={isSubmitting}
+//                   >
+//                     {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+//                   </button>
+//                 </div>
+//               </form>
+
+             
+//             </CardContent>
+//           </Card>
+//         </div>
+
+//         {/* Template Modal */}
+//         {isModalOpen && (
+//           <TemplateModal
+//             isOpen={isModalOpen}
+//             onClose={() => setIsModalOpen(false)}
+//             onSelect={(template) => setSelectedTemplate(template)}
+//           />
+//         )}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default CreatePresentation;
+
+
+
+
+
+
+
+
+
+
+
 
 
  // <div className="w-full flex justify-center mt-4">

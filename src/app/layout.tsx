@@ -12,6 +12,7 @@ import { Toaster as SonnarToaster } from '@/components/ui/sonner'
 import { CrispProvider } from '@/components/custom/crisp-provider';
 import { ToasterProvider } from '@/components/toaster-provider';
 import { arSA } from '@clerk/localizations'
+import { CreditProvider } from '@/contexts/CreditContext';
 
 
 const tajawal = Tajawal({
@@ -33,7 +34,7 @@ export default function RootLayout({
 
     <ClerkProvider localization={arSA}  appearance={{ baseTheme: dark }}>
             <CrispProvider />
-
+            <CreditProvider>
     <html
       dir="rtl" lang="ar"
       suppressHydrationWarning
@@ -56,6 +57,8 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
+    </CreditProvider>
+
     </ClerkProvider>
   )
 }
