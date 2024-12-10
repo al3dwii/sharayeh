@@ -1,7 +1,18 @@
-// components/PlanCard.jsx
-import PropTypes from 'prop-types';
+// components/PlanCard.tsx
+import React from 'react';
 
-const PlanCard = ({ plan, onSubscribe }) => (
+interface Plan {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface PlanCardProps {
+  plan: Plan;
+  onSubscribe: (planId: string) => void;
+}
+
+const PlanCard: React.FC<PlanCardProps> = ({ plan, onSubscribe }) => (
   <div className="border p-6 rounded-lg shadow-lg w-64 text-center">
     <h2 className="text-2xl font-bold">{plan.name}</h2>
     <p className="mt-4 text-xl">
@@ -15,14 +26,5 @@ const PlanCard = ({ plan, onSubscribe }) => (
     </button>
   </div>
 );
-
-PlanCard.propTypes = {
-  plan: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-  }).isRequired,
-  onSubscribe: PropTypes.func.isRequired,
-};
 
 export default PlanCard;
