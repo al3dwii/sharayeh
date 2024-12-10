@@ -1,27 +1,44 @@
+// Import necessary modules and types
 import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
-import prismadb from "@/utils/prismadb"
-import { stripe } from "@/lib/stripe"
+import { NextResponse, NextRequest } from 'next/server';
+import prismadb from "@/utils/prismadb";
+import { stripe } from "@/lib/stripe";
+import Stripe from 'stripe';
 
-export async function POST(request) {
+// Define the POST handler with proper typing
+export async function POST(request: NextRequest) {
   const sig = headers().get('stripe-signature');
   const buf = await request.text();
 
-  let event;
+  let event: Stripe.Event;
 
   try {
+    if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+      throw new Error('Missing Stripe signature or webhook secret.');
+    }
+
+    // Construct the Stripe event
     event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error('Webhook signature verification failed.', err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    // Type guard to ensure err is an Error
+    if (err instanceof Error) {
+      console.error('Webhook signature verification failed.', err.message);
+      return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    } else {
+      console.error('Webhook signature verification failed.', err);
+      return new Response('Webhook Error: Invalid signature.', { status: 400 });
+    }
   }
 
+  // Handle different event types
   switch (event.type) {
     case 'checkout.session.completed':
-      await handleCheckoutSessionCompleted(event.data.object);
+      const session = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutSessionCompleted(session);
       break;
     case 'customer.subscription.deleted':
-      await handleSubscriptionDeleted(event.data.object);
+      const subscription = event.data.object as Stripe.Subscription;
+      await handleSubscriptionDeleted(subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);
@@ -30,7 +47,8 @@ export async function POST(request) {
   return NextResponse.json({ received: true });
 }
 
-async function handleCheckoutSessionCompleted(session) {
+// Handler for checkout.session.completed event
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId;
   const planId = session.metadata?.planId;
 
@@ -40,7 +58,7 @@ async function handleCheckoutSessionCompleted(session) {
   }
 
   // Attempt to get line items (either expanded or via an API call)
-  let lineItem = session.line_items?.data?.[0];
+  let lineItem: Stripe.LineItem | undefined = session.line_items?.data?.[0];
   if (!lineItem) {
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
     lineItem = lineItems.data?.[0];
@@ -62,26 +80,28 @@ async function handleCheckoutSessionCompleted(session) {
 
   if (session.mode === 'subscription') {
     // Fetch subscription details from Stripe
-    const subscription = await stripe.subscriptions.retrieve(session.subscription);
+    const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
 
-    // Use subscription.current_period_end, which is a Unix timestamp
+    // Convert Unix timestamp to JavaScript Date
     const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
 
+    // Upsert user subscription in the database
     await prismadb.userSubscription.upsert({
       where: { userId },
       update: {
-        stripeSubscriptionId: session.subscription,
+        stripeSubscriptionId: session.subscription as string,
         stripePriceId: lineItem.price.id,
         stripeCurrentPeriodEnd: currentPeriodEnd,
       },
       create: {
         userId,
-        stripeSubscriptionId: session.subscription,
+        stripeSubscriptionId: session.subscription as string,
         stripePriceId: lineItem.price.id,
         stripeCurrentPeriodEnd: currentPeriodEnd,
       },
     });
 
+    // Upsert user credits
     const existingCredits = await prismadb.userCredits.findUnique({
       where: { userId },
     });
@@ -102,6 +122,7 @@ async function handleCheckoutSessionCompleted(session) {
       });
     }
 
+    // Create a credit transaction
     await prismadb.creditTransaction.create({
       data: {
         userId,
@@ -134,7 +155,8 @@ async function handleCheckoutSessionCompleted(session) {
   }
 }
 
-async function handleSubscriptionDeleted(subscription) {
+// Handler for customer.subscription.deleted event
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const userSubscription = await prismadb.userSubscription.findUnique({
     where: { stripeSubscriptionId: subscription.id },
   });
@@ -160,6 +182,170 @@ async function handleSubscriptionDeleted(subscription) {
     },
   });
 }
+
+
+// import { headers } from 'next/headers';
+// import { NextResponse } from 'next/server';
+// import prismadb from "@/utils/prismadb"
+// import { stripe } from "@/lib/stripe"
+
+// export async function POST(request) {
+//   const sig = headers().get('stripe-signature');
+//   const buf = await request.text();
+
+//   let event;
+
+//   try {
+//     event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET);
+//   } catch (err) {
+//     console.error('Webhook signature verification failed.', err.message);
+//     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+//   }
+
+//   switch (event.type) {
+//     case 'checkout.session.completed':
+//       await handleCheckoutSessionCompleted(event.data.object);
+//       break;
+//     case 'customer.subscription.deleted':
+//       await handleSubscriptionDeleted(event.data.object);
+//       break;
+//     default:
+//       console.log(`Unhandled event type ${event.type}`);
+//   }
+
+//   return NextResponse.json({ received: true });
+// }
+
+// async function handleCheckoutSessionCompleted(session) {
+//   const userId = session.metadata?.userId;
+//   const planId = session.metadata?.planId;
+
+//   if (!userId || !planId) {
+//     console.error("Missing metadata (userId or planId) in session.");
+//     return;
+//   }
+
+//   // Attempt to get line items (either expanded or via an API call)
+//   let lineItem = session.line_items?.data?.[0];
+//   if (!lineItem) {
+//     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+//     lineItem = lineItems.data?.[0];
+//   }
+
+//   if (!lineItem || !lineItem.price?.id) {
+//     console.error("No line_items found on session.");
+//     return;
+//   }
+
+//   const plan = await prismadb.subscriptionPlan.findUnique({
+//     where: { id: planId },
+//   });
+
+//   if (!plan) {
+//     console.error('Subscription plan not found.');
+//     return;
+//   }
+
+//   if (session.mode === 'subscription') {
+//     // Fetch subscription details from Stripe
+//     const subscription = await stripe.subscriptions.retrieve(session.subscription);
+
+//     // Use subscription.current_period_end, which is a Unix timestamp
+//     const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+
+//     await prismadb.userSubscription.upsert({
+//       where: { userId },
+//       update: {
+//         stripeSubscriptionId: session.subscription,
+//         stripePriceId: lineItem.price.id,
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//       },
+//       create: {
+//         userId,
+//         stripeSubscriptionId: session.subscription,
+//         stripePriceId: lineItem.price.id,
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//       },
+//     });
+
+//     const existingCredits = await prismadb.userCredits.findUnique({
+//       where: { userId },
+//     });
+
+//     if (existingCredits) {
+//       await prismadb.userCredits.update({
+//         where: { userId },
+//         data: {
+//           credits: plan.credits,
+//         },
+//       });
+//     } else {
+//       await prismadb.userCredits.create({
+//         data: {
+//           userId,
+//           credits: plan.credits,
+//         },
+//       });
+//     }
+
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: plan.credits,
+//         description: `Credits added for ${plan.name} plan.`,
+//       },
+//     });
+//   } else {
+//     // Handle one-time payments or non-subscription mode
+//     await prismadb.userCredits.upsert({
+//       where: { userId },
+//       update: {
+//         credits: plan.credits,
+//       },
+//       create: {
+//         userId,
+//         credits: plan.credits,
+//       },
+//     });
+
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: plan.credits,
+//         description: `Credits added for ${plan.name} plan.`,
+//       },
+//     });
+//   }
+// }
+
+// async function handleSubscriptionDeleted(subscription) {
+//   const userSubscription = await prismadb.userSubscription.findUnique({
+//     where: { stripeSubscriptionId: subscription.id },
+//   });
+
+//   if (!userSubscription) {
+//     console.error('User subscription not found.');
+//     return;
+//   }
+
+//   await prismadb.userCredits.update({
+//     where: { userId: userSubscription.userId },
+//     data: {
+//       credits: 0,
+//     },
+//   });
+
+//   await prismadb.creditTransaction.create({
+//     data: {
+//       userId: userSubscription.userId,
+//       type: 'DEDUCTION',
+//       amount: 0,
+//       description: `Subscription canceled. Credits reset.`,
+//     },
+//   });
+// }
 
 
 // import { headers } from 'next/headers';
