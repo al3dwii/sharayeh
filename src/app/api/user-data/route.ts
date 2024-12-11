@@ -26,6 +26,21 @@ export async function GET(req: NextRequest) {
       },
     });
 
+        // If the userCredits record doesn't exist, create one with default values
+    if (!userCredits) {
+      userCredits = await db.userCredits.create({
+        data: {
+          userId,
+          credits: 10,
+          usedCredits: 0,
+        },
+        select: {
+          credits: true,
+          usedCredits: true,
+        },
+      });
+    }
+
     // Return the user credits data
     return NextResponse.json({ 
       credits: userCredits.credits, 
