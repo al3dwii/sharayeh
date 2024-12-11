@@ -14,9 +14,9 @@ const SubscriptionPlans = () => {
 
   // Use the plan IDs that exist in your database as strings
   const plans = [
-    { id: 'cm4ijzevp00008ys5enalik51', name: 'Free', price: 0 },
-    { id: 'cm4ijzfm500018ys5lfls9223', name: 'Standard', price: 10 },
-    { id: 'cm4ijzg3700028ys5w7agup9y', name: 'Premium', price: 25 },
+    { id: 'cm4kcbd6t00007ndb3r9dydrc', name: 'Free', price: 0 },
+    { id: 'cm4kcbe5u00017ndbe7dphuoo', name: 'Standard', price: 10 },
+    { id: 'cm4kcbeop00027ndbbg8k20me', name: 'Premium', price: 25 },
   ];
 
   const handleSubscribe = async (planId: string) => {

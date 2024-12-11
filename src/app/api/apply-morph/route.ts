@@ -12,7 +12,7 @@ export const runtime = 'nodejs'; // Ensure Node.js runtime
 
 // Initialize Axios with retry logic and updated configurations
 const axiosInstance = axios.create({
-  timeout: 30000, // 30 seconds
+  timeout: 60000, // 30 seconds
   maxContentLength: Infinity, // Remove content length limit
   maxBodyLength: Infinity,    // Remove body length limit
   responseType: 'arraybuffer', // Default response type
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
             Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            path: '/', // Explicitly specify the root path
+            path: '', // Explicitly specify the root path
           },
           responseType: 'json', // Ensure the response is treated as JSON
         }
