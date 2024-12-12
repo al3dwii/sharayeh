@@ -172,7 +172,7 @@ const CreatePresentation: React.FC = () => {
       await axios.patch(
         '/api/update-credits',
         {
-          pointsUsed: 1,
+          pointsUsed: 5,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -407,7 +407,7 @@ const CreatePresentation: React.FC = () => {
 
       // Clear the timeout ID
       pollingTimeoutIdRef.current = null;
-    }, 60000); // 1 minute timeout
+    }, 90000); // 1 minute timeout
 
     pollingTimeoutIdRef.current = timeoutId;
     console.log('⏳ Polling timeout ID set:', timeoutId);
