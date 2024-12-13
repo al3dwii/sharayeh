@@ -11,6 +11,11 @@ import { getAuth } from '@clerk/nextjs/server';
 import { db } from "@/lib/db"; // Adjust the path based on your project structure
 import { z } from 'zod';
 
+// Define your schema
+const schema = z.object({
+  resultedFile: z.string().optional(),
+});
+
 // Define the runtime
 export const runtime = 'nodejs';
 
@@ -172,7 +177,8 @@ export async function POST(req: NextRequest) {
     const parsedBody = ApplyMorphSchema.safeParse(await req.json());
 
     if (!parsedBody.success) {
-      console.error('❌ Invalid request body:', parsedBody.error.errors);
+      const error = (parsedBody as z.SafeParseError<typeof schema>).error;
+      console.error('❌ Invalid request body:', error.errors);
       return NextResponse.json(
         { success: false, error: 'Invalid request data.' },
         { status: 400 }
@@ -228,7 +234,9 @@ export async function POST(req: NextRequest) {
 
     // **Step 10: Save the Downloaded File to the Temporary Path**
     console.log('💾 Saving file to temporary path');
-    await fs.promises.writeFile(uploadedFilePath, fileBuffer);
+    const uint8ArrayBuffer = new Uint8Array(fileBuffer);
+    await fs.promises.writeFile(uploadedFilePath, uint8ArrayBuffer);
+    // await fs.promises.writeFile(uploadedFilePath, fileBuffer);
     console.log('✅ File saved to temporary path.');
 
     // **Step 11: Authenticate with Aspose API**
