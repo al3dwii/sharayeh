@@ -40,6 +40,19 @@ export function PricingCards({ userId, isPro }: { userId: string | null; isPro: 
         "الوصول إلى التحليلات"
       ],
       "limitations": []
+    },
+    {
+      "id": "pro",
+      "title": "خطة المحترفين",
+      "price": "29.99$",
+      "frequency": "شهرياً",
+      "features": [
+        "رفع مستندات غير محدود",
+        "معالجة OCR المتقدمة",
+        "دعم الأولوية",
+        "الوصول إلى التحليلات"
+      ],
+      "limitations": []
     }
     
   ];
@@ -55,7 +68,7 @@ export function PricingCards({ userId, isPro }: { userId: string | null; isPro: 
         </h2>
       </div>
 
-      <div className="mx-auto grid max-w-screen-lg gap-5 bg-inherit py-5 md:grid-cols-2 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-screen-lg gap-5 bg-inherit py-5 md:grid-cols-3 lg:grid-cols-3">
         {pricingPlans.map((plan) => (
           <div className="relative flex flex-col overflow-hidden rounded-xl border" key={plan.id}>
             <div className="min-h-[150px] items-start space-y-4 bg-blue-200 p-6">

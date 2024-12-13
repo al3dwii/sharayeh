@@ -21,8 +21,8 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: 'gadawel',
-  description: 'Scanned documents tables OCR',
+  title: 'sharayeh',
+  description: 'Powerpoint by Ai in minutes',
 }
 
 export default function RootLayout({

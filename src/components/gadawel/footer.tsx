@@ -30,7 +30,7 @@ export const Footer = () => {
     <div className="text-xl  font-semibold">sharayh.com</div>
 
 </div>                    <p className={'text-white'}>
-                        تحويل الجداول إلى وورد قابل للتعديل
+                        انشاء بوربوينت بالذكاء الصناعي في دقائق
                     </p>
                     {/* <div className={'flex items-center gap-2'}>
                         {socialLinks.map((item) => (
@@ -42,7 +42,7 @@ export const Footer = () => {
                         }
                     </div> */}
                 </div>
-                <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>      
+                {/* <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>      
                      <Header text={'الخدمات'}/>
                     <ul className={'flex flex-col space-y-2'}>
                         {mockTools.map((item) => (
@@ -53,7 +53,7 @@ export const Footer = () => {
                             </li>
                         ))}
                     </ul>
-                </div>
+                </div> */}
                 <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>
                       <Header text={'المعلومات'}/>
                     <ul className={'flex flex-col space-y-2'}>
@@ -66,7 +66,7 @@ export const Footer = () => {
                         ))}
                     </ul>
                 </div>
-                <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>
+                <div className={'flex flex-col pb-8 space-y-3 text-right lg:text-right md:px-4'}>
                      <Header text={'الشركة'}/>
                     <ul className={'flex flex-col space-y-2'}>
                         {mockCompany.map((item) => (
@@ -80,7 +80,10 @@ export const Footer = () => {
                 </div>
                 <Socialicons />
             </div>
+            <div className={'   p-2 '}>
+    </div>
             <div className={' bg-[#000]  justify-center p-2 text-[#ccc] text-[16px]   items-center'}>
+           
         <div >
         © {year} sharayh.com 
     </div>

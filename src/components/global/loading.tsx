@@ -1,9 +1,34 @@
 
 import React from 'react'
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 const Loading = () => {
   return (
-    <div role="status">
+    <>
+    <div className="flex w-full flex-col gap-2 py-2 md:py-2">
+      <section className="container flex flex-col items-center">
+        <div className="mx-auto flex w-full flex-col items-center gap-2">
+          <Skeleton className="mb-2 h-4 w-1/12" />
+          <Skeleton className="h-2 w-2/6" />
+          <Skeleton className="mb-3 mt-2 h-2 w-1/5" />
+        </div>
+
+        {/* <div className="mx-auto grid w-full max-w-screen-lg gap-5 bg-inherit py-5 md:grid-cols-3 lg:grid-cols-3">
+          <Skeleton className="h-[520px] w-full" />
+          <Skeleton className="h-[520px] w-full" />
+          <Skeleton className="h-[520px] w-full" />
+        </div>
+
+        <div className="mt-3 flex w-full flex-col items-center gap-2">
+          <Skeleton className="h-4 w-2/6" />
+          <Skeleton className="h-4 w-1/6" />
+        </div> */}
+      </section>
+
+      <hr className="container" />
+    </div>
+    {/* <div role="status">
       <svg
         aria-hidden="true"
         className="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-primary-foreground/30 fill-primary-foreground "
@@ -20,7 +45,8 @@ const Loading = () => {
           className="fill-primary"
         />
       </svg>
-    </div>
+    </div> */}
+    </>
   )
 }
 
