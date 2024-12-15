@@ -2,7 +2,7 @@
 
 import prismadb from "@/utils/prismadb";
 import { getCurrentUser } from "@/utils/auth"; 
-import PricingSection from "@/components/Pricing/PricingSection";
+import PricingSection from "@/components/pricing/PricingSection";
 import { Footer } from "@/components/gadawel/footer";
 import { PricingFaqs } from "@/components/gadawel/pricingfags";
 
