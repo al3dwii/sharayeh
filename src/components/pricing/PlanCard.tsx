@@ -3,7 +3,7 @@
 "use client";
 
 import { FC } from "react";
-import Button from "@/components/UI/Button2";
+import Button from "@/components/ui/Button2";
 
 interface Plan {
   id: string;
