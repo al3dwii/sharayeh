@@ -7,8 +7,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import Button from "@/components/UI/Button2";
-import * as Icons from "@/components/UI/Icons";
+import Button from "@/components/ui/Button2";
+import * as Icons from "@/components/ui/Icons";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import axios from "axios";
