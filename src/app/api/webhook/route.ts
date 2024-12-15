@@ -8,12 +8,7 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client'; // Import Prisma types
 
-// Disable Next.js's default body parsing to access raw request body
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
 
 // Define supported event types for better control
 const supportedEvents = new Set([
@@ -264,6 +259,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     },
   });
 }
+
+
+
 
 // // app/api/webhook/route.ts
 

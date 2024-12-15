@@ -1,53 +1,112 @@
-// Import Prisma client
-import  prismadb from "@/utils/prismadb";
-import { currentUser } from "@clerk/nextjs";
-import { PricingCards } from "@/components/gadawel/pricing-cards";
-// import { PricingFaq } from "@/components/gadawel/pricing-faq";
+// /src/app/pricing/page.tsx
+
+import prismadb from "@/utils/prismadb";
+import { getCurrentUser } from "@/utils/auth"; 
+import PricingSection from "@/components/Pricing/PricingSection";
 import { Footer } from "@/components/gadawel/footer";
-// import Navigation from '@/components/site/navigation';
 import { PricingFaqs } from "@/components/gadawel/pricingfags";
-import  SubscriptionPlans  from "@/components/SubscriptionPlans";
 
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Pricing",
+  description: "Choose the plan that fits your needs.",
 };
 
 export default async function PricingPage() {
-  const user = await currentUser();
-  let isPro = false;
+  try {
+    const user = await getCurrentUser(); 
+    let isPro = false;
 
-  if (user) {
-    // Fetch the subscription plan using Prisma
-    const subscriptionPlan = await prismadb.userSubscription.findUnique({
-      where: { userId: user.id },
-      select: {
-        stripeSubscriptionId: true,
-        stripePriceId: true,
-        stripeCurrentPeriodEnd: true,
-      },
-    });
+    if (user) {
+      const subscriptionPlan = await prismadb.userSubscription.findUnique({
+        where: { userId: user.id },
+        select: {
+          stripeSubscriptionId: true,
+          stripePriceId: true,
+          stripeCurrentPeriodEnd: true,
+        },
+      });
 
-    // Set isPro to true if there is an active subscription
-    isPro = !!subscriptionPlan?.stripeSubscriptionId;
-  }
+      isPro = !!subscriptionPlan?.stripeSubscriptionId;
+    }
 
-  return (
-    <>
-      <div className="flex w-full flex-col gap-16 py-8 md:py-8">
-        <PricingCards userId={user?.id ?? null} isPro={isPro} />
-        <hr className="container" />
-        
-        <SubscriptionPlans /> 
-
-        <PricingFaqs /> 
-
-        {/* <PricingFaq /> */}
+    return (
+      <>
+        <main className="flex w-full flex-col gap-16 py-8 md:py-12">
+          <PricingSection isPro={isPro} />
+          <hr className="container my-8" />
+          <PricingFaqs />
+        </main>
+        <Footer />
+      </>
+    );
+  } catch (error) {
+    console.error("Error loading pricing page:", error);
+    return (
+      <div className="container mx-auto py-20 text-center">
+        <h1 className="text-2xl font-bold">Something went wrong</h1>
+        <p className="mt-4">Please try again later.</p>
       </div>
-      <Footer />
-    </>
-  );
+    );
+  }
 }
+
+
+
+// // /Users/omair/shraih/src/app/(pages)/pricing/page.tsx
+// // Import Prisma client
+// import  prismadb from "@/utils/prismadb";
+// import { currentUser } from "@clerk/nextjs";
+// import { PricingCards } from "@/components/gadawel/pricing-cards";
+// // import { PricingFaq } from "@/components/gadawel/pricing-faq";
+// import { Footer } from "@/components/gadawel/footer";
+// // import Navigation from '@/components/site/navigation';
+// import { PricingFaqs } from "@/components/gadawel/pricingfags";
+// import  SubscriptionPlans  from "@/components/SubscriptionPlans";
+
+
+// export const metadata = {
+//   title: "Pricing",
+// };
+
+// export default async function PricingPage() {
+//   const user = await currentUser();
+//   let isPro = false;
+
+//   if (user) {
+//     // Fetch the subscription plan using Prisma
+//     const subscriptionPlan = await prismadb.userSubscription.findUnique({
+//       where: { userId: user.id },
+//       select: {
+//         stripeSubscriptionId: true,
+//         stripePriceId: true,
+//         stripeCurrentPeriodEnd: true,
+//       },
+//     });
+
+//     // Set isPro to true if there is an active subscription
+//     isPro = !!subscriptionPlan?.stripeSubscriptionId;
+//   }
+
+//   return (
+//     <>
+//       <div className="flex w-full flex-col gap-16 py-8 md:py-8">
+//         <PricingCards userId={user?.id ?? null} isPro={isPro} />
+//         <hr className="container" />
+        
+//         <SubscriptionPlans /> 
+
+//         <PricingFaqs /> 
+
+//         {/* <PricingFaq /> */}
+//       </div>
+//       <Footer />
+//     </>
+//   );
+// }
+
+
 
 
 // // apps/nextjs/src/app/[lang]/(marketing)/pricing/page.tsx

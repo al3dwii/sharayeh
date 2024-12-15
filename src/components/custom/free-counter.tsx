@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useStore } from '@/store/useStore'; // Import the global store
 
-import Loading from '@/components/global/loading'
+import Skel from '@/components/global/Skeleton'
 
 
 export const FreeCounter = ({
@@ -80,7 +80,7 @@ export const FreeCounter = ({
       <div className="px-3  ">
         <Card className="bg-blue-200  border-0">
           <CardContent className="py-6">
-          <Loading></Loading>
+          <Skel></Skel>
 
           </CardContent>
         </Card>
