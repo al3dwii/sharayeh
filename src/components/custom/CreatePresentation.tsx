@@ -468,7 +468,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#D4EDDA', // Success green background
               color: '#155724', // Success text color
@@ -493,7 +493,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -518,7 +518,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#FFF3CD', // Warning yellow background
               color: '#856404', // Warning text color
@@ -543,7 +543,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#FFF3CD', // Warning yellow background
               color: '#856404', // Warning text color
@@ -568,7 +568,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -593,7 +593,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -618,7 +618,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -643,7 +643,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -668,7 +668,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#F8D7DA', // Error red background
               color: '#721C24', // Error text color
@@ -693,7 +693,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#FFF3CD', // Warning yellow background
               color: '#856404', // Warning text color
@@ -718,7 +718,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#FFF3CD', // Warning yellow background
               color: '#856404', // Warning text color
@@ -743,7 +743,7 @@ const CreatePresentation: React.FC = () => {
           </div>,
           {
             position: 'top-center',
-            duration: 30000,
+            duration: 20000,
             style: {
               backgroundColor: '#FFF3CD', // Warning yellow background
               color: '#856404', // Warning text color

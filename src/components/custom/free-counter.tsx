@@ -71,9 +71,6 @@ export const FreeCounter = ({
     return null;
   }
 
-  // if (isPro) {
-  //   return null;
-  // }
 
   if (isLoading) {
     return (
@@ -121,12 +118,7 @@ export const FreeCounter = ({
             />
           </div>
 
-          {/* <div className="text-center text-sm text-black mb-4 space-y-2">
-            <p>
-              Used Credits: {usedCredits} / Total Credits: {credits + usedCredits}
-            </p>
-            <Progress className="h-3" value={(usedCredits / (credits + usedCredits)) * 100} />
-          </div> */}
+      
           {!isPro && (
             <div className="flex justify-center">
             <Button onClick={proModal.onOpen} className="w-40  bg-blue-500">

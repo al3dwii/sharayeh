@@ -1,48 +1,77 @@
-// // src/contexts/CreditContext.tsx
+// src/contexts/CreditContext.tsx
 
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import axios from 'axios';
 import { useUser, useAuth } from '@clerk/nextjs';
+import { pricingPlans, Plan } from '@/config/planConfig'; // Import plan config
 
 interface CreditContextType {
   credits: number | null;
+  usedCredits: number | null;
+  planId: string | null;
   refreshCredits: () => Promise<void>;
 }
 
 const CreditContext = createContext<CreditContextType | undefined>(undefined);
 
 export const CreditProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [credits, setCredits] = useState<number | null>(null);
+  const [usedCredits, setUsedCredits] = useState<number | null>(null);
+  const [planId, setPlanId] = useState<string | null>(null);
 
-  const fetchCredits = async () => {
+  // Ref to track if fetchUserData has been called
+  const hasFetched = useRef(false);
+
+  const fetchUserData = async () => {
     if (user) {
       try {
         const token = await getToken();
         const response = await axios.get('/api/user-data', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCredits(response.data.credits);
-        console.log('🔄 Credits fetched:', response.data);
-      } catch (error) {
-        console.error('Error fetching credits:', error);
+        const { credits, usedCredits, planId } = response.data;
+        setCredits(credits);
+        setUsedCredits(usedCredits);
+        setPlanId(planId);
+        console.log('🔄 User data fetched:', response.data);
+      } catch (error: any) {
+        console.error('Error fetching user data:', error);
         setCredits(null);
+        setUsedCredits(null);
+        setPlanId(null);
       }
     } else {
       setCredits(null);
+      setUsedCredits(null);
+      setPlanId(null);
     }
   };
 
   useEffect(() => {
-    fetchCredits();
-    // Optionally, set up polling or subscriptions for real-time updates here
+    if (isLoaded && user && !hasFetched.current) {
+      // Set the ref to true to prevent future fetches
+      hasFetched.current = true;
+      fetchUserData();
+    }
+  }, [user, isLoaded]);
+
+  // Optional: Listen for user changes and reset the fetch guard if user logs out/in
+  useEffect(() => {
+    if (!user) {
+      hasFetched.current = false;
+      // Optionally reset credits, usedCredits, and planId when user logs out
+      setCredits(null);
+      setUsedCredits(null);
+      setPlanId(null);
+    }
   }, [user]);
 
   return (
-    <CreditContext.Provider value={{ credits, refreshCredits: fetchCredits }}>
+    <CreditContext.Provider value={{ credits, usedCredits, planId, refreshCredits: fetchUserData }}>
       {children}
     </CreditContext.Provider>
   );
@@ -55,6 +84,139 @@ export const useCredits = (): CreditContextType => {
   }
   return context;
 };
+
+
+
+// // src/contexts/CreditContext.tsx
+
+// 'use client';
+
+// import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// import axios from 'axios';
+// import { useUser, useAuth } from '@clerk/nextjs';
+// import { pricingPlans, Plan } from '@/config/planConfig'; // Import plan config
+
+// interface CreditContextType {
+//   credits: number | null;
+//   usedCredits: number | null;
+//   planId: string | null;
+//   refreshCredits: () => Promise<void>;
+// }
+
+// const CreditContext = createContext<CreditContextType | undefined>(undefined);
+
+// export const CreditProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+//   const { user, isLoaded } = useUser();
+//   const { getToken } = useAuth();
+//   const [credits, setCredits] = useState<number | null>(null);
+//   const [usedCredits, setUsedCredits] = useState<number | null>(null);
+//   const [planId, setPlanId] = useState<string | null>(null);
+
+//   const fetchUserData = async () => {
+//     if (user) {
+//       try {
+//         const token = await getToken();
+//         const response = await axios.get('/api/user-data', {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         const { credits, usedCredits, planId } = response.data;
+//         setCredits(credits);
+//         setUsedCredits(usedCredits);
+//         setPlanId(planId);
+//         console.log('🔄 User data fetched:', response.data);
+//       } catch (error: any) {
+//         console.error('Error fetching user data:', error);
+//         setCredits(null);
+//         setUsedCredits(null);
+//         setPlanId(null);
+//       }
+//     } else {
+//       setCredits(null);
+//       setUsedCredits(null);
+//       setPlanId(null);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isLoaded) {
+//       fetchUserData();
+//     }
+//   }, [user, isLoaded]);
+
+//   return (
+//     <CreditContext.Provider value={{ credits, usedCredits, planId, refreshCredits: fetchUserData }}>
+//       {children}
+//     </CreditContext.Provider>
+//   );
+// };
+
+// export const useCredits = (): CreditContextType => {
+//   const context = useContext(CreditContext);
+//   if (!context) {
+//     throw new Error('useCredits must be used within a CreditProvider');
+//   }
+//   return context;
+// };
+
+
+
+// // // src/contexts/CreditContext.tsx
+
+// 'use client'
+
+// import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// import axios from 'axios';
+// import { useUser, useAuth } from '@clerk/nextjs';
+
+// interface CreditContextType {
+//   credits: number | null;
+//   refreshCredits: () => Promise<void>;
+// }
+
+// const CreditContext = createContext<CreditContextType | undefined>(undefined);
+
+// export const CreditProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+//   const { user } = useUser();
+//   const { getToken } = useAuth();
+//   const [credits, setCredits] = useState<number | null>(null);
+
+//   const fetchCredits = async () => {
+//     if (user) {
+//       try {
+//         const token = await getToken();
+//         const response = await axios.get('/api/user-data', {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         setCredits(response.data.credits);
+//         console.log('🔄 Credits fetched:', response.data);
+//       } catch (error) {
+//         console.error('Error fetching credits:', error);
+//         setCredits(null);
+//       }
+//     } else {
+//       setCredits(null);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchCredits();
+//     // Optionally, set up polling or subscriptions for real-time updates here
+//   }, [user]);
+
+//   return (
+//     <CreditContext.Provider value={{ credits, refreshCredits: fetchCredits }}>
+//       {children}
+//     </CreditContext.Provider>
+//   );
+// };
+
+// export const useCredits = (): CreditContextType => {
+//   const context = useContext(CreditContext);
+//   if (!context) {
+//     throw new Error('useCredits must be used within a CreditProvider');
+//   }
+//   return context;
+// };
 
 
 // // src/contexts/CreditContext.tsx
