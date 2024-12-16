@@ -14,23 +14,48 @@ export async function POST(req: Request) {
     return new Response('Error: Missing signing secret', { status: 500 });
   }
 
+  // Log the presence and length of the secret for debugging
+  console.log('SIGNING_SECRET is set:', SIGNING_SECRET ? 'Yes' : 'No');
+  console.log('SIGNING_SECRET length:', SIGNING_SECRET.length);
+
   const wh = new Webhook(SIGNING_SECRET);
 
   const headerPayload = headers();
-  const svix_id = headerPayload.get('svix-id');
-  const svix_timestamp = headerPayload.get('svix-timestamp');
-  const svix_signature = headerPayload.get('svix-signature');
+
+  // Option 1: Using Record<string, string>
+  const allHeaders: Record<string, string> = {};
+
+  // Option 2: Using Index Signature
+  // const allHeaders: { [key: string]: string } = {};
+
+  // Populate allHeaders
+  for (const [key, value] of headerPayload.entries()) {
+    allHeaders[key] = value;
+  }
+
+  console.log('All Headers:', allHeaders);
+
+  const svix_id = allHeaders['svix-id'];
+  const svix_timestamp = allHeaders['svix-timestamp'];
+  const svix_signature = allHeaders['svix-signature'];
+
+  // Log specific svix headers
+  console.log('svix-id:', svix_id);
+  console.log('svix-timestamp:', svix_timestamp);
+  console.log('svix-signature:', svix_signature);
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
     console.error('Missing Svix headers');
     return new Response('Error: Missing Svix headers', { status: 400 });
   }
 
-  let rawBody;
+  let rawBody: string;
   try {
     // Read the raw body as text
     rawBody = await req.text();
-    console.log('Raw body:', rawBody);
+    console.log('Raw body length:', rawBody.length);
+    // Log a snippet to verify content without exposing sensitive data
+    console.log('Raw body snippet:', rawBody.substring(0, 200));
   } catch (err) {
     console.error('Error reading raw body:', err);
     return new Response('Error: Invalid body', { status: 400 });
@@ -51,7 +76,7 @@ export async function POST(req: Request) {
     return new Response('Error: Verification failed', { status: 400 });
   }
 
-  let payload;
+  let payload: any;
   try {
     // Parse the JSON payload after verification
     payload = JSON.parse(rawBody);
@@ -62,7 +87,7 @@ export async function POST(req: Request) {
   }
 
   // Handle specific event types
-  if (evt.type === 'user.created' || evt.type === 'user.updated') { // Optionally handle more event types
+  if (evt.type === 'user.created' || evt.type === 'user.updated') {
     console.log(`Handling ${evt.type} event`);
     const user = evt.data;
 
