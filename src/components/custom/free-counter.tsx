@@ -1,17 +1,18 @@
 'use client';
+
 import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useUser } from '@clerk/nextjs'; // Correct client-side hook
+import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
+import { useRouter } from 'next/navigation'; // <-- Import here
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useProModal } from "@/hooks/use-pro-modal";
-import { useStore } from '@/store/useStore'; // Import the global store
+import { useStore } from '@/store/useStore';
 
 import Skel from '@/components/global/Skeleton'
-
 
 export const FreeCounter = ({
   isPro = true,
@@ -22,10 +23,10 @@ export const FreeCounter = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { user, isLoaded } = useUser(); // Access user data and loading state
+  const { user, isLoaded } = useUser();
   const proModal = useProModal();
+  const router = useRouter(); // <-- Use router
 
-  // Subscribe to the global store
   const credits = useStore((state) => state.credits);
   const usedCredits = useStore((state) => state.usedCredits);
   const setCredits = useStore((state) => state.setCredits);
@@ -33,11 +34,15 @@ export const FreeCounter = ({
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // If you want to trigger a refresh right after the component mounts:
+    // This will cause any server components data to be refetched
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     const fetchUserCredits = async () => {
-      if (!isLoaded) return; // Wait until user data is loaded
+      if (!isLoaded) return;
 
       if (!user) {
         setError("User not authenticated.");
@@ -46,7 +51,6 @@ export const FreeCounter = ({
       }
 
       try {
-        // Fetch user credits
         const response = await axios.get(`/api/user-data`);
         const { credits, usedCredits } = response.data;
         setCredits(credits);
@@ -62,7 +66,6 @@ export const FreeCounter = ({
     fetchUserCredits();
   }, [user, isLoaded, setCredits, setUsedCredits]);
 
-  // Debugging: Log user data
   useEffect(() => {
     console.log("User data in FreeCounter:", user);
   }, [user]);
@@ -71,14 +74,12 @@ export const FreeCounter = ({
     return null;
   }
 
-
   if (isLoading) {
     return (
-      <div className="px-3  ">
-        <Card className="bg-blue-200  border-0">
+      <div className="px-3">
+        <Card className="bg-blue-200 border-0">
           <CardContent className="py-6">
-          <Skel></Skel>
-
+            <Skel />
           </CardContent>
         </Card>
       </div>
@@ -87,7 +88,7 @@ export const FreeCounter = ({
 
   if (error) {
     return (
-      <div className="px-3 ">
+      <div className="px-3">
         <Card className="bg-red-200 border-0">
           <CardContent className="py-6">
             <p className="text-center text-sm text-red-800">{error}</p>
@@ -97,42 +98,173 @@ export const FreeCounter = ({
     );
   }
 
+  const totalCredits = (credits ?? 0) + (usedCredits ?? 0);
+  const progressValue = totalCredits > 0
+    ? ((usedCredits ?? 0) / totalCredits) * 100
+    : 0;
+
   return (
-    
-<div className=" m-auto px-3 max-w-[800px] ">
-<Card className="bg-blue-100 border-0">
-        <CardContent className="py-6 ">
+    <div className="m-auto px-3 max-w-[800px]">
+      <Card className="bg-blue-100 border-0">
+        <CardContent className="py-6">
           <div className="text-center text-sm text-black mb-4 space-y-2">
             <p>
-              {/* Used Credits: {usedCredits ?? 0} / Total Credits: {(credits ?? 0) + (usedCredits ?? 0)} */}
-              النقاط المستخدمة: {usedCredits ?? 0} / إجمالي النقاط: {(credits ?? 0) + (usedCredits ?? 0)}
-
+              النقاط المستخدمة: {usedCredits ?? 0} / إجمالي النقاط: {totalCredits}
             </p>
-            <Progress
-              className="h-3"
-              value={
-                credits !== null && usedCredits !== null
-                  ? (usedCredits / (credits + usedCredits)) * 100
-                  : 0 // Default to 0 if either value is null
-              }
-            />
+            <Progress className="h-3" value={progressValue} />
           </div>
 
-      
           {!isPro && (
             <div className="flex justify-center">
-            <Button onClick={proModal.onOpen} className="w-40  bg-blue-500">
-              ترقية الباقة
-              <Zap className="w-4 h-4 mr-4 fill-white" />
-            </Button>
+              <Button onClick={proModal.onOpen} className="w-40 bg-blue-500">
+                ترقية الباقة
+                <Zap className="w-4 h-4 mr-4 fill-white" />
+              </Button>
             </div>
           )}
-          
         </CardContent>
       </Card>
     </div>
   );
 };
+
+
+
+// 'use client';
+// import { Zap } from "lucide-react";
+// import { useEffect, useState } from "react";
+// import { useUser } from '@clerk/nextjs'; // Correct client-side hook
+// import axios from 'axios';
+
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { Progress } from "@/components/ui/progress";
+// import { useProModal } from "@/hooks/use-pro-modal";
+// import { useStore } from '@/store/useStore'; // Import the global store
+
+// import Skel from '@/components/global/Skeleton'
+
+
+// export const FreeCounter = ({
+//   isPro = true,
+// }: {
+//   isPro: boolean,
+// }) => {
+//   const [mounted, setMounted] = useState(false);
+//   const [isLoading, setIsLoading] = useState<boolean>(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   const { user, isLoaded } = useUser(); // Access user data and loading state
+//   const proModal = useProModal();
+
+//   // Subscribe to the global store
+//   const credits = useStore((state) => state.credits);
+//   const usedCredits = useStore((state) => state.usedCredits);
+//   const setCredits = useStore((state) => state.setCredits);
+//   const setUsedCredits = useStore((state) => state.setUsedCredits);
+
+//   useEffect(() => {
+//     setMounted(true);
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchUserCredits = async () => {
+//       if (!isLoaded) return; // Wait until user data is loaded
+
+//       if (!user) {
+//         setError("User not authenticated.");
+//         setIsLoading(false);
+//         return;
+//       }
+
+//       try {
+//         // Fetch user credits
+//         const response = await axios.get(`/api/user-data`);
+//         const { credits, usedCredits } = response.data;
+//         setCredits(credits);
+//         setUsedCredits(usedCredits);
+//         setIsLoading(false);
+//       } catch (err: any) {
+//         console.error('Error fetching user credits:', err);
+//         setError("Failed to fetch credit data.");
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchUserCredits();
+//   }, [user, isLoaded, setCredits, setUsedCredits]);
+
+//   // Debugging: Log user data
+//   useEffect(() => {
+//     console.log("User data in FreeCounter:", user);
+//   }, [user]);
+
+//   if (!mounted) {
+//     return null;
+//   }
+
+
+//   if (isLoading) {
+//     return (
+//       <div className="px-3  ">
+//         <Card className="bg-blue-200  border-0">
+//           <CardContent className="py-6">
+//           <Skel></Skel>
+
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="px-3 ">
+//         <Card className="bg-red-200 border-0">
+//           <CardContent className="py-6">
+//             <p className="text-center text-sm text-red-800">{error}</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+
+//   return (
+    
+// <div className=" m-auto px-3 max-w-[800px] ">
+// <Card className="bg-blue-100 border-0">
+//         <CardContent className="py-6 ">
+//           <div className="text-center text-sm text-black mb-4 space-y-2">
+//             <p>
+//               {/* Used Credits: {usedCredits ?? 0} / Total Credits: {(credits ?? 0) + (usedCredits ?? 0)} */}
+//               النقاط المستخدمة: {usedCredits ?? 0} / إجمالي النقاط: {(credits ?? 0) + (usedCredits ?? 0)}
+
+//             </p>
+//             <Progress
+//               className="h-3"
+//               value={
+//                 credits !== null && usedCredits !== null
+//                   ? (usedCredits / (credits + usedCredits)) * 100
+//                   : 0 // Default to 0 if either value is null
+//               }
+//             />
+//           </div>
+
+      
+//           {!isPro && (
+//             <div className="flex justify-center">
+//             <Button onClick={proModal.onOpen} className="w-40  bg-blue-500">
+//               ترقية الباقة
+//               <Zap className="w-4 h-4 mr-4 fill-white" />
+//             </Button>
+//             </div>
+//           )}
+          
+//         </CardContent>
+//       </Card>
+//     </div>
+//   );
+// };
 
 
 // 'use client';

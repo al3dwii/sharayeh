@@ -817,6 +817,22 @@ const CreatePresentation: React.FC = () => {
     }
   }, [submissionStatus]);
 
+
+  const handleDownload = () => {
+    // Create a hidden anchor tag to trigger the download
+    const link = document.createElement("a");
+    link.href = downloadUrl; // File URL
+    link.download = ""; // Use the default filename from the URL
+    link.rel = "noopener noreferrer"; // Security
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Trigger a refresh after initiating the download
+    router.refresh();
+  };
+
+
   return (
     <>
       {/* Modals */}
@@ -862,16 +878,24 @@ const CreatePresentation: React.FC = () => {
                   </div>
                 )}
                 {downloadUrl ? (
-                  <div className="w-full flex justify-center mt-4">
-                    <a
-                      href={downloadUrl}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      تحميل الملف
-                    </a>
-                  </div>
+
+                  <button
+                  onClick={handleDownload}
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                  تحميل الملف
+                  </button>
+
+                  // <div className="w-full flex justify-center mt-4">
+                  //   <a
+                  //     href={downloadUrl}
+                  //     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  //     target="_blank"
+                  //     rel="noopener noreferrer"
+                  //   >
+                  //     تحميل الملف
+                  //   </a>
+                  // </div>
                 ) : (
                   <div className="text-gray-500 mt-4 text-center"></div>
                 )}
