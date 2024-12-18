@@ -167,23 +167,23 @@ const CreatePresentation: React.FC = () => {
       }
       console.log('🔑 JWT token obtained.');
 
-      // **Deduct one credit on the server with Authorization header**
-      console.log('🔄 Deducting one credit from user account.');
-      await axios.patch(
-        '/api/update-credits',
-        {
-          pointsUsed: 5,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log('✅ Credit deducted successfully.');
+      // // **Deduct one credit on the server with Authorization header**
+      // console.log('🔄 Deducting one credit from user account.');
+      // await axios.patch(
+      //   '/api/update-credits',
+      //   {
+      //     pointsUsed: 5,
+      //   },
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   }
+      // );
+      // console.log('✅ Credit deducted successfully.');
 
-      // Refresh credits after deduction
-      console.log('🔄 Refreshing user credits.');
-      await refreshCredits();
-      console.log('✅ User credits refreshed.');
+      // // Refresh credits after deduction
+      // console.log('🔄 Refreshing user credits.');
+      // await refreshCredits();
+      // console.log('✅ User credits refreshed.');
 
       // **Create a new File record with Authorization header**
       const fileName = documentFile ? documentFile.name : `Topic - ${topicValue}`;
@@ -209,7 +209,9 @@ const CreatePresentation: React.FC = () => {
 
       if (topicValue) {
         // Topic-specific webhook
-        webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
+        webhookUrl = 'https://hook.eu2.make.com/aux5228idss2mrwbou64reqzvh4rjccg';
+
+        // webhookUrl = 'https://hook.eu2.make.com/k5i7ogeqgl7jbgbd72xkbinx3x0ma3vq';
         data = {
           topic: topicValue,
           templateId: selectedTemplate.id,
@@ -345,8 +347,33 @@ const CreatePresentation: React.FC = () => {
           // Clear the interval and timeout
           stopPolling();
 
-          // Refresh credits to reflect any additions
-          await refreshCredits();
+          // Now that the file is ready, deduct credits here
+          try {
+            const token = await getToken();
+            if (!token) {
+              setSubmissionStatus('unauthorized');
+              return;
+            }
+
+            // Deduct credits now that the file is completed
+            await axios.patch(
+              '/api/update-credits',
+              { pointsUsed: 5 },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            console.log('🔄 Credits deducted after completion.');
+
+            // Refresh credits
+            await refreshCredits();
+
+            // Trigger a router refresh to update UserInfo component
+            router.refresh();
+
+          } catch (creditError) {
+            console.error('Error updating credits after completion:', creditError);
+          }
           console.log('🔄 Credits refreshed after completion.');
         } else if (res.data.status === 'FAILED') {
           setIsLoading(false);
@@ -878,24 +905,16 @@ const CreatePresentation: React.FC = () => {
                   </div>
                 )}
                 {downloadUrl ? (
-
+<div className="w-full flex justify-center mt-4">
                   <button
                   onClick={handleDownload}
                   className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                   >
                   تحميل الملف
                   </button>
+                   </div>
 
-                  // <div className="w-full flex justify-center mt-4">
-                  //   <a
-                  //     href={downloadUrl}
-                  //     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                  //     target="_blank"
-                  //     rel="noopener noreferrer"
-                  //   >
-                  //     تحميل الملف
-                  //   </a>
-                  // </div>
+                 
                 ) : (
                   <div className="text-gray-500 mt-4 text-center"></div>
                 )}

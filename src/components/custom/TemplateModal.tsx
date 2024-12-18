@@ -73,7 +73,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
             <button
               key={value}
               onClick={() => setSelectedCategory(value)}
-              className={`mx-2 px-4 py-2 rounded ${
+              className={`mx-2 px-2 py-2 rounded ${
                 selectedCategory === value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
               }`}
               aria-pressed={selectedCategory === value}
@@ -84,7 +84,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose, onSelect
           <div >
            <button
           onClick={onClose}
-          className="mr-8 w-full bg-black text-white p-2 rounded hover:bg-gray-600"
+          className="mr-4 w-full bg-black text-white p-2 rounded hover:bg-gray-600"
 
           aria-label="Close modal"
         >

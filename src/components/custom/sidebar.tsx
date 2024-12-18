@@ -7,7 +7,7 @@ import { Code, ImageIcon, LayoutDashboard, MessageSquare, Music, Settings, Video
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { FreeCounter } from "@/components/custom/free-counter";
+// import { UserInfo } from "@/components/custom/UserInfo";
 
 import { Tajawal } from 'next/font/google';
 const tajawal = Tajawal({ 
@@ -62,13 +62,7 @@ const routes = [
   
 ];
 
-export const Sidebar = ({
-  apiLimitCount = 0,
-  isPro = false
-}: {
-  apiLimitCount: number;
-  isPro: boolean;
-}) => {
+export const Sidebar = () => {
   const pathname = usePathname();
 
   return (
@@ -100,9 +94,9 @@ export const Sidebar = ({
           ))}
         </div>
       </div>
-      <FreeCounter 
+      {/* <UserInfo 
         isPro={isPro}
-      />
+      /> */}
       {/* <FreeCounter 
         apiLimitCount={apiLimitCount} 
         isPro={isPro}

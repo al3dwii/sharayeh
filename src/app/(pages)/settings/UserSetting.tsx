@@ -1,4 +1,5 @@
-'use client';
+
+'use client'
 
 import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,7 +15,7 @@ import { useStore } from '@/store/useStore';
 
 import Skel from '@/components/global/Skeleton'
 
-export const FreeCounter = ({
+export const UserSetting = ({
   isPro = true,
 }: {
   isPro: boolean,
@@ -127,6 +128,86 @@ export const FreeCounter = ({
     </div>
   );
 };
+
+// // No 'use client' here. This is a pure server component.
+
+// // Import server-only utilities
+// import { auth } from '@clerk/nextjs';
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Progress } from "@/components/ui/progress";
+// import { Zap } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+
+// interface UserInfoProps {
+//   isPro?: boolean;
+// }
+
+// export const UserInfo = async ({ isPro = true }: UserInfoProps) => {
+//   // Await the auth call since it’s async
+//   const { userId } = auth();
+
+//   if (!userId) {
+//     return (
+//       <div className="px-3">
+//         <Card className="bg-red-200 border-0">
+//           <CardContent className="py-6">
+//             <p className="text-center text-sm text-red-800">User not authenticated.</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+
+//   // Fetch user data from an API route or directly from a database
+//   // Note: fetch() in a server component is run on the server at request time.
+//   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user-data`, {
+//     // Ensure no caching if you want the freshest data
+//     cache: 'no-store'
+//   });
+
+//   if (!res.ok) {
+//     return (
+//       <div className="px-3">
+//         <Card className="bg-red-200 border-0">
+//           <CardContent className="py-6">
+//             <p className="text-center text-sm text-red-800">Failed to fetch credit data.</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+
+//   const { credits, usedCredits } = await res.json();
+  
+//   const totalCredits = (credits ?? 0) + (usedCredits ?? 0);
+//   const progressValue = totalCredits > 0 ? ((usedCredits ?? 0) / totalCredits) * 100 : 0;
+
+//   return (
+//     <div className="m-auto px-3 max-w-[800px]">
+//       <Card className="bg-blue-100 border-0">
+//         <CardContent className="py-6">
+//           <div className="text-center text-sm text-black mb-4 space-y-2">
+//             <p>
+//               النقاط المستخدمة: {usedCredits ?? 0} / إجمالي النقاط: {totalCredits}
+//             </p>
+//             <Progress className="h-3" value={progressValue} />
+//           </div>
+
+//           {!isPro && (
+//             <div className="flex justify-center">
+//               {/* This button can open a modal, but modal logic should be in a client component */}
+//               <Button className="w-40 bg-blue-500">
+//                 ترقية الباقة
+//                 <Zap className="w-4 h-4 mr-4 fill-white" />
+//               </Button>
+//             </div>
+//           )}
+//         </CardContent>
+//       </Card>
+//     </div>
+//   );
+// };
+
 
 
 
