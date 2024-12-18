@@ -43,7 +43,7 @@ const DashboardPage = async () => {
   }));
 
   return (
-    <div className="md:mr-60 p-2 mt-2 grid grid-rows-[auto,1fr,auto] min-h-screen">
+    <div className="md:mr-60 p-2 mt-2 min-h-screen">
 
     {/* <div className="md:mr-60 p-2 mt-2"> */}
       <DashboardShell>
