@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,22 +8,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-model User {
-  id                 String             @id @unique @default(cuid())
-  email              String             @unique
-  name               String?
-  credits            Int                @default(10) // Default credits for free plan
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  subscription       Subscription?
-  userCredits        UserCredits?
-  userSubscription   UserSubscription?
-  files              File[]
-  creditTransactions CreditTransaction[]
-
-  @@map("users")
-}
-
 model UserCredits {
   id          Int      @id @default(autoincrement())
   userId      String   @unique
@@ -34,22 +16,18 @@ model UserCredits {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
-
   @@map("user_credits")
 }
 
 model UserSubscription {
-  id                     String             @id @unique @default(cuid())
-  userId                 String             @unique
-  stripeCustomerId       String?            @unique @map("stripe_customer_id")
-  stripeSubscriptionId   String?            @unique @map("stripe_subscription_id")
-  stripePriceId          String?            @map("stripe_price_id")
-  stripeCurrentPeriodEnd DateTime?          @map("stripe_current_period_end")
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  id                     String    @id @unique @default(cuid())
+  userId                 String    @unique
+  stripeCustomerId       String?   @unique @map("stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map("stripe_subscription_id")
+  stripePriceId          String?   @map("stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   @@map("user_subscription")
 }
@@ -61,8 +39,6 @@ model CreditTransaction {
   amount      Int
   description String
   timestamp   DateTime         @default(now())
-
-  user User @relation(fields: [userId], references: [id])
 
   @@map("credit_transactions")
 }
@@ -87,8 +63,6 @@ model File {
   results          Json?
 
   fileGenerations  FileGeneration[]
-
-  user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@map("files") 
@@ -131,8 +105,7 @@ model SubscriptionPlan {
   canUploadPDF           Boolean
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
-  
-  // Relation to subscriptions
+
   subscriptions          Subscription[]     @relation("PlanSubscriptions")
 
   @@map("subscription_plans")
@@ -148,7 +121,6 @@ model Subscription {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
-  user  User             @relation(fields: [userId], references: [id])
   plan  SubscriptionPlan @relation("PlanSubscriptions", fields: [planId], references: [id])
 
   @@map("subscriptions")

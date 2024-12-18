@@ -2,10 +2,12 @@
 import { ReactNode } from 'react';
 import { auth } from '@clerk/nextjs';
 import { Sidebar } from '@/components/custom/sidebar';
-import MobileNav from '@/components/custom/mobilenav';
-import { checkSubscription } from '@/utils/subscription';
-import { getApiLimitCount } from '@/utils/api-limit';
+// import MobileNav from '@/components/custom/mobilenav';
+// import { checkSubscription } from '@/utils/subscription';
+// import { getApiLimitCount } from '@/utils/api-limit';
 import { redirect } from 'next/navigation';
+import Link from 'next/link'
+
 
 
 const DashboardLayout = async ({ children }: { children: ReactNode }) => {
@@ -18,10 +20,10 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
     // throw new Error('User not authenticated');
   }
 
-  const [isPro, apiLimitCount] = await Promise.all([
-    checkSubscription(userId),
-    getApiLimitCount(userId),
-  ]);
+  // const [isPro, apiLimitCount] = await Promise.all([
+  //   checkSubscription(userId),
+  //   getApiLimitCount(userId),
+  // ]);
 
   return (
     <>
@@ -30,7 +32,19 @@ const DashboardLayout = async ({ children }: { children: ReactNode }) => {
           <Sidebar  />
         </div>
         <main>
-          <MobileNav />
+       
+          {/* <div className="   m-2 p-4 bg-gray-200 items-center gap-4">
+        <nav className="">
+            <ul className="flex text-black items-center gap-4">
+              <li>
+                <Link href="/pricing">الاشتراك</Link>
+              </li>
+              <li>
+                <Link href="/blog">المدونة</Link>
+              </li>
+            </ul>
+          </nav>
+          </div> */}
           {children}
         </main>
       </div>
