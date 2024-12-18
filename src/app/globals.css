@@ -494,4 +494,10 @@ footer {
   z-index: 50;
 }
 
+fieldset:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 

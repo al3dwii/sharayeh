@@ -129,6 +129,7 @@ export const UserInfo = ({
   );
 };
 
+
 // // No 'use client' here. This is a pure server component.
 
 // // Import server-only utilities
