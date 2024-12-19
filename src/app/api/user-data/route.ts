@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       const createdUserCredits = await db.userCredits.create({
         data: {
           userId,
-          credits: 10, // Default credits for Free plan
+          credits: 100, // Default credits for Free plan
           usedCredits: 0, // Default usedCredits
         },
         select: {

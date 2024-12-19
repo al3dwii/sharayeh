@@ -39,7 +39,7 @@ export async function PATCH(req: NextRequest) {
       console.log('⚠️ Credits are null. Initializing to default value.');
       await db.userCredits.update({
         where: { userId },
-        data: { credits: 10 }, // Set to default value
+        data: { credits: 100 }, // Set to default value
       });
       // Re-fetch userCredits after update
       const updatedUserCredits = await db.userCredits.findUnique({
