@@ -90,9 +90,7 @@ const DashboardPage = async () => {
         </div>
       </DashboardShell>
       <Footer />
-      {errorOccurred && (
-        <ClientToast message="حدث عطل ما جرب لاحقاً او تواصل معنا" />
-      )}
+      
     </div>
   );
 };
