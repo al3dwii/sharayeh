@@ -8,18 +8,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-enum TransactionType {
-  DEDUCTION
-  ADDITION
-  ADJUSTMENT
-}
-
-enum SubscriptionTier {
-  FREE
-  STANDARD
-  PREMIUM
-}
-
 model UserCredits {
   id          Int      @id @default(autoincrement())
   userId      String   @unique
@@ -29,40 +17,6 @@ model UserCredits {
   updatedAt   DateTime @updatedAt
 
   @@map("user_credits")
-}
-
-model SubscriptionPlan {
-  id                     String             @id @unique @default(cuid())
-  name                   String             @unique
-  price                  Float
-  stripePriceId          String             @unique
-  credits                Int
-  presentations          Int
-  slidesPerPresentation  Int
-  canAddTransition       Boolean
-  canUploadPDF           Boolean
-  tier                   SubscriptionTier   // New field
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
-
-  subscriptions          Subscription[]     @relation("PlanSubscriptions")
-
-  @@map("subscription_plans")
-}
-
-model Subscription {
-  id                   String             @id @unique @default(cuid())
-  userId               String             @unique
-  planId               String
-  stripeSubscriptionId String             @unique
-  startsAt             DateTime           @default(now())
-  endsAt               DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-
-  plan  SubscriptionPlan @relation("PlanSubscriptions", fields: [planId], references: [id])
-
-  @@map("subscriptions")
 }
 
 model UserSubscription {
@@ -78,7 +32,6 @@ model UserSubscription {
   @@map("user_subscription")
 }
 
-
 model CreditTransaction {
   id          Int              @id @default(autoincrement())
   userId      String
@@ -88,6 +41,12 @@ model CreditTransaction {
   timestamp   DateTime         @default(now())
 
   @@map("credit_transactions")
+}
+
+enum TransactionType {
+  DEDUCTION
+  ADDITION
+  ADJUSTMENT
 }
 
 model File {
@@ -132,6 +91,39 @@ enum GenerationStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+model SubscriptionPlan {
+  id                     String             @id @unique @default(cuid())
+  name                   String             @unique
+  price                  Float
+  stripePriceId          String             @unique
+  credits                Int
+  presentations          Int
+  slidesPerPresentation  Int
+  canAddTransition       Boolean
+  canUploadPDF           Boolean
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  subscriptions          Subscription[]     @relation("PlanSubscriptions")
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                   String             @id @unique @default(cuid())
+  userId               String             @unique
+  planId               String
+  stripeSubscriptionId String             @unique
+  startsAt             DateTime           @default(now())
+  endsAt               DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  plan  SubscriptionPlan @relation("PlanSubscriptions", fields: [planId], references: [id])
+
+  @@map("subscriptions")
 }
 
 model StripeEvent {

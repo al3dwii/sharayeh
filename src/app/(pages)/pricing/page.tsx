@@ -1,3 +1,4 @@
+
 // src/app/pricing/page.tsx
 
 import prismadb from "@/utils/prismadb";

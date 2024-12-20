@@ -277,7 +277,7 @@ const CreatePresentation: React.FC = () => {
 
             await axios.patch(
               '/api/update-credits',
-              { pointsUsed: 25 },
+              { pointsUsed: 100 },
               {
                 headers: { Authorization: `Bearer ${token}` },
               }

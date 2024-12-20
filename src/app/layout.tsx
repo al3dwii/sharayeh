@@ -13,6 +13,7 @@ import { CrispProvider } from '@/components/custom/crisp-provider';
 import { ToasterProvider } from '@/components/toaster-provider';
 import { arSA } from '@clerk/localizations'
 import { CreditProvider } from '@/contexts/CreditContext';
+import { UserProvider } from "@/contexts/UserContext"; 
 
 
 const tajawal = Tajawal({
@@ -33,8 +34,11 @@ export default function RootLayout({
   return (
 
     <ClerkProvider localization={arSA}  appearance={{ baseTheme: dark }}>
-            <CrispProvider />
+          <UserProvider>
             <CreditProvider>
+
+            <CrispProvider />
+            
     <html
       dir="rtl" lang="ar"
       suppressHydrationWarning
@@ -58,6 +62,7 @@ export default function RootLayout({
       </body>
     </html>
     </CreditProvider>
+    </UserProvider>
 
     </ClerkProvider>
   )
