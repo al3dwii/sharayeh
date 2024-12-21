@@ -21,7 +21,7 @@ export const pricingPlans: Plan[] = [
     stripePriceId: "price_1QVtmXAlDgxzsK9aFXzqJmSy",
     title: "الخطة الأساسية",
     price: "0$",
-    frequency: "شهرياً",
+    frequency: "",
     features: [
       "رفع 10 مستندات شهرياً",
       "معالجة OCR الأساسية",
@@ -38,7 +38,7 @@ export const pricingPlans: Plan[] = [
     stripePriceId: "price_1QVtn7AlDgxzsK9aupXkenzq",
     title: "خطة المعيارية",
     price: "10$",
-    frequency: "شهرياً",
+    frequency: "3 أشهر",
     features: [
       "رفع 100 مستند شهرياً",
       "معالجة OCR متقدمة",
@@ -55,7 +55,7 @@ export const pricingPlans: Plan[] = [
     stripePriceId: "price_1QVtnTAlDgxzsK9aWNXCKGqT",
     title: "خطة المحترفين",
     price: "25$",
-    frequency: "شهرياً",
+    frequency: "6 أشهر",
     features: [
       "رفع مستندات غير محدود",
       "معالجة OCR المتقدمة",

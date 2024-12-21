@@ -57,10 +57,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({ currentPlanId }) => {
   return (
     <section className="container flex flex-col items-center text-center">
       <div className="mx-auto mb-10 flex w-full flex-col gap-5">
-        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <p className="font-tajawal text-4xl font-bold   text-black">
           الاشتراكات
         </p>
-        <h2 className="font-heading text-3xl leading-[1.1] md:text-5xl">
+        <h2 className="font-tajawal font-heading text-sm leading-[1.1] md:text-xl">
           اختر الباقة المناسبة
         </h2>
       </div>
@@ -86,6 +86,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ currentPlanId }) => {
           >
             admin@sharayeh.com
           </a>{" "}
+          <br />
           راسلنا لاي استفسار
           <br />
           <strong>جاهزون للرد والدعم</strong>
