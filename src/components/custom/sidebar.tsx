@@ -1,89 +1,81 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { Montserrat } from 'next/font/google'
-import { Code, ImageIcon, LayoutDashboard, MessageSquare, Music, Settings, VideoIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Montserrat } from "next/font/google";
+import { LayoutDashboard, Settings, VideoIcon, LogOut } from "lucide-react"; // Import LogOut icon
+import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-// import { UserInfo } from "@/components/custom/UserInfo";
 
-import { Tajawal } from 'next/font/google';
-const tajawal = Tajawal({ 
-  weight: '700', // or any other valid weight value
-  subsets: ['latin']
+import { Tajawal } from "next/font/google";
+import { useClerk, useUser } from "@clerk/nextjs"; // Import useClerk and useUser hooks
+
+const tajawal = Tajawal({
+  weight: "700",
+  subsets: ["latin"],
 });
 
-const poppins = Montserrat ({ weight: '600', subsets: ['latin'] });
+const montserrat = Montserrat({
+  weight: "600",
+  subsets: ["latin"],
+});
 
 const routes = [
   {
-    label: 'لوحة التحكم',
+    label: "لوحة التحكم",
     icon: LayoutDashboard,
-    href: '/dashboard',
-    color: "text-sky-500"
+    href: "/dashboard",
+    color: "text-sky-500",
   },
   {
-    label: 'الاعدادات',
+    label: "الاعدادات",
     icon: Settings,
-    href: '/settings',
+    href: "/settings",
+    color: "text-gray-500",
   },
-
   {
-    label: 'الاسعار',
+    label: "الاشتراك",
     icon: VideoIcon,
     color: "text-orange-700",
-    href: '/pricing',
+    href: "/pricing",
   },
-  
- 
-  {
-    label: 'تسجيل الغروج',
-    icon: ImageIcon,
-    color: "text-pink-700",
-    href: '/log-out',
-  },
-  
-  // {
-  //   label: 'الصوت',
-  //   icon: Code,
-  //   color: "text-green-700",
-  //   href: '/voice',
-  // },
-  // {
-  //   label: 'النصوص العربية',
-  //   icon: MessageSquare,
-  //   href: '/arabictext',
-  //   color: "text-violet-500",
-  // },
-
-  
-  
+  // Logout route removed
 ];
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useClerk(); // Access the signOut method
+  const { user } = useUser(); // Access user information
+
+  const handleLogout = async () => {
+    try {
+      await signOut(); // Sign out the user
+      router.push("/login"); // Redirect to the login page after logout
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Optionally, display an error message to the user
+    }
+  };
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-gray-100 mt-14 text-black">
       <div className="px-3 py-2 flex-1">
-      {/* <Link href="/" className="flex items-center ml-4">
-      <div className="relative h-8 w-8 ml-2 animate-spin">
-        <Image fill alt="Logo" src="/logo.png" />
-      </div>
-      <h1 className={cn("text-2xl font-bold text-black", tajawal.className)}>
-      Gadawel.com      </h1>
-    </Link> */}
-        
+        {/* Optional: Display User Information */}
+        {user && (
+          <div className="mb-4 px-3">
+            <p className="text-lg font-semibold">مرحبًا، {user.firstName}</p>
+          </div>
+        )}
+
         <div className="space-y-1">
           {routes.map((route) => (
             <Link
-              key={route.href} 
+              key={route.href}
               href={route.href}
               className={cn(
                 "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-black hover:bg-black/10 rounded-lg transition",
-                pathname === route.href ? "text-black bg-black/10" : "bg-white/10",
+                pathname === route.href ? "text-black bg-black/10" : "bg-white/10"
               )}
             >
               <div className="flex items-center flex-1">
@@ -94,15 +86,102 @@ export const Sidebar = () => {
           ))}
         </div>
       </div>
-      {/* <UserInfo 
-        isPro={isPro}
-      /> */}
-      {/* <FreeCounter 
-        apiLimitCount={apiLimitCount} 
-        isPro={isPro}
-      /> */}
+
+      {/* Logout Button */}
+      <div className="px-3">
+        <button
+          onClick={handleLogout}
+          className="text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-black hover:bg-black/10 rounded-lg transition bg-white/10"
+          aria-label="تسجيل الخروج"
+        >
+          <div className="flex items-center bg-blue-300 p-4 flex-1">
+            <LogOut className="h-5 w-5 ml-3 text-pink-700" /> {/* Use LogOut icon */}
+            تسجيل الخروج
+          </div>
+        </button>
+      </div>
     </div>
   );
 };
+
+
+// "use client";
+
+// import Link from "next/link";
+// import Image from "next/image";
+// import { Montserrat } from 'next/font/google'
+// import { Code, ImageIcon, LayoutDashboard, MessageSquare, Music, Settings, VideoIcon } from "lucide-react";
+// import { usePathname } from "next/navigation";
+
+// import { cn } from "@/lib/utils";
+
+// import { Tajawal } from 'next/font/google';
+// const tajawal = Tajawal({ 
+//   weight: '700', 
+//   subsets: ['latin']
+// });
+
+// const poppins = Montserrat ({ weight: '600', subsets: ['latin'] });
+
+// const routes = [
+//   {
+//     label: 'لوحة التحكم',
+//     icon: LayoutDashboard,
+//     href: '/dashboard',
+//     color: "text-sky-500"
+//   },
+//   {
+//     label: 'الاعدادات',
+//     icon: Settings,
+//     href: '/settings',
+//   },
+
+//   {
+//     label: 'الاشتراك',
+//     icon: VideoIcon,
+//     color: "text-orange-700",
+//     href: '/pricing',
+//   },
+  
+ 
+//   {
+//     label: 'تسجيل الخروج',
+//     icon: ImageIcon,
+//     color: "text-pink-700",
+//     href: '/log-out',
+//   },
+  
+// ];
+
+// export const Sidebar = () => {
+//   const pathname = usePathname();
+
+//   return (
+//     <div className="space-y-4 py-4 flex flex-col h-full bg-gray-100 mt-14 text-black">
+//       <div className="px-3 py-2 flex-1">
+  
+        
+//         <div className="space-y-1">
+//           {routes.map((route) => (
+//             <Link
+//               key={route.href} 
+//               href={route.href}
+//               className={cn(
+//                 "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-black hover:bg-black/10 rounded-lg transition",
+//                 pathname === route.href ? "text-black bg-black/10" : "bg-white/10",
+//               )}
+//             >
+//               <div className="flex items-center flex-1">
+//                 <route.icon className={cn("h-5 w-5 ml-3", route.color)} />
+//                 {route.label}
+//               </div>
+//             </Link>
+//           ))}
+//         </div>
+//       </div>
+  
+//     </div>
+//   );
+// };
 
 

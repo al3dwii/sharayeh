@@ -95,6 +95,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUserData(null);
     }
   };
+
+  
   
   // const fetchUserData = async () => {
   //   if (user) {

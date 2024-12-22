@@ -1,7 +1,10 @@
+// app/api/user-data/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db'; // Prisma client
 import { getAuth } from '@clerk/nextjs/server'; // Clerk server-side auth
 import { pricingPlans, Plan } from '@/config/planConfig'; // Import plan config
+import { stripe } from '@/lib/stripe'; // Import Stripe client
 
 export const dynamic = 'force-dynamic'; // Ensure dynamic content is fetched at runtime
 
@@ -18,34 +21,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch or create UserCredits
+    // Fetch or create UserCredits using upsert
     const userCredits = await ensureUserCredits(userId);
-
-    // Check for Subscription
-    const subscription = await db.subscription.findUnique({
-      where: { userId },
-      select: {
-        planId: true,
-        plan: {
-          select: {
-            tier: true,
-          },
-        },
-      },
-    });
-
-    if (subscription?.planId && subscription.plan?.tier) {
-      console.log('📊 Retrieved Subscription:', subscription);
-      return buildResponse(userCredits, subscription.planId, subscription.plan.tier);
-    }
 
     // Check for UserSubscription
     const userSubscription = await db.userSubscription.findUnique({
       where: { userId },
-      select: { stripePriceId: true },
+      select: { stripeSubscriptionId: true, stripePriceId: true },
     });
 
-    if (userSubscription?.stripePriceId) {
+    if (userSubscription?.stripeSubscriptionId && userSubscription.stripePriceId) {
       console.log('📊 Retrieved UserSubscription:', userSubscription);
 
       const plan = pricingPlans.find(
@@ -70,27 +55,28 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Helper to ensure UserCredits exist for the user
+// Helper to ensure UserCredits exist for the user using upsert
 async function ensureUserCredits(userId: string) {
-  let userCredits = await db.userCredits.findUnique({
-    where: { userId },
-    select: { credits: true, usedCredits: true },
-  });
+  try {
+    console.log('📊 Ensuring UserCredits for userId:', userId);
 
-  if (!userCredits) {
-    console.log('📊 UserCredits not found. Creating default UserCredits.');
-    userCredits = await db.userCredits.create({
-      data: {
+    const userCredits = await db.userCredits.upsert({
+      where: { userId }, // Unique identifier to check existing record
+      update: {}, // No fields to update if the record exists
+      create: {
         userId,
         credits: 200, // Default credits for Free plan
         usedCredits: 0,
       },
-      select: { credits: true, usedCredits: true },
+      select: { credits: true, usedCredits: true }, // Select only necessary fields
     });
-    console.log('📊 Created UserCredits:', userCredits);
-  }
 
-  return userCredits;
+    console.log('📊 Retrieved or Created UserCredits:', userCredits);
+    return userCredits;
+  } catch (error: any) {
+    console.error('🛑 Error in ensureUserCredits:', error);
+    throw error; // Re-throw the error after logging
+  }
 }
 
 // Helper function to build API response
@@ -118,6 +104,235 @@ function getFreePlan(): Plan {
   }
   return freePlan;
 }
+
+
+// // app/api/user-data/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { db } from '@/lib/db'; // Prisma client
+// import { getAuth } from '@clerk/nextjs/server'; // Clerk server-side auth
+// import { pricingPlans, Plan } from '@/config/planConfig'; // Import plan config
+// import { stripe } from '@/lib/stripe'; // Import Stripe client
+
+// export const dynamic = 'force-dynamic'; // Ensure dynamic content is fetched at runtime
+
+// // Handle GET requests to /api/user-data
+// export async function GET(req: NextRequest) {
+//   try {
+//     console.log('🔍 Incoming GET request to /api/user-data');
+
+//     const { userId } = getAuth(req); // Extract userId from auth context
+//     console.log('👤 Authenticated User ID:', userId);
+
+//     if (!userId) {
+//       console.log("Response: Unauthorized - Missing userId");
+//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     // Fetch or create UserCredits
+//     const userCredits = await ensureUserCredits(userId);
+
+//     // Check for UserSubscription
+//     const userSubscription = await db.userSubscription.findUnique({
+//       where: { userId },
+//       select: { stripeSubscriptionId: true, stripePriceId: true },
+//     });
+
+//     if (userSubscription?.stripeSubscriptionId && userSubscription.stripePriceId) {
+//       console.log('📊 Retrieved UserSubscription:', userSubscription);
+
+//       const plan = pricingPlans.find(
+//         (plan: Plan) => plan.stripePriceId === userSubscription.stripePriceId
+//       );
+
+//       if (plan) {
+//         console.log('📊 Mapped UserSubscription to SubscriptionPlan:', plan);
+//         return buildResponse(userCredits, plan.id, plan.tier);
+//       }
+
+//       console.log('📊 No matching SubscriptionPlan found for stripePriceId:', userSubscription.stripePriceId);
+//     }
+
+//     // Default to Free plan if no active subscription
+//     const freePlan = getFreePlan();
+//     console.log('📊 User has no subscription. Assigning Free plan:', freePlan.id);
+//     return buildResponse(userCredits, freePlan.id, freePlan.tier);
+//   } catch (error: any) {
+//     console.error('🛑 Error fetching user data:', error);
+//     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+//   }
+// }
+
+// // Helper to ensure UserCredits exist for the user
+// async function ensureUserCredits(userId: string) {
+//   let userCredits = await db.userCredits.findUnique({
+//     where: { userId },
+//     select: { credits: true, usedCredits: true },
+//   });
+
+//   if (!userCredits) {
+//     console.log('📊 UserCredits not found. Creating default UserCredits.');
+//     userCredits = await db.userCredits.create({
+//       data: {
+//         userId,
+//         credits: 200, // Default credits for Free plan
+//         usedCredits: 0,
+//       },
+//       select: { credits: true, usedCredits: true },
+//     });
+//     console.log('📊 Created UserCredits:', userCredits);
+//   }
+
+//   return userCredits;
+// }
+
+// // Helper function to build API response
+// function buildResponse(
+//   userCredits: { credits: number; usedCredits: number },
+//   planId: string,
+//   tier: string
+// ) {
+//   return NextResponse.json(
+//     {
+//       credits: userCredits.credits,
+//       usedCredits: userCredits.usedCredits,
+//       planId,
+//       tier,
+//     },
+//     { status: 200 }
+//   );
+// }
+
+// // Helper function to get Free plan
+// function getFreePlan(): Plan {
+//   const freePlan = pricingPlans.find((plan: Plan) => plan.id === 'cm4kcbd6t00007ndb3r9dydrc');
+//   if (!freePlan) {
+//     throw new Error('Free plan not found in pricingPlans');
+//   }
+//   return freePlan;
+// }
+
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { db } from '@/lib/db'; // Prisma client
+// import { getAuth } from '@clerk/nextjs/server'; // Clerk server-side auth
+// import { pricingPlans, Plan } from '@/config/planConfig'; // Import plan config
+
+// export const dynamic = 'force-dynamic'; // Ensure dynamic content is fetched at runtime
+
+// // Handle GET requests to /api/user-data
+// export async function GET(req: NextRequest) {
+//   try {
+//     console.log('🔍 Incoming GET request to /api/user-data');
+
+//     const { userId } = getAuth(req); // Extract userId from auth context
+//     console.log('👤 Authenticated User ID:', userId);
+
+//     if (!userId) {
+//       console.log("Response: Unauthorized - Missing userId");
+//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     // Fetch or create UserCredits
+//     const userCredits = await ensureUserCredits(userId);
+
+//     // Check for Subscription
+//     const subscription = await db.subscription.findUnique({
+//       where: { userId },
+//       select: {
+//         planId: true,
+//         plan: {
+//           select: {
+//             tier: true,
+//           },
+//         },
+//       },
+//     });
+
+//     if (subscription?.planId && subscription.plan?.tier) {
+//       console.log('📊 Retrieved Subscription:', subscription);
+//       return buildResponse(userCredits, subscription.planId, subscription.plan.tier);
+//     }
+
+//     // Check for UserSubscription
+//     const userSubscription = await db.userSubscription.findUnique({
+//       where: { userId },
+//       select: { stripePriceId: true },
+//     });
+
+//     if (userSubscription?.stripePriceId) {
+//       console.log('📊 Retrieved UserSubscription:', userSubscription);
+
+//       const plan = pricingPlans.find(
+//         (plan: Plan) => plan.stripePriceId === userSubscription.stripePriceId
+//       );
+
+//       if (plan) {
+//         console.log('📊 Mapped UserSubscription to SubscriptionPlan:', plan);
+//         return buildResponse(userCredits, plan.id, plan.tier);
+//       }
+
+//       console.log('📊 No matching SubscriptionPlan found for stripePriceId:', userSubscription.stripePriceId);
+//     }
+
+//     // Default to Free plan if no active subscription
+//     const freePlan = getFreePlan();
+//     console.log('📊 User has no subscription. Assigning Free plan:', freePlan.id);
+//     return buildResponse(userCredits, freePlan.id, freePlan.tier);
+//   } catch (error: any) {
+//     console.error('🛑 Error fetching user data:', error);
+//     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+//   }
+// }
+
+// // Helper to ensure UserCredits exist for the user
+// async function ensureUserCredits(userId: string) {
+//   let userCredits = await db.userCredits.findUnique({
+//     where: { userId },
+//     select: { credits: true, usedCredits: true },
+//   });
+
+//   if (!userCredits) {
+//     console.log('📊 UserCredits not found. Creating default UserCredits.');
+//     userCredits = await db.userCredits.create({
+//       data: {
+//         userId,
+//         credits: 200, // Default credits for Free plan
+//         usedCredits: 0,
+//       },
+//       select: { credits: true, usedCredits: true },
+//     });
+//     console.log('📊 Created UserCredits:', userCredits);
+//   }
+
+//   return userCredits;
+// }
+
+// // Helper function to build API response
+// function buildResponse(
+//   userCredits: { credits: number; usedCredits: number },
+//   planId: string,
+//   tier: string
+// ) {
+//   return NextResponse.json(
+//     {
+//       credits: userCredits.credits,
+//       usedCredits: userCredits.usedCredits,
+//       planId,
+//       tier,
+//     },
+//     { status: 200 }
+//   );
+// }
+
+// // Helper function to get Free plan
+// function getFreePlan(): Plan {
+//   const freePlan = pricingPlans.find((plan: Plan) => plan.id === 'cm4kcbd6t00007ndb3r9dydrc');
+//   if (!freePlan) {
+//     throw new Error('Free plan not found in pricingPlans');
+//   }
+//   return freePlan;
+// }
 
 
 // // src/app/api/user-data/route.ts
