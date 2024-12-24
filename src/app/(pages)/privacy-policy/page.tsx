@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           margin: '0 auto',
           fontFamily: 'tahoma',
           lineHeight: '2.2',
-           marginTop: '40px',
+          marginTop: '40px',
         }}
       >
         <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>سياسة الخصوصية</h1>
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
         <h2>11. التواصل معنا</h2>
         <p>
           إذا كانت لديك أي أسئلة أو استفسارات حول هذه السياسة أو حول كيفية تعاملنا مع بياناتك الشخصية، فيُرجى التواصل معنا 
-          عبر البريد الإلكتروني التالي: <a href="mailto:support@sharayeh.com">support@sharayeh.com</a>.
+          عبر البريد الإلكتروني التالي: <a href='mailto:support@sharayeh.com'>support@sharayeh.com</a>.
         </p>
       </main>
 
@@ -113,7 +113,6 @@ export default function PrivacyPolicy() {
     </>
   );
 }
-
 
 
 // // app/privacy-policy/page.js
