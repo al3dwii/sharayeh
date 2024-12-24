@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Montserrat } from "next/font/google";
-import { LayoutDashboard, Settings, VideoIcon, LogOut } from "lucide-react"; // Import LogOut icon
+import { LayoutDashboard, Settings, PackageCheckIcon, LogOut, SubscriptIcon } from "lucide-react"; // Import LogOut icon
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -34,8 +34,8 @@ const routes = [
     color: "text-gray-500",
   },
   {
-    label: "الاشتراك",
-    icon: VideoIcon,
+    label: "الباقات",
+    icon: PackageCheckIcon,
     color: "text-orange-700",
     href: "/pricing",
   },

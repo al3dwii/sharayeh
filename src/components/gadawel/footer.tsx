@@ -54,7 +54,36 @@ export const Footer = () => {
                         ))}
                     </ul>
                 </div> */}
-                <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>
+
+      {/* معلومات Section */}
+      <div className="flex flex-col space-y-3 text-right lg:text-right md:px-4">
+        <Header text="المعلومات" />
+        <ul className="flex flex-col space-y-2">
+          {mockKnowledgeBase.map((item) => (
+            <li key={item.id}>
+              <Link href={item.href} className="text-white hover:underline">
+                {item.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* الشركة Section */}
+      <div className="flex flex-col pb-8 space-y-3 text-right lg:text-right md:px-4">
+        <Header text="الشركة" />
+        <ul className="flex flex-col space-y-2">
+          {mockCompany.map((item) => (
+            <li key={item.id}>
+              <Link href={item.href} className="text-white hover:underline">
+                {item.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+                
+                {/* <div className={'flex flex-col space-y-3 text-right lg:text-right md:px-4'}>
                       <Header text={'المعلومات'}/>
                     <ul className={'flex flex-col space-y-2'}>
                         {mockKnowledgeBase.map((item) => (
@@ -71,13 +100,16 @@ export const Footer = () => {
                     <ul className={'flex flex-col space-y-2'}>
                         {mockCompany.map((item) => (
                             <li key={item.id}>
-                                <a target={'_blank'} href={item.href} className={'text-white'}>
+                                <a  href={item.href} className={'text-white'}>
                                     {item.name}
                                 </a>
                             </li>
                         ))}
-                    </ul>
+                    </ul> */}
+
                 </div>
+                <div >
+
                 <Socialicons />
             </div>
             <div className={'   p-2 '}>

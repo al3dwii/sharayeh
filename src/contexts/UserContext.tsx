@@ -96,40 +96,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  
-  
-  // const fetchUserData = async () => {
-  //   if (user) {
-  //     try {
-  //       const token = await getToken();
-  //       const response = await axios.get("/api/user-data", {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-
-  //       const { credits, usedCredits, planId, tier } = response.data;
-
-  //       // Optional: Match plan details
-  //       const planDetails = pricingPlans.find((plan) => plan.id === planId);
-
-  //       if (
-  //         typeof credits === "number" &&
-  //         typeof usedCredits === "number" &&
-  //         typeof planId === "string" &&
-  //         ["FREE", "STANDARD", "PREMIUM"].includes(tier)
-  //       ) {
-  //         setUserData({ credits, usedCredits, planId, tier, planDetails });
-  //         console.log("🔄 User data fetched:", response.data);
-  //       } else {
-  //         throw new Error("Invalid data format received");
-  //       }
-  //     } catch (error: any) {
-  //       console.error("Error fetching user data:", error);
-  //       setUserData(null);
-  //     }
-  //   } else {
-  //     setUserData(null);
-  //   }
-  // };
 
   // Fetch user data when the user is loaded and authenticated
   useEffect(() => {

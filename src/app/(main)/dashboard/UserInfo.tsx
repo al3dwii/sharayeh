@@ -13,6 +13,9 @@ import { Progress } from "@/components/ui/progress";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useStore } from '@/store/useStore';
 
+import Link from 'next/link';
+
+
 import Skel from '@/components/global/Skeleton'
 
 export const UserInfo = ({
@@ -114,15 +117,15 @@ export const UserInfo = ({
             </p>
             <Progress className="h-3" value={progressValue} />
           </div>
-
-          {!isPro && (
             <div className="flex justify-center">
-              <Button onClick={proModal.onOpen} className="w-40 bg-blue-500">
-                ترقية الباقة
-                <Zap className="w-4 h-4 mr-4 fill-white" />
-              </Button>
+            <Link href="/pricing">
+          <Button className="w-40 bg-blue-500 flex items-center justify-center">
+            اضافة رصيد 
+            <Zap className="w-4 h-4 mr-2 fill-white" />
+          </Button>
+        </Link>
             </div>
-          )}
+          
         </CardContent>
       </Card>
     </div>

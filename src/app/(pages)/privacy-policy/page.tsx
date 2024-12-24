@@ -1,149 +1,332 @@
-import React from 'react';
+// app/privacy-policy/page.js
 
+import Head from 'next/head';
+import { Footer } from "@/components/gadawel/footer";
 
-
-const PrivacyPolicy = ( ) => {
+export default function PrivacyPolicy() {
   return (
-    <div className="privacy-policy"  dir="ltr">
-      <h1 className="privacy-policy__title">Privacy Policy</h1>
-
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">A. Accountability</h2>
-        <p className="privacy-policy__text">
-          At gadawel (“we,” “us,” “our”), we respect and prioritize users’
-          privacy and ensure that they understand how we collect, use, protect,
-          and disclose personal information. Our services, which include file
-          upload and OCR processing, are designed to assist individuals and
-          businesses in digitizing text from images and documents.
+    <>
+      <Head>
+        <title>سياسة الخصوصية - شرايح.كوم</title>
+        <meta
+          name="description"
+          content="اطلع على سياسة الخصوصية الخاصة بشرايح.كوم، منصة مقدمة من شركة سيبويه الأمريكية، والتي تُعنى بتوليد العروض التقديمية بالذكاء الاصطناعي باللغة العربية."
+        />
+      </Head>
+      <main
+        style={{
+          direction: 'rtl',
+          padding: '40px 20px',
+          maxWidth: '900px',
+          margin: '0 auto',
+          fontFamily: 'tahoma',
+          lineHeight: '2.2',
+           marginTop: '40px',
+        }}
+      >
+        <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>سياسة الخصوصية</h1>
+        <p>
+          نرحب بك في شرايح.كوم (<strong>sharayeh.com</strong>)، وهي منصة تابعة لشركة سيبويه (<strong>Sibawayh</strong>) 
+          المُسجلة في الولايات المتحدة الأمريكية. تهدف منصتنا إلى تقديم خدمة توليد العروض التقديمية (PowerPoint) 
+          بالاعتماد على تقنيات الذكاء الاصطناعي، مع التركيز على دعم اللغة العربية واحتياجات المستخدمين في منطقة الشرق الأوسط. 
+          إن خصوصيتك تهمنا، ونلتزم بحماية بياناتك وفقًا لأعلى معايير الأمان. توضح هذه السياسة الأسس التي يتم على 
+          أساسها جمع واستخدام وحماية معلوماتك الشخصية عند استخدام خدماتنا.
         </p>
-        <p className="privacy-policy__text">
-          This Privacy Policy explains how we manage personal information that
-          is shared with us when users visit our website, use our services, or
-          communicate with us.
-        </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">B. Personal Information</h2>
-        <p className="privacy-policy__text">We collect two types of personal information:</p>
-        <ul className="privacy-policy__list">
-          <li className="privacy-policy__list-item">
-            <strong>Identifying Information</strong>: This includes data that can identify a specific person, such as a name, email address, or telephone number, when combined with other details like physical characteristics, addresses, or history.
-          </li>
-          <li className="privacy-policy__list-item">
-            <strong>Sensitive Information</strong>: This includes personal details like race, gender, religion, education, employment, financial history, or personal opinions. We ensure that sensitive data is handled with utmost confidentiality.
-          </li>
+        <h2>1. جمع البيانات</h2>
+        <p>
+          نقوم بجمع المعلومات التي تقدمها طواعيةً عند التسجيل في خدماتنا، بما يشمل الاسم، وعنوان البريد الإلكتروني، 
+          وبيانات التواصل الأخرى. بالإضافة إلى ذلك، قد نجمع بيانات يتم الحصول عليها تلقائيًا مثل عنوان IP، 
+          ونوع المتصفح، والموقع الذي تمت الإحالة منه، والصفحات التي تزورها ضمن منصتنا.
+        </p>
+
+        <h2>2. استخدام البيانات</h2>
+        <p>
+          نستخدم بياناتك لتحسين وتخصيص تجربتك على شرايح.كوم، بما في ذلك توفير الدعم الفني، وإعلامك بتحديثات المنتجات، 
+          وتحليل استخدام المنصة بهدف الارتقاء بجودة خدماتنا. كما قد نستخدم بياناتك لإرسال مواد تسويقية وترويجية، 
+          وذلك بعد الحصول على موافقتك الصريحة.
+        </p>
+
+        <h2>3. حماية البيانات</h2>
+        <p>
+          نعتمد إجراءات أمنية متنوعة لحماية بياناتك من الوصول أو التعديل أو الإفشاء غير المصرح به، وتشمل هذه الإجراءات 
+          استخدام التشفير، والجدران النارية، وتقنيات الكشف عن التسلل. على الرغم من ذلك، ينبغي الإقرار بأن نقل البيانات 
+          عبر الإنترنت لا يمكن أن يكون آمنًا بنسبة 100%.
+        </p>
+
+        <h2>4. مشاركة البيانات مع الأطراف الثالثة</h2>
+        <p>
+          لا نُفصح عن بياناتك الشخصية لأطراف ثالثة دون الحصول على إذنك المسبق، إلا في الحالات التالية:
+        </p>
+        <ul>
+          <li>لتلبية احتياجاتك، مثل معالجة المدفوعات أو تقديم الدعم الفني.</li>
+          <li>عند الإلزام القانوني أو الامتثال لطلب من جهة حكومية أو قضائية.</li>
+          <li>لحماية حقوقنا أو حقوق الآخرين، أو منع أي نشاط غير قانوني أو غير مصرح به.</li>
         </ul>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">C. The Personal Information We Collect</h2>
-        <p className="privacy-policy__text">
-          The personal information we collect at gadawel includes:
+        <h2>5. خدمات وروابط الأطراف الثالثة</h2>
+        <p>
+          قد تحتوي منصتنا على روابط لخدمات أو مواقع إلكترونية تابعة لأطراف ثالثة. نحن لسنا مسؤولين عن ممارسات الخصوصية 
+          الخاصة بتلك المواقع أو الخدمات، ونشجعك على مراجعة سياسات الخصوصية الخاصة بهم قبل تقديم أي بيانات شخصية.
         </p>
-        <ul className="privacy-policy__list">
-          <li className="privacy-policy__list-item">Basic identification data necessary for account creation: name, email, and password.</li>
-          <li className="privacy-policy__list-item">Data related to improving our services and user experience on our website.</li>
-          <li className="privacy-policy__list-item">Information used for marketing, service improvements, and customer relationship management.</li>
-        </ul>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">D. Why We Collect Personal Information and Your Consent</h2>
-        <p className="privacy-policy__text">
-          We collect personal information to:
+        <h2>6. ملفات تعريف الارتباط (Cookies)</h2>
+        <p>
+          نستخدم ملفات تعريف الارتباط لتحسين تجربتك على شرايح.كوم، وذلك من خلال جمع معلومات تساعدنا على فهم طريقة 
+          استخدامك لخدماتنا وتخصيص المحتوى والإعلانات وفقًا لاهتماماتك. بإمكانك التحكم في تفضيلات ملفات تعريف الارتباط 
+          عبر إعدادات المتصفح الخاص بك.
         </p>
-        <ul className="privacy-policy__list">
-          <li className="privacy-policy__list-item">Operate our website and provide a personalized experience.</li>
-          <li className="privacy-policy__list-item">Allow customers to access and use our OCR services.</li>
-          <li className="privacy-policy__list-item">Fulfill our contractual obligations to customers.</li>
-        </ul>
-        <p className="privacy-policy__text">
-          We may use cookies and similar technologies to collect additional information and to associate browsing behavior with your account, if applicable.
-        </p>
-        <p className="privacy-policy__text">
-          By using our services or browsing our website, you consent to our collection and use of your personal and non-personal information as outlined in this Policy.
-        </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">E. Internal Access to Personal Information</h2>
-        <p className="privacy-policy__text">
-          Access to personal information is restricted to gadawel employees who need it for:
+        <h2>7. حقوق المستخدم</h2>
+        <p>
+          يحق لك طلب الوصول إلى بياناتك الشخصية وتصحيحها أو حذفها، كما يحق لك سحب الموافقة على معالجة بياناتك في أي وقت. 
+          لمعالجة طلباتك المتعلقة ببياناتك الشخصية، يُرجى التواصل معنا عبر معلومات الاتصال المذكورة أدناه.
         </p>
-        <ul className="privacy-policy__list">
-          <li className="privacy-policy__list-item">Developing and providing our services.</li>
-          <li className="privacy-policy__list-item">Offering customer support.</li>
-        </ul>
-        <p className="privacy-policy__text">
-          We may also share personal information with trusted third-party service providers, such as cloud hosting services and payment processors, for business operations.
-        </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">F. External Disclosure of Personal Information</h2>
-        <p className="privacy-policy__text">
-        gadawel does not sell or disclose your personal information to third parties, except where necessary for business operations (e.g., third-party support services) or as required by law.
+        <h2>8. الاحتفاظ بالبيانات</h2>
+        <p>
+          نحتفظ ببياناتك الشخصية فقط طوال الفترة اللازمة لتحقيق الأغراض التي جُمعت لأجلها، أو لتلبية المتطلبات القانونية 
+          ذات الصلة. بعد انتهاء تلك الفترة، نقوم بحذف أو إخفاء هويّة بياناتك بشكل آمن.
         </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">G. Retention of Personal Information</h2>
-        <p className="privacy-policy__text">
-          We retain personal information to ensure future service availability and ongoing customer support. Personal data is disposed of securely when no longer needed, either through shredding physical documents or permanently deleting electronic records.
+        <h2>9. التعديلات على سياسة الخصوصية</h2>
+        <p>
+          قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر لتتوافق مع أي تغيرات في ممارساتنا أو المتطلبات القانونية. 
+          سنقوم بالإعلان عن أي تحديثات عبر نشر النسخة الجديدة على هذه الصفحة. نوصيك بمراجعة سياسة الخصوصية بانتظام 
+          للبقاء على اطلاعٍ دائم بالتحديثات.
         </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">H. Accuracy of Personal Information</h2>
-        <p className="privacy-policy__text">
-          We strive to ensure that personal information is accurate and up to date. Customers are encouraged to inform us of any changes to their details.
+        <h2>10. القانون والاختصاص القضائي</h2>
+        <p>
+          تخضع هذه السياسة لقوانين الولايات المتحدة الأمريكية، ويتم تفسيرها وفقًا لتلك القوانين. وتوافق على أن أي نزاع 
+          يتعلق بهذه السياسة أو ينشأ عنها ينعقد الاختصاص الحصري بنظره للمحاكم الأمريكية.
         </p>
-      </section>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">I. Safeguards</h2>
-        <p className="privacy-policy__text">
-          We employ industry-standard security measures, including encryption (HTTPS over TLS), to protect personal information.
+        <h2>11. التواصل معنا</h2>
+        <p>
+          إذا كانت لديك أي أسئلة أو استفسارات حول هذه السياسة أو حول كيفية تعاملنا مع بياناتك الشخصية، فيُرجى التواصل معنا 
+          عبر البريد الإلكتروني التالي: <a href="mailto:support@sharayeh.com">support@sharayeh.com</a>.
         </p>
-      </section>
+      </main>
 
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">J. Data Breaches</h2>
-        <p className="privacy-policy__text">
-          In the event of a data breach, we will notify affected customers and advise them on steps to protect their personal information. We will also notify authorities as required by law.
-        </p>
-      </section>
-
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">K. Your Access to Your Personal Information</h2>
-        <p className="privacy-policy__text">
-          You have the right to access your personal information. To request a copy or to update your data, contact us at <a href="mailto:support@gadawel.com" className="privacy-policy__link">support@gadawel.com</a>, specifying “Privacy Inquiry” in the subject line.
-        </p>
-      </section>
-
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">L. Compliance</h2>
-        <p className="privacy-policy__text">
-          We have made reasonable efforts to comply with privacy laws in all jurisdictions where we offer our services. If you believe we are not meeting legal requirements, please contact our Privacy Compliance Officer at <a href="mailto:support@gadawel.com" className="privacy-policy__link">support@gadawel.com</a>.
-        </p>
-      </section>
-
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">M. Managing Cookies</h2>
-        <p className="privacy-policy__text">
-          We use cookies to improve your experience on our website and to gather analytics. You can manage cookie preferences through your browser settings. Blocking cookies may affect the functionality of our website.
-        </p>
-      </section>
-
-      <section className="privacy-policy__section">
-        <h2 className="privacy-policy__section-title">N. Amendments to this Privacy Policy</h2>
-        <p className="privacy-policy__text">
-          We may amend this Privacy Policy periodically. Continued use of our website or services after amendments signifies your consent to the updated policy.
-        </p>
-      </section>
-    </div>
+      <Footer />
+    </>
   );
-};
+}
 
-export default PrivacyPolicy;
+
+
+// // app/privacy-policy/page.js
+
+// import Head from 'next/head';
+// import { Footer } from "@/components/gadawel/footer";
+
+// export default function PrivacyPolicy() {
+//   return (
+//     <>
+//       <Head>
+//         <title>سياسة الخصوصية - شرايه.كوم</title>
+//         <meta
+//           name="description"
+//           content="اطلع على سياسة الخصوصية الخاصة بشرايه.كوم، منصة مقدمة من شركة سيباويه الأمريكية، والتي تُعنى بتوليد العروض التقديمية بالذكاء الاصطناعي باللغة العربية."
+//         />
+//       </Head>
+//       <main
+//         style={{
+//           direction: 'rtl',
+//           padding: '40px 20px',
+//           maxWidth: '900px',
+//           margin: '0 auto',
+//           fontFamily: 'tahoma',
+//           lineHeight: '1.6',
+//         }}
+//       >
+//         <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>سياسة الخصوصية</h1>
+//         <p>
+//           نرحب بك في شرايه.كوم (<strong>sharayeh.com</strong>)، وهي منصة تابعة لشركة سيباويه (<strong>Sibawayh</strong>) 
+//           المُسجلة في الولايات المتحدة الأمريكية. تهدف منصتنا إلى تقديم خدمة توليد العروض التقديمية (PowerPoint) 
+//           بالاعتماد على تقنيات الذكاء الاصطناعي، مع التركيز على دعم اللغة العربية واحتياجات المستخدمين في منطقة الشرق الأوسط. 
+//           إن خصوصيتك تهمنا، ونلتزم بحماية بياناتك وفقًا لأعلى معايير الأمان. توضح هذه السياسة الأسس التي يتم على 
+//           أساسها جمع واستخدام وحماية معلوماتك الشخصية عند استخدام خدماتنا.
+//         </p>
+
+//         <h2>1. جمع البيانات</h2>
+//         <p>
+//           نقوم بجمع المعلومات التي تقدمها طواعيةً عند التسجيل في خدماتنا، بما يشمل الاسم، وعنوان البريد الإلكتروني، 
+//           وبيانات التواصل الأخرى. بالإضافة إلى ذلك، قد نجمع بيانات يتم الحصول عليها تلقائيًا مثل عنوان IP، 
+//           ونوع المتصفح، والموقع الذي تمت الإحالة منه، والصفحات التي تزورها ضمن منصتنا.
+//         </p>
+
+//         <h2>2. استخدام البيانات</h2>
+//         <p>
+//           نستخدم بياناتك لتحسين وتخصيص تجربتك على شرايه.كوم، بما في ذلك توفير الدعم الفني، وإعلامك بتحديثات المنتجات، 
+//           وتحليل استخدام المنصة بهدف الارتقاء بجودة خدماتنا. كما قد نستخدم بياناتك لإرسال مواد تسويقية وترويجية، 
+//           وذلك بعد الحصول على موافقتك الصريحة.
+//         </p>
+
+//         <h2>3. حماية البيانات</h2>
+//         <p>
+//           نعتمد إجراءات أمنية متنوعة لحماية بياناتك من الوصول أو التعديل أو الإفشاء غير المصرح به، وتشمل هذه الإجراءات 
+//           استخدام التشفير، والجدران النارية، وتقنيات الكشف عن التسلل. على الرغم من ذلك، ينبغي الإقرار بأن نقل البيانات 
+//           عبر الإنترنت لا يمكن أن يكون آمنًا بنسبة 100%.
+//         </p>
+
+//         <h2>4. مشاركة البيانات مع الأطراف الثالثة</h2>
+//         <p>
+//           لا نُفصح عن بياناتك الشخصية لأطراف ثالثة دون الحصول على إذنك المسبق، إلا في الحالات التالية:
+//         </p>
+//         <ul>
+//           <li>لتلبية احتياجاتك، مثل معالجة المدفوعات أو تقديم الدعم الفني.</li>
+//           <li>عند الإلزام القانوني أو الامتثال لطلب من جهة حكومية أو قضائية.</li>
+//           <li>لحماية حقوقنا أو حقوق الآخرين، أو منع أي نشاط غير قانوني أو غير مصرح به.</li>
+//         </ul>
+
+//         <h2>5. خدمات وروابط الأطراف الثالثة</h2>
+//         <p>
+//           قد تحتوي منصتنا على روابط لخدمات أو مواقع إلكترونية تابعة لأطراف ثالثة. نحن لسنا مسؤولين عن ممارسات الخصوصية 
+//           الخاصة بتلك المواقع أو الخدمات، ونشجعك على مراجعة سياسات الخصوصية الخاصة بهم قبل تقديم أي بيانات شخصية.
+//         </p>
+
+//         <h2>6. ملفات تعريف الارتباط (Cookies)</h2>
+//         <p>
+//           نستخدم ملفات تعريف الارتباط لتحسين تجربتك على شرايه.كوم، وذلك من خلال جمع معلومات تساعدنا على فهم طريقة 
+//           استخدامك لخدماتنا وتخصيص المحتوى والإعلانات وفقًا لاهتماماتك. بإمكانك التحكم في تفضيلات ملفات تعريف الارتباط 
+//           عبر إعدادات المتصفح الخاص بك.
+//         </p>
+
+//         <h2>7. حقوق المستخدم</h2>
+//         <p>
+//           يحق لك طلب الوصول إلى بياناتك الشخصية وتصحيحها أو حذفها، كما يحق لك سحب الموافقة على معالجة بياناتك في أي وقت. 
+//           لمعالجة طلباتك المتعلقة ببياناتك الشخصية، يُرجى التواصل معنا عبر معلومات الاتصال المذكورة أدناه.
+//         </p>
+
+//         <h2>8. الاحتفاظ بالبيانات</h2>
+//         <p>
+//           نحتفظ ببياناتك الشخصية فقط طوال الفترة اللازمة لتحقيق الأغراض التي جُمعت لأجلها، أو لتلبية المتطلبات القانونية 
+//           ذات الصلة. بعد انتهاء تلك الفترة، نقوم بحذف أو إخفاء هويّة بياناتك بشكل آمن.
+//         </p>
+
+//         <h2>9. التعديلات على سياسة الخصوصية</h2>
+//         <p>
+//           قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر لتتوافق مع أي تغيرات في ممارساتنا أو المتطلبات القانونية. 
+//           سنقوم بالإعلان عن أي تحديثات عبر نشر النسخة الجديدة على هذه الصفحة. نوصيك بمراجعة سياسة الخصوصية بانتظام 
+//           للبقاء على اطلاعٍ دائم بالتحديثات.
+//         </p>
+
+//         <h2>10. القانون والاختصاص القضائي</h2>
+//         <p>
+//           تخضع هذه السياسة لقوانين الولايات المتحدة الأمريكية، ويتم تفسيرها وفقًا لتلك القوانين. وتوافق على أن أي نزاع 
+//           يتعلق بهذه السياسة أو ينشأ عنها ينعقد الاختصاص الحصري بنظره للمحاكم الأمريكية.
+//         </p>
+
+//         <h2>11. التواصل معنا</h2>
+//         <p>
+//           إذا كانت لديك أي أسئلة أو استفسارات حول هذه السياسة أو حول كيفية تعاملنا مع بياناتك الشخصية، فيُرجى التواصل معنا 
+//           عبر البريد الإلكتروني التالي: <a href="mailto:support@sibawayh.com">support@sibawayh.com</a>.
+//         </p>
+//       </main>
+
+//       <Footer />
+//     </>
+//   );
+// }
+
+
+// // app/privacy-policy/page.js
+
+// import Head from 'next/head';
+// import { Footer } from "@/components/gadawel/footer";
+
+
+// export default function PrivacyPolicy() {
+//   return (
+//     <>
+//       <Head>
+//         <title>سياسة الخصوصية - سيباويه</title>
+//         <meta
+//           name="description"
+//           content="تعرف على سياسة الخصوصية الخاصة بسيباويه وكيفية جمع واستخدام وحماية بياناتك الشخصية عند استخدام خدماتنا."
+//         />
+//       </Head>
+//       <main
+//         style={{
+//           direction: 'rtl',
+//           padding: '40px 20px',
+//           maxWidth: '900px',
+//           margin: '0 auto',
+//           fontFamily: 'tahoma',
+//           lineHeight: '1.6',
+//         }}
+//       >
+//         <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>سياسة الخصوصية</h1>
+//         <p>
+//           نحن في سيباويه نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية المعلومات التي تقدمها لنا عند استخدامك لخدماتنا. يرجى قراءة هذه السياسة بعناية لفهم ممارساتنا المتعلقة ببياناتك الشخصية.
+//         </p>
+
+//         <h2>1. جمع البيانات</h2>
+//         <p>
+//           نقوم بجمع المعلومات التي تقدمها طواعية عند التسجيل في خدماتنا، مثل الاسم، البريد الإلكتروني، ومعلومات الاتصال الأخرى. بالإضافة إلى ذلك، قد نقوم بجمع بيانات تلقائية مثل عنوان IP، نوع المتصفح، وصفحة الويب التي تم الوصول منها، والصفحات التي تزورها داخل موقعنا.
+//         </p>
+
+//         <h2>2. استخدام البيانات</h2>
+//         <p>
+//           نستخدم بياناتك لتحسين خدماتنا، وتخصيص تجربتك، والتواصل معك بشأن تحديثات المنتجات، وتقديم الدعم الفني، وتحليل استخدام الموقع لتحسين أدائنا. قد نستخدم بياناتك أيضًا لإرسال رسائل تسويقية إذا وافقت على ذلك.
+//         </p>
+
+//         <h2>3. حماية البيانات</h2>
+//         <p>
+//           نتخذ إجراءات أمنية مناسبة لحماية بياناتك من الوصول غير المصرح به، التغيير، أو الكشف. تشمل هذه الإجراءات التشفير، الجدران النارية، ونظم الكشف عن التسلل. ومع ذلك، يجب أن تدرك أن نقل البيانات عبر الإنترنت لا يمكن أن يكون آمناً بنسبة 100%.
+//         </p>
+
+//         <h2>4. مشاركة البيانات مع الأطراف الثالثة</h2>
+//         <p>
+//           لا نشارك بياناتك الشخصية مع أطراف ثالثة دون موافقتك، باستثناء الحالات التالية:
+//           <ul>
+//             <li>لتلبية الطلبات الخاصة بك، مثل معالجة المدفوعات أو تقديم الدعم الفني.</li>
+//             <li>عندما يكون ذلك مطلوبًا بموجب القانون أو للامتثال لطلب قانوني.</li>
+//             <li>لحماية حقوقنا أو حقوق الآخرين.</li>
+//           </ul>
+//         </p>
+
+//         <h2>5. خدمات الأطراف الثالثة</h2>
+//         <p>
+//           قد تحتوي خدماتنا على روابط لمواقع ويب أو خدمات من أطراف ثالثة. نحن لسنا مسؤولين عن ممارسات الخصوصية في هذه المواقع أو الخدمات، ونشجعك على قراءة سياسات الخصوصية الخاصة بهم قبل تقديم أي معلومات شخصية.
+//         </p>
+
+//         <h2>6. ملفات تعريف الارتباط (Cookies)</h2>
+//         <p>
+//           نستخدم ملفات تعريف الارتباط لتحسين تجربتك على موقعنا. تساعدنا ملفات تعريف الارتباط في فهم كيفية استخدامك للموقع، وتخصيص المحتوى والإعلانات، وتحليل حركة المرور. يمكنك إدارة تفضيلات ملفات تعريف الارتباط من خلال إعدادات متصفحك.
+//         </p>
+
+//         <h2>7. حقوق المستخدم</h2>
+//         <p>
+//           لديك الحق في الوصول إلى بياناتك الشخصية، تصحيحها، أو حذفها. يمكنك أيضًا سحب موافقتك على معالجة بياناتك في أي وقت. لمعالجة طلباتك المتعلقة ببياناتك الشخصية، يرجى الاتصال بنا عبر معلومات الاتصال الموضحة أدناه.
+//         </p>
+
+//         <h2>8. الاحتفاظ بالبيانات</h2>
+//         <p>
+//           نحتفظ ببياناتك الشخصية فقط للفترة اللازمة لتحقيق الأغراض التي جمعت من أجلها، أو للامتثال للالتزامات القانونية. بعد انتهاء فترة الاحتفاظ، نقوم بحذف أو إخفاء بياناتك الشخصية بشكل آمن.
+//         </p>
+
+//         <h2>9. التغييرات على سياسة الخصوصية</h2>
+//         <p>
+//           قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر لتعكس التغييرات في ممارساتنا أو المتطلبات القانونية. سنقوم بإعلامك بأي تغييرات من خلال نشر السياسة المحدثة على هذه الصفحة. نوصيك بمراجعة سياسة الخصوصية بانتظام للبقاء على اطلاع بأي تغييرات.
+//         </p>
+
+//         <h2>10. قانون الخصوصية والاختصاص القضائي</h2>
+//         <p>
+//           تخضع سياسة الخصوصية هذه وتفسر وفقًا لقوانين الولايات المتحدة الأمريكية. توافق على أن أي نزاع ينشأ عن أو يتعلق بهذه السياسة سيتم تقديمه حصريًا لمحاكم الولايات المتحدة الأمريكية.
+//         </p>
+
+//         <h2>11. الاتصال بنا</h2>
+//         <p>
+//           إذا كان لديك أي أسئلة أو استفسارات بشأن سياسة الخصوصية هذه، يرجى الاتصال بنا عبر البريد الإلكتروني: <a href="mailto:support@sibawayh.com">support@sibawayh.com</a>
+//         </p>
+//       </main>
+//                           <Footer />
+      
+//     </>
+//   );
+// }
+
+

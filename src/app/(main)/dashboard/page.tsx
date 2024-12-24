@@ -51,29 +51,9 @@ const DashboardPage = async () => {
           <div className="  w-full md:flex-row md:space-x-4 space-y-4 md:space-y-0">
          
             <div className="mb-12">
-            <nav className="fixed top-16 left-0 right-0 bg-blue-50 md:hidden lg:hidden z-50 ">
-    <ul className="flex justify-around items-center h-12 px-4">
-      <li className="w-1/2">
-        <Link 
-          href="/pricing" 
-          className="flex items-center justify-center w-full h-full text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          <div className="text-lg font-semibold">الاشتراك</div>
-        </Link>
-      </li>
-      <div className="h-8 w-px bg-gray-300"></div>
-      <li className="w-1/2">
-        <Link 
-          href="/blog" 
-          className="flex items-center justify-center w-full h-full text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          <div className="text-lg font-semibold">المدونة</div>
-        </Link>
-      </li>
-    </ul>
-  </nav>
-
-  <div className="mt-16">
+           
+  <div className="mt-28">
+ 
             
               <UserInfo isPro={isPro} />
             </div>

@@ -15,12 +15,14 @@ export default function BlogPage() {
     .sort((a, b) => compareDesc(new Date(a.date), new Date(b.date)));
 
   return (
-    <main>
+    <>
+    <main className="m-8 p-8 ">
       <BlogPosts posts={posts} />
-      <Footer />
+     
 
     </main>
-    
+     <Footer />
+     </>
   );
 }
 

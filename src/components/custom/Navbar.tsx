@@ -11,7 +11,7 @@ const Navigation = () => {
 
   return (
     
-    <header className="sticky top-0 z-40 flex w-full justify-center bg-primary backdrop-blur-xl text-black transition-all">
+    <header className="fixed top-0 z-50 flex w-full justify-center bg-primary backdrop-blur-xl text-black transition-all">
       <div className="container flex h-16 items-center justify-between gap-2 px-2 md:px-6 lg:px-8">
         <div className="flex items-center gap-6 space-x-reverse">
           <Link href="/" className="flex items-center ">

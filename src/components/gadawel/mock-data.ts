@@ -15,13 +15,13 @@ export const mockKnowledgeBase = [
     
     {
         id: 1,
-        name: 'دليل الاستخدام ',
-        href: '/converter-guide',
+        name: 'بنود الخدمة ',
+        href: '/terms-of-service',
     },
     {
         id: 2,
         name: 'سياسية الخصوصية',
-        href: '/converter-faq',
+        href: 'privacy-policy',
     },    
 ]
 
@@ -29,7 +29,7 @@ export const mockCompany = [
     {
         id: 1,
         name: 'المدونة',
-        href: '/press',
+        href: '/blog',
     },
 ]
     export const faqs = [
