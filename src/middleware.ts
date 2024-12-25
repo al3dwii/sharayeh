@@ -14,6 +14,7 @@ const PUBLIC_ROUTES = [
   "/blog/:path*",    
   "/terms-of-service",
   "/privacy-policy",
+  "/api(.*)", 
 
   // Add other public routes as needed
 ];
