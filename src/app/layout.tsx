@@ -14,6 +14,8 @@ import { ToasterProvider } from '@/components/toaster-provider';
 import { arSA } from '@clerk/localizations'
 import { CreditProvider } from '@/contexts/CreditContext';
 import { UserProvider } from "@/contexts/UserContext"; 
+import ProModal from '@/components/ProModal'; // Ensure correct casing and path
+
 
 
 const tajawal = Tajawal({
@@ -56,6 +58,8 @@ export default function RootLayout({
         >
           <ModalProvider />
           {children}
+          <ProModal />
+
             <ToasterProvider />
             <SonnarToaster position="bottom-left" />
         </ThemeProvider>
