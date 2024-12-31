@@ -15,6 +15,11 @@ import { arSA } from '@clerk/localizations'
 import { CreditProvider } from '@/contexts/CreditContext';
 import { UserProvider } from "@/contexts/UserContext"; 
 import ProModal from '@/components/ProModal'; // Ensure correct casing and path
+import Navbar from '@/components/custom/Navbar'
+import { Footer } from "@/components/gadawel/footer";
+
+import React, { Suspense } from 'react';
+
 
 
 
@@ -57,13 +62,22 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ModalProvider />
+          <Navbar />
+          <Suspense fallback={<div>Loading...</div>}>
+
+
           {children}
+          </Suspense>
+
+          <Footer />
+
           <ProModal />
 
             <ToasterProvider />
             <SonnarToaster position="bottom-left" />
         </ThemeProvider>
       </body>
+
     </html>
     </CreditProvider>
     </UserProvider>

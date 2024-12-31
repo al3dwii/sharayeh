@@ -33,7 +33,6 @@ export default async function Home() {
           />
         </Link>
       </section>
-      <Footer />
 
     </>
   )

@@ -1,36 +1,23 @@
-
-import { ReactNode } from 'react';
-import { auth } from '@clerk/nextjs';
+// app/dashboard/layout.tsx
+import React from 'react'
 import { Sidebar } from '@/components/custom/sidebar';
 
-import { redirect } from 'next/navigation';
-
-
-
-const DashboardLayout = async ({ children }: { children: ReactNode }) => {
-  const { userId } = auth();
-
-  if (!userId) {
-   
-    redirect('/sign-in');
-  
-  }
-
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <>
-      <div className="h-full relative">
-        <div className="hidden h-full md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-gray-100">
-        
-          <Sidebar  />
-        </div>
-        <main>
-       
-         
+    <div className="flex min-h-screen">
+      {/* Sidebar (hidden on small screens, expanded on md+) */}
+      <Sidebar />
+
+      {/* Main content area */}
+      <div className="flex flex-1 flex-col">
+        <main className="flex-1 p-4 md:p-6">
           {children}
         </main>
       </div>
-    </>
-  );
-};
-
-export default DashboardLayout;
+    </div>
+  )
+}

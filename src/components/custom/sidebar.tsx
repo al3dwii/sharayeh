@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -59,7 +60,8 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-gray-100 mt-14 text-black">
+    <aside className="hidden w-64 flex-shrink-0 bg-gray-100 p-4 text-white md:block">
+      <div className=" h-full mt-20 text-black">
       <div className="px-3 py-2 flex-1">
         {/* Optional: Display User Information */}
         {user && (
@@ -101,8 +103,26 @@ export const Sidebar = () => {
         </button>
       </div>
     </div>
+    {/* <nav>
+      <ul>
+        <li className="mb-2 rounded px-4 py-2 hover:bg-gray-700">
+          <Link href="/dashboard">Dashboard</Link>
+        </li>
+        <li className="mb-2 rounded px-4 py-2 hover:bg-gray-700">
+          <Link href="/dashboard/analytics">Analytics</Link>
+        </li>
+        <li className="mb-2 rounded px-4 py-2 hover:bg-gray-700">
+          <Link href="/dashboard/settings">Settings</Link>
+        </li>
+      </ul>
+    </nav> */}
+  </aside>
+    
   );
 };
+
+
+
 
 
 // "use client";

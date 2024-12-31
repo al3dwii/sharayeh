@@ -109,7 +109,7 @@ export default function PrivacyPolicy() {
         </p>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

@@ -21,7 +21,7 @@ export default function BlogPage() {
      
 
     </main>
-     <Footer />
+     {/* <Footer /> */}
      </>
   );
 }

@@ -52,7 +52,6 @@ export default async function PricingPage() {
         </main>
         <PricingFaqs />
 
-        <Footer />
       </>
     );
   } catch (error) {

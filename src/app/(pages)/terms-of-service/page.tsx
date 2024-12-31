@@ -120,7 +120,7 @@ export default function TermsOfService() {
           </p>
         </main>
         
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </>
   );
