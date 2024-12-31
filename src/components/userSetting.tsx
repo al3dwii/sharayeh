@@ -1,11 +1,9 @@
-// /src/components/UserSetting.tsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ClientToast from '@/components/custom/ClientToast';
-import SubscriptionCard from '@/components/SubscriptionCard';
+import PackageCard from '@/components/PackageCard';
 import CreditsCard from '@/components/CreditsCard';
 import CreditTransactionsCard from '@/components/CreditTransactionsCard';
 
@@ -25,13 +23,19 @@ interface UserData {
     createdAt: string;
     updatedAt: string;
   } | null;
-  UserSubscription: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    stripePriceId?: string;
-    stripeCurrentPeriodEnd?: string;
-    createdAt: string;
-    updatedAt: string;
+  UserPackage: {
+    packageId: string;
+    acquiredAt: string;
+    expiresAt: string | null;
+    package: {
+      name: string;
+      price: number;
+      credits: number;
+      presentations: number;
+      slidesPerPresentation: number;
+      canAddTransition: boolean;
+      canUploadPDF: boolean;
+    } | null;
   } | null;
   CreditTransactions: Array<{
     type: string;
@@ -47,18 +51,6 @@ interface UserData {
     status: string;
     createdAt: string;
   }>;
-  Subscriptions: Array<{
-    plan: {
-      name: string;
-      price: number;
-      credits: number;
-      presentations: number;
-      slidesPerPresentation: number;
-      canAddTransition: boolean;
-      canUploadPDF: boolean;
-    };
-  }>;
-  // Add other user-related fields as necessary
 }
 
 const UserSetting: React.FC<UserSettingProps> = ({ userId, isPro, onUpdate }) => {
@@ -66,7 +58,6 @@ const UserSetting: React.FC<UserSettingProps> = ({ userId, isPro, onUpdate }) =>
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    // Add other fields as necessary
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +74,6 @@ const UserSetting: React.FC<UserSettingProps> = ({ userId, isPro, onUpdate }) =>
       setFormData({
         name: response.data.name || '',
         email: response.data.email || '',
-        // Populate other fields as necessary
       });
     } catch (err: any) {
       console.error('Error fetching user data:', err);
@@ -167,8 +157,6 @@ const UserSetting: React.FC<UserSettingProps> = ({ userId, isPro, onUpdate }) =>
           />
         </div>
 
-        {/* Add other fields as necessary */}
-
         <button
           type="submit"
           disabled={loading}
@@ -180,10 +168,10 @@ const UserSetting: React.FC<UserSettingProps> = ({ userId, isPro, onUpdate }) =>
         </button>
       </form>
 
-      {/* Subscription and Credits Cards */}
+      {/* Package and Credits Cards */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Subscription Card */}
-        <SubscriptionCard subscription={user.UserSubscription} />
+        {/* Package Card */}
+        <PackageCard userPackage={user.UserPackage} />
 
         {/* Credits Card */}
         <CreditsCard userCredits={user.UserCredits} />

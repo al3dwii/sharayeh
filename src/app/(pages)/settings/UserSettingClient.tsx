@@ -1,10 +1,9 @@
-// src/app/(pages)/settings/UserSettingClient.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ClientToast from '@/components/custom/ClientToast';
-import SubscriptionCard from '@/components/SubscriptionCard';
+import PackageCard from '@/components/PackageCard';
 import CreditsCard from '@/components/CreditsCard';
 import CreditTransactionsCard from '@/components/CreditTransactionsCard';
 
@@ -18,13 +17,19 @@ interface UserData {
     createdAt: string;
     updatedAt: string;
   } | null;
-  UserSubscription: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    stripePriceId?: string;
-    stripeCurrentPeriodEnd?: string;
-    createdAt: string;
-    updatedAt: string;
+  UserPackage: {
+    packageId: string;
+    acquiredAt: string;
+    expiresAt: string | null;
+    package: {
+      name: string;
+      price: number;
+      credits: number;
+      presentations: number;
+      slidesPerPresentation: number;
+      canAddTransition: boolean;
+      canUploadPDF: boolean;
+    } | null;
   } | null;
   CreditTransactions: Array<{
     type: string;
@@ -39,17 +44,6 @@ interface UserData {
     type: string;
     status: string;
     createdAt: string;
-  }>;
-  Subscriptions: Array<{
-    plan: {
-      name: string;
-      price: number;
-      credits: number;
-      presentations: number;
-      slidesPerPresentation: number;
-      canAddTransition: boolean;
-      canUploadPDF: boolean;
-    };
   }>;
 }
 
@@ -162,9 +156,9 @@ export default function UserSettingClient() {
         </button>
       </form>
 
-      {/* Subscription and Credits Cards */}
+      {/* Package and Credits Cards */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SubscriptionCard subscription={user.UserSubscription} />
+        <PackageCard userPackage={user.UserPackage} />
         <CreditsCard userCredits={user.UserCredits} />
       </div>
 

@@ -1,4 +1,3 @@
-
 // pages/user/[userId]/page.tsx
 
 import { Suspense } from 'react';
@@ -8,9 +7,11 @@ import { db } from '@/lib/db';
 
 import UserProfileCard from '@/components/user-detail/user-info-card';
 import { AccountInfoCard } from '@/components/user-detail/account-info-card';
+// import { CreditsCard } from '@/components/user-detail/credits-card';
+// import { PackageCard } from '@/components/user-detail/package-card'; // Replace SubscriptionCard with PackageCard
 import { CreditsCard } from '@/components/user-detail/credits-card';
-import { SubscriptionCard } from '@/components/user-detail/subscription-card';
 import { FilesCard } from '@/components/user-detail/files-card';
+import { PackageCard } from '@/components/user-detail/subscription-card';
 
 interface UserDetailPageProps {
   params: {
@@ -19,10 +20,13 @@ interface UserDetailPageProps {
 }
 
 async function getUserData(userId: string) {
-  const [user, userCredits, userSubscription, userFiles] = await Promise.all([
+  const [user, userCredits, userPackage, userFiles] = await Promise.all([
     clerkClient.users.getUser(userId).catch(() => null),
     db.userCredits.findUnique({ where: { userId } }),
-    db.userSubscription.findUnique({ where: { userId } }),
+    db.userPackage.findUnique({
+      where: { userId },
+      include: { package: true }, // Include package details
+    }),
     db.file.findMany({ where: { userId } }),
   ]);
 
@@ -30,7 +34,7 @@ async function getUserData(userId: string) {
     notFound();
   }
 
-  return { user, userCredits, userSubscription, userFiles };
+  return { user, userCredits, userPackage, userFiles };
 }
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
@@ -56,7 +60,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 }
 
 async function UserData({ userId }: { userId: string }) {
-  const { user, userCredits, userSubscription, userFiles } = await getUserData(userId);
+  const { user, userCredits, userPackage, userFiles } = await getUserData(userId);
 
   return (
     <main className="container mx-auto flex flex-1 flex-col gap-6 p-4 md:gap-8 md:p-8">
@@ -66,10 +70,13 @@ async function UserData({ userId }: { userId: string }) {
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <CreditsCard userCredits={userCredits} />
-        <SubscriptionCard userSubscription={userSubscription} />
+        <PackageCard userPackage={userPackage} /> 
+       {/* <SubscriptionCard userPackage={userPackage} /> */}
+
       </div>
       <FilesCard userFiles={userFiles} userId={user.id} /> {/* Pass userId if needed for actions */}
     </main>
   );
 }
+
 

@@ -4,23 +4,20 @@ const DAY_IN_MS = 86_400_000;
 
 export const checkSubscription = async (userId: string): Promise<boolean> => {
   try {
-    const subscription = await prismadb.userSubscription.findUnique({
+    const subscription = await prismadb.userPackage.findUnique({
       where: { userId },
       select: {
-        stripePriceId: true,
-        stripeCurrentPeriodEnd: true,
+        stripeCustomerId: true,
       },
     });
 
     if (
       subscription &&
-      subscription.stripePriceId &&
-      subscription.stripeCurrentPeriodEnd
+      subscription.stripeCustomerId 
     ) {
-      const periodEndWithGrace = subscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS;
       const currentTime = Date.now();
 
-      return periodEndWithGrace > currentTime;
+      return ;
     }
 
     return false;
