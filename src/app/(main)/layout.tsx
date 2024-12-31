@@ -10,7 +10,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     <Navbar />
       <main className="h-full ">
         
-         <nav className="fixed  z-50 top-16 left-0 right-0 bg-blue-50 md:hidden lg:hidden  ">
+         {/* <nav className="fixed  z-50 top-16 left-0 right-0 bg-blue-50 md:hidden lg:hidden  ">
     <ul className="flex justify-around items-center h-12 px-4">
       <li className="w-1/2">
         <Link 
@@ -30,7 +30,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         </Link>
       </li>
     </ul>
-  </nav>
+  </nav> */}
        {children}
       </main>
       </>

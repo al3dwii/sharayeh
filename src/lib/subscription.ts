@@ -1,35 +1,66 @@
 import { auth } from "@clerk/nextjs";
-
 import prismadb from "@/utils/prismadb";
 
-const DAY_IN_MS = 86_400_000;
+// No need for DAY_IN_MS if there's no expiration date
+// const DAY_IN_MS = 86_400_000;
 
-export const checkSubscription = async () => {
+export const checkPackage = async () => {
   const { userId } = auth();
 
+  // If the user is not authenticated
   if (!userId) {
     return false;
   }
 
-  const userSubscription = await prismadb.userSubscription.findUnique({
-    where: {
-      userId: userId,
-    },
+  // Fetch the user's credits
+  const userPackage = await prismadb.userPackage.findUnique({
+    where: { userId },
     select: {
-      stripeSubscriptionId: true,
-      stripeCurrentPeriodEnd: true,
       stripeCustomerId: true,
-      stripePriceId: true,
     },
-  })
+  });
 
-  if (!userSubscription) {
+  // If no credits record or zero credits, assume no active package
+  if (!userPackage) {
     return false;
   }
 
-  const isValid =
-    userSubscription.stripePriceId &&
-    userSubscription.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now()
-
-  return !!isValid;
+  // If user has credits, consider that valid package access
+  return true;
 };
+
+// import { auth } from "@clerk/nextjs";
+
+// import prismadb from "@/utils/prismadb";
+
+// const DAY_IN_MS = 86_400_000;
+
+// export const checkSubscription = async () => {
+//   const { userId } = auth();
+
+//   if (!userId) {
+//     return false;
+//   }
+
+//   const userSubscription = await prismadb.userSubscription.findUnique({
+//     where: {
+//       userId: userId,
+//     },
+//     select: {
+//       stripeSubscriptionId: true,
+//       stripeCurrentPeriodEnd: true,
+//       stripeCustomerId: true,
+//       stripePriceId: true,
+//     },
+//   })
+
+//   if (!userSubscription) {
+//     return false;
+//   }
+
+//   const isValid =
+//     userSubscription.stripePriceId &&
+//     userSubscription.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now()
+
+//   return !!isValid;
+// };

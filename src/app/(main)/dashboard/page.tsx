@@ -8,7 +8,7 @@ import { auth } from '@clerk/nextjs';
 import { DashboardShell } from '@/components/custom/shell';
 import { Footer } from "@/components/gadawel/footer";
 import { UserInfo } from "./UserInfo";
-import { checkSubscription } from "@/lib/subscription";
+// import { checkSubscription } from "@/lib/subscription";
 import ClientToast from "@/components/custom/ClientToast";
 
 import Link from 'next/link'
@@ -16,7 +16,7 @@ import Link from 'next/link'
 const DashboardPage = async () => {
   const { userId } = auth();
 
-  const isPro = await checkSubscription();
+  // const isPro = await checkSubscription();
 
   if (!userId) {
     return (
@@ -55,7 +55,7 @@ const DashboardPage = async () => {
   <div className="mt-28">
  
             
-              <UserInfo isPro={isPro} />
+              <UserInfo  />
             </div>
             <div className="flex-1">
             </div>

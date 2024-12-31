@@ -6,13 +6,15 @@ export interface Plan {
   frequency: string;
   features: string[];
   limitations: string[];
-  tier: "FREE" | "STANDARD" | "PREMIUM"; // Added tier for consistency
+  tier: "FREE" | "STANDARD" | "PREMIUM" | "SUPER";
+
 }
 
 export const planHierarchy: string[] = [
   "cm4kcbd6t00007ndb3r9dydrc", // Free
   "cm4kcbe5u00017ndbe7dphuoo", // Standard
   "cm4kcbeop00027ndbbg8k20me", // Premium
+  "cm4kcbeop00027ndbbg8k20mesuper", // Super
 ];
 
 export const pricingPlans: Plan[] = [
@@ -35,7 +37,7 @@ export const pricingPlans: Plan[] = [
   },
   {
     id: "cm4kcbe5u00017ndbe7dphuoo",
-    stripePriceId: "price_1QVtn7AlDgxzsK9aupXkenzq",
+    stripePriceId: "price_1QaNoBAlDgxzsK9aNcAmhn2W",
     title: "خطة المعيارية",
     price: "10$",
     frequency: "3 أشهر",
@@ -52,7 +54,7 @@ export const pricingPlans: Plan[] = [
   },
   {
     id: "cm4kcbeop00027ndbbg8k20me",
-    stripePriceId: "price_1QVtnTAlDgxzsK9aWNXCKGqT",
+    stripePriceId: "price_1QaNnAAlDgxzsK9aWdxLeU5U",
     title: "خطة المحترفين",
     price: "25$",
     frequency: "6 أشهر",
@@ -65,7 +67,93 @@ export const pricingPlans: Plan[] = [
     limitations: [],
     tier: "PREMIUM",
   },
+  // {
+  //   id: "cm4kcbeop00027ndbbg8k20mesuper",
+  //   stripePriceId: "price_1Qc69GAlDgxzsK9aKuQvYr9s",
+  //   title: "خطة الشركات",
+  //   price: "55$",
+  //   frequency: "6 أشهر",
+  //   features: [
+  //     "رفع مستندات غير محدود",
+  //     "معالجة OCR المتقدمة",
+  //     "دعم الأولوية",
+  //     "الوصول إلى التحليلات الشاملة",
+  //   ],
+  //   limitations: [],
+  //   tier: "SUPER",
+  // },
 ];
+
+
+
+// export interface Plan {
+//   id: string;
+//   stripePriceId: string;
+//   title: string;
+//   price: string;
+//   frequency: string;
+//   features: string[];
+//   limitations: string[];
+//   tier: "FREE" | "STANDARD" | "PREMIUM"; // Added tier for consistency
+// }
+
+// export const planHierarchy: string[] = [
+//   "cm4kcbd6t00007ndb3r9dydrc", // Free
+//   "cm4kcbe5u00017ndbe7dphuoo", // Standard
+//   "cm4kcbeop00027ndbbg8k20me", // Premium
+// ];
+
+// export const pricingPlans: Plan[] = [
+//   {
+//     id: "cm4kcbd6t00007ndb3r9dydrc",
+//     stripePriceId: "price_1QVtmXAlDgxzsK9aFXzqJmSy",
+//     title: "الخطة الأساسية",
+//     price: "0$",
+//     frequency: "",
+//     features: [
+//       "رفع 10 مستندات شهرياً",
+//       "معالجة OCR الأساسية",
+//       "دعم عبر البريد الإلكتروني",
+//     ],
+//     limitations: [
+//       "لا توجد تحليلات متقدمة",
+//       "سعة تخزين محدودة",
+//     ],
+//     tier: "FREE",
+//   },
+//   {
+//     id: "cm4kcbe5u00017ndbe7dphuoo",
+//     stripePriceId: "price_1QVtn7AlDgxzsK9aupXkenzq",
+//     title: "خطة المعيارية",
+//     price: "10$",
+//     frequency: "3 أشهر",
+//     features: [
+//       "رفع 100 مستند شهرياً",
+//       "معالجة OCR متقدمة",
+//       "دعم عبر الدردشة",
+//     ],
+//     limitations: [
+//       "تحليلات محدودة",
+//       "سعة تخزين متوسطة",
+//     ],
+//     tier: "STANDARD",
+//   },
+//   {
+//     id: "cm4kcbeop00027ndbbg8k20me",
+//     stripePriceId: "price_1QVtnTAlDgxzsK9aWNXCKGqT",
+//     title: "خطة المحترفين",
+//     price: "25$",
+//     frequency: "6 أشهر",
+//     features: [
+//       "رفع مستندات غير محدود",
+//       "معالجة OCR المتقدمة",
+//       "دعم الأولوية",
+//       "الوصول إلى التحليلات الشاملة",
+//     ],
+//     limitations: [],
+//     tier: "PREMIUM",
+//   },
+// ];
 
 
 

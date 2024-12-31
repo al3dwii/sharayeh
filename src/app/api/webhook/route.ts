@@ -2,21 +2,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import prismadb from '@/utils/prismadb';
+import { db } from '@/lib/db'; // Use consistent Prisma client
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
-import { Prisma } from '@prisma/client'; // Import Prisma types
+import { Prisma } from '@prisma/client';
 
-// Define supported event types for better control
-const supportedEvents = new Set([
-  'checkout.session.completed',
-  'customer.subscription.created', // Added
-  'customer.subscription.deleted',
-  'customer.subscription.updated',
-  // Add other relevant events as needed
-]);
+// Only handle checkout.session.completed for one-time payments
+const supportedEvents = new Set(['checkout.session.completed']);
 
-export async function POST(request: NextRequest) { // Changed to NextRequest
+export async function POST(request: NextRequest) {
   const sig = headers().get('stripe-signature');
   const buf = await request.arrayBuffer();
   const body = Buffer.from(buf);
@@ -36,17 +30,17 @@ export async function POST(request: NextRequest) { // Changed to NextRequest
     );
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error('Webhook signature verification failed.', err.message);
+      console.error('Webhook signature verification failed:', err.message);
       return new Response(`Webhook Error: ${err.message}`, { status: 400 });
     } else {
-      console.error('Webhook signature verification failed.', err);
+      console.error('Webhook signature verification failed:', err);
       return new Response('Webhook Error: Invalid signature.', { status: 400 });
     }
   }
 
   // Implement idempotency by checking if the event has been processed
   const eventId = event.id;
-  const existingEvent = await prismadb.stripeEvent.findUnique({
+  const existingEvent = await db.stripeEvent.findUnique({
     where: { id: eventId },
   });
 
@@ -59,44 +53,28 @@ export async function POST(request: NextRequest) { // Changed to NextRequest
     if (!supportedEvents.has(event.type)) {
       console.log(`Unhandled event type ${event.type}`);
       // Optionally, store unhandled events to prevent reprocessing
-      await prismadb.stripeEvent.create({
+      await db.stripeEvent.create({
         data: {
           id: event.id,
           type: event.type,
-          data: event.data.object as Prisma.JsonValue, // Explicit cast
+          data: event.data.object as Prisma.JsonValue,
         },
       });
       return NextResponse.json({ received: true });
     }
 
-    // Handle supported event types
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutSessionCompleted(session);
-        break;
-      case 'customer.subscription.created':
-        const newSubscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(newSubscription);
-        break;
-      case 'customer.subscription.deleted':
-        const deletedSubscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(deletedSubscription);
-        break;
-      case 'customer.subscription.updated':
-        const updatedSubscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(updatedSubscription);
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+    // Handle the supported event
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutSessionCompleted(session);
     }
 
     // Store the event to ensure idempotency
-    await prismadb.stripeEvent.create({
+    await db.stripeEvent.create({
       data: {
         id: event.id,
         type: event.type,
-        data: event.data.object as Prisma.JsonValue, // Explicit cast
+        data: event.data.object as Prisma.JsonValue,
       },
     });
 
@@ -107,319 +85,918 @@ export async function POST(request: NextRequest) { // Changed to NextRequest
   }
 }
 
-// Handler for checkout.session.completed event
+// =============================================================================
+// Handler for checkout.session.completed event (one-time payment)
+// =============================================================================
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId;
-  const planId = session.metadata?.planId;
+  const packageId = session.metadata?.packageId;
+  const customerId = session.customer as string | undefined; // Extract Customer ID
 
-  if (!userId || !planId) {
-    console.error('Missing metadata (userId or planId) in session.');
+  if (!userId || !packageId || !customerId) {
+    console.error('Missing metadata (userId, packageId, or customerId) in session.');
     return;
   }
 
-  // Retrieve the subscription ID from the session
-  const subscriptionId = session.subscription as string | undefined;
-
-  if (!subscriptionId) {
-    console.error('No subscription ID found in session.');
-    return;
-  }
-
-  // Fetch subscription details from Stripe
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-  if (!subscription) {
-    console.error('Subscription not found in Stripe.');
-    return;
-  }
-
-  // Fetch the subscription plan from the database
-  const plan = await prismadb.subscriptionPlan.findUnique({
-    where: { id: planId },
-  });
-
-  if (!plan) {
-    console.error('Subscription plan not found.');
-    return;
-  }
-
-  // Convert Unix timestamp to JavaScript Date
-  const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
-
-  // Extract customer ID safely
-  const stripeCustomerId =
-    typeof subscription.customer === 'string'
-      ? subscription.customer
-      : undefined;
-
-  if (!stripeCustomerId) {
-    console.error('Invalid customer ID in subscription.');
-    return;
-  }
-
-  // Upsert user subscription in the database
+  // 1) Upsert a UserPackage record for this user/package
   try {
-    await prismadb.userSubscription.upsert({
+    await db.userPackage.upsert({
       where: { userId },
       update: {
-        stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0]?.price.id || '',
-        stripeCurrentPeriodEnd: currentPeriodEnd,
-        stripeCustomerId: stripeCustomerId,
+        packageId,
+        acquiredAt: new Date(),
+        expiresAt: null, // No expiration for one-time purchases
+        stripeCustomerId: customerId, // Updated field
       },
       create: {
         userId,
-        stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0]?.price.id || '',
-        stripeCurrentPeriodEnd: currentPeriodEnd,
-        stripeCustomerId: stripeCustomerId,
+        packageId,
+        acquiredAt: new Date(),
+        expiresAt: null,
+        stripeCustomerId: customerId, // Updated field
       },
     });
+    console.log(`UserPackage upserted for userId: ${userId}, packageId: ${packageId}`);
   } catch (error) {
-    console.error('Error upserting user subscription:', error);
+    console.error('Error upserting userPackage:', error);
+    throw error; // Re-throw to handle idempotency storage
+  }
+
+  // 2) Fetch the purchased package details
+  const purchasedPackage = await db.package.findUnique({
+    where: { id: packageId },
+  });
+  if (!purchasedPackage) {
+    console.error('Package not found for the provided packageId.');
     return;
   }
 
-  // **Initialize or Increment User Credits**
+  // 3) Initialize or increment user credits
   try {
-    const existingCredits = await prismadb.userCredits.findUnique({
+    const existingCredits = await db.userCredits.findUnique({
       where: { userId },
     });
 
     if (existingCredits) {
-      // **Increment** credits instead of overwriting
-      await prismadb.userCredits.update({
+      // Increment existing credits
+      await db.userCredits.update({
         where: { userId },
-        data: { 
+        data: {
           credits: {
-            increment: plan.credits
+            increment: purchasedPackage.credits,
           },
         },
       });
+      console.log(`Credits incremented by ${purchasedPackage.credits} for userId: ${userId}`);
     } else {
-      // **Create** credits if not existing
-      await prismadb.userCredits.create({
+      // Create user credits
+      await db.userCredits.create({
         data: {
           userId,
-          credits: plan.credits,
+          credits: purchasedPackage.credits,
           usedCredits: 0,
         },
       });
+      console.log(`UserCredits created with ${purchasedPackage.credits} credits for userId: ${userId}`);
     }
   } catch (error) {
     console.error('Error initializing/updating user credits:', error);
-    return;
+    throw error; // Re-throw to handle idempotency storage
   }
 
-  // Log the credit addition as a transaction
+  // 4) Log the credit addition as a transaction
   try {
-    await prismadb.creditTransaction.create({
+    await db.creditTransaction.create({
       data: {
         userId,
         type: 'ADDITION',
-        amount: plan.credits,
-        description: `Credits added for ${plan.name} plan.`,
+        amount: purchasedPackage.credits,
+        description: `Credits added for one-time purchase of ${purchasedPackage.name}.`,
       },
     });
+    console.log(`Credit transaction logged for userId: ${userId}, amount: ${purchasedPackage.credits}`);
   } catch (error) {
     console.error('Error creating credit transaction:', error);
-    return;
+    throw error; // Re-throw to handle idempotency storage
   }
+
+  console.log(`One-time purchase completed for user: ${userId}, package: ${packageId}.`);
 }
 
-// Handler for customer.subscription.created event
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata?.userId;
-  const planId = subscription.metadata?.planId;
 
-  if (!userId || !planId) {
-    console.error('Missing metadata (userId or planId) in subscription.');
-    return;
-  }
 
-  // Fetch the subscription plan from the database
-  const plan = await prismadb.subscriptionPlan.findUnique({
-    where: { id: planId },
-  });
 
-  if (!plan) {
-    console.error('Subscription plan not found.');
-    return;
-  }
+// // app/api/webhook/route.ts
 
-  // Convert Unix timestamp to JavaScript Date
-  const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+// import { NextRequest, NextResponse } from 'next/server';
+// import { stripe } from '@/lib/stripe';
+// import { db } from '@/lib/db'; // Use consistent Prisma client
+// import Stripe from 'stripe';
+// import { headers } from 'next/headers';
+// import { Prisma } from '@prisma/client';
 
-  // Upsert user subscription details in the database
-  try {
-    await prismadb.userSubscription.upsert({
-      where: { userId },
-      update: {
-        stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0]?.price.id || '',
-        stripeCurrentPeriodEnd: currentPeriodEnd,
-        stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : undefined,
-      },
-      create: {
-        userId,
-        stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0]?.price.id || '',
-        stripeCurrentPeriodEnd: currentPeriodEnd,
-        stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : undefined,
-      },
-    });
-  } catch (error) {
-    console.error('Error upserting user subscription:', error);
-    return;
-  }
+// // Only handle checkout.session.completed for one-time payments
+// const supportedEvents = new Set(['checkout.session.completed']);
 
-  // **Initialize or Increment User Credits**
-  try {
-    const existingCredits = await prismadb.userCredits.findUnique({ where: { userId } });
+// export async function POST(request: NextRequest) {
+//   const sig = headers().get('stripe-signature');
+//   const buf = await request.arrayBuffer();
+//   const body = Buffer.from(buf);
 
-    if (existingCredits) {
-      // **Increment** credits instead of overwriting
-      await prismadb.userCredits.update({
-        where: { userId },
-        data: { 
-          credits: {
-            increment: plan.credits
-          },
-        },
-      });
-    } else {
-      // **Create** credits if not existing
-      await prismadb.userCredits.create({
-        data: {
-          userId,
-          credits: plan.credits,
-          usedCredits: 0,
-        },
-      });
-    }
-  } catch (error) {
-    console.error('Error initializing/updating user credits:', error);
-    return;
-  }
+//   let event: Stripe.Event;
 
-  // Log the credit addition as a transaction
-  try {
-    await prismadb.creditTransaction.create({
-      data: {
-        userId,
-        type: 'ADDITION',
-        amount: plan.credits,
-        description: `Credits added for new subscription to ${plan.name} plan.`,
-      },
-    });
-  } catch (error) {
-    console.error('Error creating credit transaction:', error);
-    return;
-  }
-}
+//   try {
+//     if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+//       throw new Error('Missing Stripe signature or webhook secret.');
+//     }
 
-// Handler for customer.subscription.deleted event
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const userSubscription = await prismadb.userSubscription.findUnique({
-    where: { stripeSubscriptionId: subscription.id },
-  });
+//     // Verify and construct the Stripe event
+//     event = stripe.webhooks.constructEvent(
+//       body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//   } catch (err: unknown) {
+//     if (err instanceof Error) {
+//       console.error('Webhook signature verification failed:', err.message);
+//       return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+//     } else {
+//       console.error('Webhook signature verification failed:', err);
+//       return new Response('Webhook Error: Invalid signature.', { status: 400 });
+//     }
+//   }
 
-  if (!userSubscription) {
-    console.error('User subscription not found.');
-    return;
-  }
+//   // Implement idempotency by checking if the event has been processed
+//   const eventId = event.id;
+//   const existingEvent = await db.stripeEvent.findUnique({
+//     where: { id: eventId },
+//   });
 
-  // Reset user credits upon subscription deletion
-  try {
-    await prismadb.userCredits.update({
-      where: { userId: userSubscription.userId },
-      data: { credits: 0 },
-    });
-  } catch (error) {
-    console.error('Error updating user credits:', error);
-    return;
-  }
+//   if (existingEvent) {
+//     console.log(`Duplicate event received: ${eventId}`);
+//     return NextResponse.json({ received: true });
+//   }
 
-  // Log the credit deduction as a transaction
-  try {
-    await prismadb.creditTransaction.create({
-      data: {
-        userId: userSubscription.userId,
-        type: 'DEDUCTION',
-        amount: 0,
-        description: 'Subscription canceled. Credits reset.',
-      },
-    });
-  } catch (error) {
-    console.error('Error creating credit transaction:', error);
-    return;
-  }
-}
+//   try {
+//     if (!supportedEvents.has(event.type)) {
+//       console.log(`Unhandled event type ${event.type}`);
+//       // Optionally, store unhandled events to prevent reprocessing
+//       await db.stripeEvent.create({
+//         data: {
+//           id: event.id,
+//           type: event.type,
+//           data: event.data.object as Prisma.JsonValue,
+//         },
+//       });
+//       return NextResponse.json({ received: true });
+//     }
 
-// Handler for customer.subscription.updated event
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata?.userId;
-  const newPlanId = subscription.metadata?.planId;
+//     // Handle the supported event
+//     if (event.type === 'checkout.session.completed') {
+//       const session = event.data.object as Stripe.Checkout.Session;
+//       await handleCheckoutSessionCompleted(session);
+//     }
 
-  if (!userId || !newPlanId) {
-    console.error('Missing metadata (userId or planId) in subscription.');
-    return;
-  }
+//     // Store the event to ensure idempotency
+//     await db.stripeEvent.create({
+//       data: {
+//         id: event.id,
+//         type: event.type,
+//         data: event.data.object as Prisma.JsonValue,
+//       },
+//     });
 
-  // Fetch the new subscription plan from the database
-  const newPlan = await prismadb.subscriptionPlan.findUnique({
-    where: { id: newPlanId },
-  });
+//     return NextResponse.json({ received: true });
+//   } catch (error) {
+//     console.error('Webhook Handling Error:', error);
+//     return NextResponse.json({ error: 'Webhook Handler Error' }, { status: 500 });
+//   }
+// }
 
-  if (!newPlan) {
-    console.error('New subscription plan not found.');
-    return;
-  }
+// // =============================================================================
+// // Handler for checkout.session.completed event (one-time payment)
+// // =============================================================================
+// async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+//   const userId = session.metadata?.userId;
+//   const packageId = session.metadata?.packageId;
 
-  // Convert Unix timestamp to JavaScript Date
-  const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+//   if (!userId || !packageId) {
+//     console.error('Missing metadata (userId or packageId) in session.');
+//     return;
+//   }
 
-  // Upsert user subscription details in the database
-  try {
-    await prismadb.userSubscription.update({
-      where: { userId },
-      data: {
-        stripePriceId: subscription.items.data[0]?.price.id || '',
-        stripeCurrentPeriodEnd: currentPeriodEnd,
-      },
-    });
-  } catch (error) {
-    console.error('Error updating user subscription:', error);
-    return;
-  }
+//   // Optionally, retrieve the PaymentIntent ID from the session
+//   const paymentIntentId = session.payment_intent as string | undefined;
 
-  // **Update: Adjust user credits by adding new plan's credits**
-  try {
-    await prismadb.userCredits.update({
-      where: { userId },
-      data: { 
-        credits: {
-          increment: newPlan.credits
-        },
-      },
-    });
-  } catch (error) {
-    console.error('Error updating user credits:', error);
-    return;
-  }
+//   // 1) Upsert a UserPackage record for this user/package
+//   try {
+//     await db.userPackage.upsert({
+//       where: { userId },
+//       update: {
+//         packageId,
+//         acquiredAt: new Date(),
+//         expiresAt: null, // No expiration for one-time purchases
+//         stripePurchaseId: paymentIntentId
+//           ? paymentIntentId
+//           : `one_time_${Date.now()}`,
+//       },
+//       create: {
+//         userId,
+//         packageId,
+//         acquiredAt: new Date(),
+//         expiresAt: null,
+//         stripePurchaseId: paymentIntentId
+//           ? paymentIntentId
+//           : `one_time_${Date.now()}`,
+//       },
+//     });
+//     console.log(`UserPackage upserted for userId: ${userId}, packageId: ${packageId}`);
+//   } catch (error) {
+//     console.error('Error upserting userPackage:', error);
+//     throw error; // Re-throw to handle idempotency storage
+//   }
 
-  // **Update: Log the credit adjustment as an addition transaction**
-  try {
-    await prismadb.creditTransaction.create({
-      data: {
-        userId,
-        type: 'ADDITION', // Changed from 'ADJUSTMENT' to 'ADDITION'
-        amount: newPlan.credits,
-        description: `Credits added for plan change to ${newPlan.name}.`,
-      },
-    });
-  } catch (error) {
-    console.error('Error creating credit transaction:', error);
-    return;
-  }
-}
+//   // 2) Fetch the purchased package details
+//   const purchasedPackage = await db.package.findUnique({
+//     where: { id: packageId },
+//   });
+//   if (!purchasedPackage) {
+//     console.error('Package not found for the provided packageId.');
+//     return;
+//   }
+
+//   // 3) Initialize or increment user credits
+//   try {
+//     const existingCredits = await db.userCredits.findUnique({
+//       where: { userId },
+//     });
+
+//     if (existingCredits) {
+//       // Increment existing credits
+//       await db.userCredits.update({
+//         where: { userId },
+//         data: {
+//           credits: {
+//             increment: purchasedPackage.credits,
+//           },
+//         },
+//       });
+//       console.log(`Credits incremented by ${purchasedPackage.credits} for userId: ${userId}`);
+//     } else {
+//       // Create user credits
+//       await db.userCredits.create({
+//         data: {
+//           userId,
+//           credits: purchasedPackage.credits,
+//           usedCredits: 0,
+//         },
+//       });
+//       console.log(`UserCredits created with ${purchasedPackage.credits} credits for userId: ${userId}`);
+//     }
+//   } catch (error) {
+//     console.error('Error initializing/updating user credits:', error);
+//     throw error; // Re-throw to handle idempotency storage
+//   }
+
+//   // 4) Log the credit addition as a transaction
+//   try {
+//     await db.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: purchasedPackage.credits,
+//         description: `Credits added for one-time purchase of ${purchasedPackage.name}.`,
+//       },
+//     });
+//     console.log(`Credit transaction logged for userId: ${userId}, amount: ${purchasedPackage.credits}`);
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     throw error; // Re-throw to handle idempotency storage
+//   }
+
+//   console.log(`One-time purchase completed for user: ${userId}, package: ${packageId}.`);
+// }
+
+
+// // app/api/webhook/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { stripe } from '@/lib/stripe';
+// import prismadb from '@/utils/prismadb';
+// import Stripe from 'stripe';
+// import { headers } from 'next/headers';
+// import { Prisma } from '@prisma/client'; // Import Prisma types
+
+// // Only handle one-time purchase event
+// const supportedEvents = new Set(['checkout.session.completed']);
+
+// export async function POST(request: NextRequest) {
+//   const sig = headers().get('stripe-signature');
+//   const buf = await request.arrayBuffer();
+//   const body = Buffer.from(buf);
+
+//   let event: Stripe.Event;
+
+//   try {
+//     if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+//       throw new Error('Missing Stripe signature or webhook secret.');
+//     }
+
+//     // Verify and construct the Stripe event
+//     event = stripe.webhooks.constructEvent(
+//       body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//   } catch (err: unknown) {
+//     if (err instanceof Error) {
+//       console.error('Webhook signature verification failed:', err.message);
+//       return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+//     } else {
+//       console.error('Webhook signature verification failed:', err);
+//       return new Response('Webhook Error: Invalid signature.', { status: 400 });
+//     }
+//   }
+
+//   // Implement idempotency by checking if the event has been processed
+//   const eventId = event.id;
+//   const existingEvent = await prismadb.stripeEvent.findUnique({
+//     where: { id: eventId },
+//   });
+
+//   if (existingEvent) {
+//     console.log(`Duplicate event received: ${eventId}`);
+//     return NextResponse.json({ received: true });
+//   }
+
+//   try {
+//     if (!supportedEvents.has(event.type)) {
+//       console.log(`Unhandled event type ${event.type}`);
+//       // Optionally, store unhandled events to prevent reprocessing
+//       await prismadb.stripeEvent.create({
+//         data: {
+//           id: event.id,
+//           type: event.type,
+//           data: event.data.object as Prisma.JsonValue,
+//         },
+//       });
+//       return NextResponse.json({ received: true });
+//     }
+
+//     // Handle the supported event
+//     switch (event.type) {
+//       case 'checkout.session.completed': {
+//         const session = event.data.object as Stripe.Checkout.Session;
+//         await handleCheckoutSessionCompleted(session);
+//         break;
+//       }
+//       default:
+//         console.log(`Unhandled event type ${event.type}`);
+//         break;
+//     }
+
+//     // Store the event to ensure idempotency
+//     await prismadb.stripeEvent.create({
+//       data: {
+//         id: event.id,
+//         type: event.type,
+//         data: event.data.object as Prisma.JsonValue,
+//       },
+//     });
+
+//     return NextResponse.json({ received: true });
+//   } catch (error) {
+//     console.error('Webhook Handling Error:', error);
+//     return NextResponse.json({ error: 'Webhook Handler Error' }, { status: 500 });
+//   }
+// }
+
+// // =============================================================================
+// // Handler for checkout.session.completed event (one-time payment)
+// // =============================================================================
+// async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+//   const userId = session.metadata?.userId;
+//   const packageId = session.metadata?.packageId;
+
+//   if (!userId || !packageId) {
+//     console.error('Missing metadata (userId or packageId) in session.');
+//     return;
+//   }
+
+//   // Optionally, retrieve the PaymentIntent ID from the session
+//   const paymentIntentId = session.payment_intent as string | undefined;
+
+//   // 1) Upsert a UserPackage record for this user/package
+//   //    - We'll store the `paymentIntentId` in `stripePurchaseId` if it exists.
+//   try {
+//     await prismadb.userPackage.upsert({
+//       where: { userId },
+//       update: {
+//         packageId,
+//         acquiredAt: new Date(),
+//         expiresAt: null, // For one-time purchases, you may not have an expiration
+//         stripePurchaseId: paymentIntentId
+//           ? paymentIntentId
+//           : `one_time_${Date.now()}`,
+//       },
+//       create: {
+//         userId,
+//         packageId,
+//         acquiredAt: new Date(),
+//         expiresAt: null,
+//         stripePurchaseId: paymentIntentId
+//           ? paymentIntentId
+//           : `one_time_${Date.now()}`,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error upserting userPackage:', error);
+//     return;
+//   }
+
+//   // 2) Fetch the purchased package details
+//   const purchasedPackage = await prismadb.package.findUnique({
+//     where: { id: packageId },
+//   });
+//   if (!purchasedPackage) {
+//     console.error('Package not found for the provided packageId.');
+//     return;
+//   }
+
+//   // 3) Initialize or increment user credits
+//   try {
+//     const existingCredits = await prismadb.userCredits.findUnique({
+//       where: { userId },
+//     });
+
+//     if (existingCredits) {
+//       // Increment existing credits
+//       await prismadb.userCredits.update({
+//         where: { userId },
+//         data: {
+//           credits: {
+//             increment: purchasedPackage.credits,
+//           },
+//         },
+//       });
+//     } else {
+//       // Create user credits
+//       await prismadb.userCredits.create({
+//         data: {
+//           userId,
+//           credits: purchasedPackage.credits,
+//           usedCredits: 0,
+//         },
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error initializing/updating user credits:', error);
+//     return;
+//   }
+
+//   // 4) Log the credit addition as a transaction
+//   try {
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: purchasedPackage.credits,
+//         description: `Credits added for one-time purchase of ${purchasedPackage.name}.`,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     return;
+//   }
+
+//   console.log(`One-time purchase completed for user: ${userId}, package: ${packageId}.`);
+// }
+
+
+
+
+// // app/api/webhook/route.ts
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { stripe } from '@/lib/stripe';
+// import prismadb from '@/utils/prismadb';
+// import Stripe from 'stripe';
+// import { headers } from 'next/headers';
+// import { Prisma } from '@prisma/client'; // Import Prisma types
+
+// // Define supported event types for better control
+// const supportedEvents = new Set([
+//   'checkout.session.completed',
+//   'customer.subscription.created', // Added
+//   'customer.subscription.deleted',
+//   'customer.subscription.updated',
+//   // Add other relevant events as needed
+// ]);
+
+// export async function POST(request: NextRequest) { // Changed to NextRequest
+//   const sig = headers().get('stripe-signature');
+//   const buf = await request.arrayBuffer();
+//   const body = Buffer.from(buf);
+
+//   let event: Stripe.Event;
+
+//   try {
+//     if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+//       throw new Error('Missing Stripe signature or webhook secret.');
+//     }
+
+//     // Verify and construct the Stripe event
+//     event = stripe.webhooks.constructEvent(
+//       body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//   } catch (err: unknown) {
+//     if (err instanceof Error) {
+//       console.error('Webhook signature verification failed.', err.message);
+//       return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+//     } else {
+//       console.error('Webhook signature verification failed.', err);
+//       return new Response('Webhook Error: Invalid signature.', { status: 400 });
+//     }
+//   }
+
+//   // Implement idempotency by checking if the event has been processed
+//   const eventId = event.id;
+//   const existingEvent = await prismadb.stripeEvent.findUnique({
+//     where: { id: eventId },
+//   });
+
+//   if (existingEvent) {
+//     console.log(`Duplicate event received: ${eventId}`);
+//     return NextResponse.json({ received: true });
+//   }
+
+//   try {
+//     if (!supportedEvents.has(event.type)) {
+//       console.log(`Unhandled event type ${event.type}`);
+//       // Optionally, store unhandled events to prevent reprocessing
+//       await prismadb.stripeEvent.create({
+//         data: {
+//           id: event.id,
+//           type: event.type,
+//           data: event.data.object as Prisma.JsonValue, // Explicit cast
+//         },
+//       });
+//       return NextResponse.json({ received: true });
+//     }
+
+//     // Handle supported event types
+//     switch (event.type) {
+//       case 'checkout.session.completed':
+//         const session = event.data.object as Stripe.Checkout.Session;
+//         await handleCheckoutSessionCompleted(session);
+//         break;
+//       case 'customer.subscription.created':
+//         const newSubscription = event.data.object as Stripe.Subscription;
+//         await handleSubscriptionCreated(newSubscription);
+//         break;
+//       case 'customer.subscription.deleted':
+//         const deletedSubscription = event.data.object as Stripe.Subscription;
+//         await handleSubscriptionDeleted(deletedSubscription);
+//         break;
+//       case 'customer.subscription.updated':
+//         const updatedSubscription = event.data.object as Stripe.Subscription;
+//         await handleSubscriptionUpdated(updatedSubscription);
+//         break;
+//       default:
+//         console.log(`Unhandled event type ${event.type}`);
+//     }
+
+//     // Store the event to ensure idempotency
+//     await prismadb.stripeEvent.create({
+//       data: {
+//         id: event.id,
+//         type: event.type,
+//         data: event.data.object as Prisma.JsonValue, // Explicit cast
+//       },
+//     });
+
+//     return NextResponse.json({ received: true });
+//   } catch (error) {
+//     console.error('Webhook Handling Error:', error);
+//     return NextResponse.json({ error: 'Webhook Handler Error' }, { status: 500 });
+//   }
+// }
+
+// // Handler for checkout.session.completed event
+// async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+//   const userId = session.metadata?.userId;
+//   const planId = session.metadata?.planId;
+
+//   if (!userId || !planId) {
+//     console.error('Missing metadata (userId or planId) in session.');
+//     return;
+//   }
+
+//   // Retrieve the subscription ID from the session
+//   const subscriptionId = session.subscription as string | undefined;
+
+//   if (!subscriptionId) {
+//     console.error('No subscription ID found in session.');
+//     return;
+//   }
+
+//   // Fetch subscription details from Stripe
+//   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+//   if (!subscription) {
+//     console.error('Subscription not found in Stripe.');
+//     return;
+//   }
+
+//   // Fetch the subscription plan from the database
+//   const plan = await prismadb.subscriptionPlan.findUnique({
+//     where: { id: planId },
+//   });
+
+//   if (!plan) {
+//     console.error('Subscription plan not found.');
+//     return;
+//   }
+
+//   // Convert Unix timestamp to JavaScript Date
+//   const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+
+//   // Extract customer ID safely
+//   const stripeCustomerId =
+//     typeof subscription.customer === 'string'
+//       ? subscription.customer
+//       : undefined;
+
+//   if (!stripeCustomerId) {
+//     console.error('Invalid customer ID in subscription.');
+//     return;
+//   }
+
+//   // Upsert user subscription in the database
+//   try {
+//     await prismadb.userSubscription.upsert({
+//       where: { userId },
+//       update: {
+//         stripeSubscriptionId: subscription.id,
+//         stripePriceId: subscription.items.data[0]?.price.id || '',
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//         stripeCustomerId: stripeCustomerId,
+//       },
+//       create: {
+//         userId,
+//         stripeSubscriptionId: subscription.id,
+//         stripePriceId: subscription.items.data[0]?.price.id || '',
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//         stripeCustomerId: stripeCustomerId,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error upserting user subscription:', error);
+//     return;
+//   }
+
+//   // **Initialize or Increment User Credits**
+//   try {
+//     const existingCredits = await prismadb.userCredits.findUnique({
+//       where: { userId },
+//     });
+
+//     if (existingCredits) {
+//       // **Increment** credits instead of overwriting
+//       await prismadb.userCredits.update({
+//         where: { userId },
+//         data: { 
+//           credits: {
+//             increment: plan.credits
+//           },
+//         },
+//       });
+//     } else {
+//       // **Create** credits if not existing
+//       await prismadb.userCredits.create({
+//         data: {
+//           userId,
+//           credits: plan.credits,
+//           usedCredits: 0,
+//         },
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error initializing/updating user credits:', error);
+//     return;
+//   }
+
+//   // Log the credit addition as a transaction
+//   try {
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: plan.credits,
+//         description: `Credits added for ${plan.name} plan.`,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     return;
+//   }
+// }
+
+// // Handler for customer.subscription.created event
+// async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+//   const userId = subscription.metadata?.userId;
+//   const planId = subscription.metadata?.planId;
+
+//   if (!userId || !planId) {
+//     console.error('Missing metadata (userId or planId) in subscription.');
+//     return;
+//   }
+
+//   // Fetch the subscription plan from the database
+//   const plan = await prismadb.subscriptionPlan.findUnique({
+//     where: { id: planId },
+//   });
+
+//   if (!plan) {
+//     console.error('Subscription plan not found.');
+//     return;
+//   }
+
+//   // Convert Unix timestamp to JavaScript Date
+//   const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+
+//   // Upsert user subscription details in the database
+//   try {
+//     await prismadb.userSubscription.upsert({
+//       where: { userId },
+//       update: {
+//         stripeSubscriptionId: subscription.id,
+//         stripePriceId: subscription.items.data[0]?.price.id || '',
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//         stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : undefined,
+//       },
+//       create: {
+//         userId,
+//         stripeSubscriptionId: subscription.id,
+//         stripePriceId: subscription.items.data[0]?.price.id || '',
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//         stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : undefined,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error upserting user subscription:', error);
+//     return;
+//   }
+
+//   // **Initialize or Increment User Credits**
+//   try {
+//     const existingCredits = await prismadb.userCredits.findUnique({ where: { userId } });
+
+//     if (existingCredits) {
+//       // **Increment** credits instead of overwriting
+//       await prismadb.userCredits.update({
+//         where: { userId },
+//         data: { 
+//           credits: {
+//             increment: plan.credits
+//           },
+//         },
+//       });
+//     } else {
+//       // **Create** credits if not existing
+//       await prismadb.userCredits.create({
+//         data: {
+//           userId,
+//           credits: plan.credits,
+//           usedCredits: 0,
+//         },
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error initializing/updating user credits:', error);
+//     return;
+//   }
+
+//   // Log the credit addition as a transaction
+//   try {
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION',
+//         amount: plan.credits,
+//         description: `Credits added for new subscription to ${plan.name} plan.`,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     return;
+//   }
+// }
+
+// // Handler for customer.subscription.deleted event
+// async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+//   const userSubscription = await prismadb.userSubscription.findUnique({
+//     where: { stripeSubscriptionId: subscription.id },
+//   });
+
+//   if (!userSubscription) {
+//     console.error('User subscription not found.');
+//     return;
+//   }
+
+//   // Reset user credits upon subscription deletion
+//   try {
+//     await prismadb.userCredits.update({
+//       where: { userId: userSubscription.userId },
+//       data: { credits: 0 },
+//     });
+//   } catch (error) {
+//     console.error('Error updating user credits:', error);
+//     return;
+//   }
+
+//   // Log the credit deduction as a transaction
+//   try {
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId: userSubscription.userId,
+//         type: 'DEDUCTION',
+//         amount: 0,
+//         description: 'Subscription canceled. Credits reset.',
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     return;
+//   }
+// }
+
+// // Handler for customer.subscription.updated event
+// async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+//   const userId = subscription.metadata?.userId;
+//   const newPlanId = subscription.metadata?.planId;
+
+//   if (!userId || !newPlanId) {
+//     console.error('Missing metadata (userId or planId) in subscription.');
+//     return;
+//   }
+
+//   // Fetch the new subscription plan from the database
+//   const newPlan = await prismadb.subscriptionPlan.findUnique({
+//     where: { id: newPlanId },
+//   });
+
+//   if (!newPlan) {
+//     console.error('New subscription plan not found.');
+//     return;
+//   }
+
+//   // Convert Unix timestamp to JavaScript Date
+//   const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+
+//   // Upsert user subscription details in the database
+//   try {
+//     await prismadb.userSubscription.update({
+//       where: { userId },
+//       data: {
+//         stripePriceId: subscription.items.data[0]?.price.id || '',
+//         stripeCurrentPeriodEnd: currentPeriodEnd,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error updating user subscription:', error);
+//     return;
+//   }
+
+//   // **Update: Adjust user credits by adding new plan's credits**
+//   try {
+//     await prismadb.userCredits.update({
+//       where: { userId },
+//       data: { 
+//         credits: {
+//           increment: newPlan.credits
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error updating user credits:', error);
+//     return;
+//   }
+
+//   // **Update: Log the credit adjustment as an addition transaction**
+//   try {
+//     await prismadb.creditTransaction.create({
+//       data: {
+//         userId,
+//         type: 'ADDITION', // Changed from 'ADJUSTMENT' to 'ADDITION'
+//         amount: newPlan.credits,
+//         description: `Credits added for plan change to ${newPlan.name}.`,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error creating credit transaction:', error);
+//     return;
+//   }
+// }

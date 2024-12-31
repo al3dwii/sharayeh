@@ -18,11 +18,7 @@ import Link from 'next/link';
 
 import Skel from '@/components/global/Skeleton'
 
-export const UserInfo = ({
-  isPro = true,
-}: {
-  isPro: boolean,
-}) => {
+export const UserInfo = () => {
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
