@@ -34,28 +34,62 @@ export const UserInfo = () => {
   const setCredits = useStore((state) => state.setCredits);
   const setUsedCredits = useStore((state) => state.setUsedCredits);
 
-  // 1) Define fetchUserCredits at the top level
-  const fetchUserCredits = async () => {
-    if (!isLoaded) return;
 
-    if (!user) {
-      setError("User not authenticated.");
-      setIsLoading(false);
-      return;
-    }
+  // 1) Modify fetchUserCredits to accept a retryCount parameter:
+const fetchUserCredits = async (retryCount = 0) => {
+  if (!isLoaded) return;
 
-    try {
-      const response = await axios.get(`/api/user-data`);
-      const { credits, usedCredits } = response.data;
-      setCredits(credits);
-      setUsedCredits(usedCredits);
-      setIsLoading(false);
-    } catch (err: any) {
-      console.error('Error fetching user credits:', err);
+  if (!user) {
+    setError("User not authenticated.");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const response = await axios.get(`/api/user-data`);
+    const { credits, usedCredits } = response.data;
+    setCredits(credits);
+    setUsedCredits(usedCredits);
+    setIsLoading(false);
+  } catch (err: any) {
+    console.error(`Error fetching user credits (attempt #${retryCount + 1})`, err);
+
+    // 2) If the retryCount is still below 3, wait 2 seconds, then retry
+    if (retryCount < 2) {
+      setTimeout(() => {
+        fetchUserCredits(retryCount + 1);
+      }, 2000);
+    } else {
+      // 3) After 3 attempts, give up and show the error
       setError("Failed to fetch credit data.");
       setIsLoading(false);
     }
-  };
+  }
+};
+
+
+  // // 1) Define fetchUserCredits at the top level
+  // const fetchUserCredits = async () => {
+  //   if (!isLoaded) return;
+
+  //   if (!user) {
+  //     setError("User not authenticated.");
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await axios.get(`/api/user-data`);
+  //     const { credits, usedCredits } = response.data;
+  //     setCredits(credits);
+  //     setUsedCredits(usedCredits);
+  //     setIsLoading(false);
+  //   } catch (err: any) {
+  //     console.error('Error fetching user credits:', err);
+  //     setError("Failed to fetch credit data.");
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     setMounted(true);
