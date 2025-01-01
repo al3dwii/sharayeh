@@ -16,6 +16,9 @@ import { FiCheckCircle, FiAlertCircle, FiInfo } from "react-icons/fi"; // Icons 
 import PresentationForm from "./PresentationForm"; // Import the new extracted form component
 import { useProModal } from "@/hooks/useProModal"; // Import the Zustand store
 
+import { useGlobalStore } from '@/store/useGlobalStore';
+
+
 interface Template {
   id: string;
   name: string;
@@ -396,7 +399,9 @@ const CreatePresentation: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    router.refresh();
+
+     // Signal that UserInfo should re-fetch
+  useGlobalStore.getState().setShouldRefreshUserInfo(true);
   };
 
   return (
