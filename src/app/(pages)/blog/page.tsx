@@ -16,7 +16,7 @@ export default function BlogPage() {
 
   return (
     <>
-    <main className="m-8 p-8 ">
+    <main className="m-2 p-2 ">
       <BlogPosts posts={posts} />
      
 

@@ -47,15 +47,16 @@ const DashboardPage = async() => {
   }));
   return (
     <>
-    <div className="m-8 p-8">
+    <div className="m-2 p-2 mt-14">
     <UserInfo  />
     <div className="m-2 p-2">
     <CreatePresentation />
     </div>
     <FileTableWithPagination userFiles={serializedUserFiles} />
 
+         
+
     </div>
-   
     </>
   )
 }
