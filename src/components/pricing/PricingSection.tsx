@@ -58,11 +58,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({ currentPlanId }) => {
     <section className="container mt-8 flex flex-col items-center text-center">
       <div className="mx-auto mb-10 flex w-full flex-col gap-5">
         <p className="font-tajawal text-4xl font-bold text-black">
-          الاشتراكات
+          الباقات
         </p>
-        <h2 className="font-tajawal font-heading text-sm leading-[1.1] md:text-xl">
-          اختر الباقة المناسبة
-        </h2>
+        <h2 className="font-tajawal font-heading text-sm leading-[1.1] md:text-xl text-blue-500">
+         الشراء مرة واحدة ولا يتم التجديد تلقائياً   
+              </h2>
       </div>
 
       <div className="mx-auto grid max-w-screen-lg gap-5 py-5 md:grid-cols-2 lg:grid-cols-3">

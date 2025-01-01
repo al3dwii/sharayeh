@@ -21,13 +21,12 @@ export const pricingPlans: Plan[] = [
   {
     id: "cm4kcbd6t00007ndb3r9dydrc",
     stripePriceId: "price_1QVtmXAlDgxzsK9aFXzqJmSy",
-    title: "الخطة الأساسية",
+    title: "الباقة التجريبية",
     price: "0$",
     frequency: "",
     features: [
-      "رفع 10 مستندات شهرياً",
-      "معالجة OCR الأساسية",
-      "دعم عبر البريد الإلكتروني",
+      "انشاء بوربوينت من 10 شرائح ",
+      "  اضافة الحركات",
     ],
     limitations: [
       "لا توجد تحليلات متقدمة",
@@ -38,9 +37,9 @@ export const pricingPlans: Plan[] = [
   {
     id: "cm4kcbe5u00017ndbe7dphuoo",
     stripePriceId: "price_1QaNoBAlDgxzsK9aNcAmhn2W",
-    title: "خطة المعيارية",
+    title: "الباقة الأساسية ",
     price: "10$",
-    frequency: "3 أشهر",
+    frequency: " ",
     features: [
       "رفع 100 مستند شهرياً",
       "معالجة OCR متقدمة",
@@ -55,16 +54,19 @@ export const pricingPlans: Plan[] = [
   {
     id: "cm4kcbeop00027ndbbg8k20me",
     stripePriceId: "price_1QaNnAAlDgxzsK9aWdxLeU5U",
-    title: "خطة المحترفين",
+    title: "الباقة المميزة",
     price: "25$",
-    frequency: "6 أشهر",
+    frequency: " ",
     features: [
       "رفع مستندات غير محدود",
       "معالجة OCR المتقدمة",
       "دعم الأولوية",
       "الوصول إلى التحليلات الشاملة",
     ],
-    limitations: [],
+    limitations: [
+      "تحليلات محدودة",
+      "سعة تخزين متوسطة",
+    ],
     tier: "PREMIUM",
   },
   // {

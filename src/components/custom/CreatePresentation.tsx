@@ -404,6 +404,15 @@ const CreatePresentation: React.FC = () => {
   useGlobalStore.getState().setShouldRefreshUserInfo(true);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      useGlobalStore.getState().setShouldRefreshUserInfo(true);
+    }, 2000);
+  
+    return () => clearTimeout(timer);
+  }, []);
+  
+
   return (
     <>
       {/* Render Notifications based on submissionStatus */}

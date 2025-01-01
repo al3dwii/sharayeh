@@ -47,7 +47,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
     if (isFreePlan) {
       return "لوحة التحكم"; // Dashboard
     } else if (isCurrentPlan) {
-      return `أنت على  ${plan.title}`; // You are on [Plan]
+      return `مشترك في   ${plan.title}`; // You are on [Plan]
     } else {
       return `ترقية إلى ${plan.title}`; // Upgrade to [Plan]
     }
@@ -58,15 +58,15 @@ const PlanCard: React.FC<PlanCardProps> = ({
       {/* Highlight Current Plan */}
       {isCurrentPlan && !isFreePlan && (
         <div className="absolute top-2 right-2 bg-green-500 text-white text-l px-2 py-1 rounded">
-          الخطة الحالية
+          الباقة الحالية
         </div>
       )}
       <div className="min-h-[150px] bg-blue-200 p-6 flex flex-col justify-between">
-        <p className="font-tajawal text-l font-bold p-8 uppercase tracking-wider text-black">
+        <p className="font-tajawal text-l font-bold p-6 uppercase tracking-wider text-black">
           {plan.title}
         </p>
         <div className="flex flex-row items-baseline">
-          <span className="text-3xl m-2 font-semibold">{plan.price}</span>
+          <span className="text-3xl m-2 center font-bold font-tajawal">{plan.price}</span>
           <span className="ml-2 text-xl font-medium">{plan.frequency}</span>
         </div>
       </div>
