@@ -4,7 +4,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Button from "@/components/ui/Button2";
+import {  Button  } from "@/components/ui/Button";
 import * as Icons from "@/components/ui/Icons";
 
 import { Plan } from "@/config/planConfig";
@@ -89,20 +89,20 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
         {isFreePlan ? (
           <Link href="/dashboard">
-            <Button variant="primary" className="w-full">
+            <Button  className="w-full">
               {getButtonLabel()}
             </Button>
           </Link>
         ) : currentPlanId ? (
           isCurrentPlan ? (
             <Link href="/dashboard">
-              <Button variant="primary" className="w-full">
+              <Button  className="w-full">
                 {getButtonLabel()}
               </Button>
             </Link>
           ) : isUpgradeAvailable() ? (
             <Button
-              variant="primary"
+             
               className="w-full"
               onClick={() => onSubscribe(plan.id)} // Pass plan.id here
             >
@@ -111,7 +111,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
           ) : null
         ) : (
           <Button
-            variant="primary"
+           
             className="w-full"
             onClick={() => onSubscribe(plan.id)} // Pass plan.id here
           >

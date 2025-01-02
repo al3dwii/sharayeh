@@ -56,7 +56,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ currentPlanId }) => {
 
   return (
     <section className="container mt-8 flex flex-col items-center text-center">
-      <div className="mx-auto mb-10 flex w-full flex-col gap-5">
+      <div className="mx-auto mt-10 flex w-full flex-col gap-5">
         <p className="font-tajawal text-4xl font-bold text-black">
           الباقات
         </p>

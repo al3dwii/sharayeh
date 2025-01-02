@@ -1,6 +1,7 @@
 // src/components/PresentationForm.tsx
 
 import React from 'react';
+import Loading from '@/components/global/loading'
 
 interface Template {
   id: string;
@@ -78,7 +79,13 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
             className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
             disabled={isSubmitting || isLoading}
           >
-            {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+            {isSubmitting ? 
+            
+            <Loading></Loading>
+
+            // 'جاري الإرسال...'
+            
+            : 'إرسال'}
           </button>
         </div>
       </fieldset>

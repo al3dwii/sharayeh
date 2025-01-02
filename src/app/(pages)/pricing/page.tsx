@@ -48,7 +48,7 @@ export default async function PricingPage() {
       <>
         <main className="flex w-full flex-col gap-16 py-8  md:py-12">
           <PricingSection currentPlanId={currentPlanId} />
-          <hr className="container my-8" />
+          {/* <hr className="container my-8" /> */}
         </main>
         <PricingFaqs />
 

@@ -56,7 +56,7 @@ const CreatePresentation: React.FC = () => {
   const onOpenProModal = useProModal((state) => state.onOpen);
 
   // Constants for validation
-  const MAX_TOPIC_LENGTH = 100; // Maximum allowed length for the topic input
+  const MAX_TOPIC_LENGTH = 50; // Maximum allowed length for the topic input
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // Maximum file size in bytes (5 MB)
   const ALLOWED_FILE_TYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx MIME type

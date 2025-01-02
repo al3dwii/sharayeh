@@ -33,7 +33,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
             color: '#155724', // Success text color
             border: '1px solid #C3E6CB', // Success border color
           },
-          icon: <FiCheckCircle color="#155724" size={24} />,
+          icon: <FiCheckCircle color="#155724" size={28} />,
         }
       );
       console.log('✅ Success toast displayed.');
@@ -58,7 +58,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
               color: '#0C5460', // Info text color
               border: '1px solid #BEE5EB', // Info border color
             },
-            icon: <FiInfo color="#0C5460" size={24} />,
+            icon: <FiInfo color="#0C5460" size={28} />,
           }
         );
         console.log('ℹ️ File is being prepared toast displayed.');
@@ -84,7 +84,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
               color: '#0C5460', // Info text color
               border: '1px solid #BEE5EB', // Info border color
             },
-            icon: <FiInfo color="#0C5460" size={24} />,
+            icon: <FiInfo color="#0C5460" size={28} />,
           }
         );
         console.log('ℹ️ File is being finalized toast displayed.');
@@ -116,7 +116,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
             color: '#721C24', // Error text color
             border: '1px solid #F5C6CB', // Error border color
           },
-          icon: <FiAlertCircle color="#721C24" size={24} />,
+          icon: <FiAlertCircle color="#721C24" size={28} />,
         }
       );
       console.log('❌ Error toast displayed.');
@@ -141,7 +141,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
             color: '#856404', // Warning text color
             border: '1px solid #FFEEBA', // Warning border color
           },
-          icon: <FiInfo color="#856404" size={24} />,
+          icon: <FiInfo color="#856404" size={28} />,
         }
       );
       console.log('⚠️ Warning toast displayed.');
@@ -166,7 +166,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
             color: '#0C5460', // Info text color
             border: '1px solid #BEE5EB', // Info border color
           },
-          icon: <FiInfo color="#0C5460" size={24} />,
+          icon: <FiInfo color="#0C5460" size={28} />,
         }
       );
       console.log('ℹ️ Upgrade required toast displayed.');
@@ -191,7 +191,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
             color: '#721C24', // Error text color
             border: '1px solid #F5C6CB', // Error border color
           },
-          icon: <FiAlertCircle color="#721C24" size={24} />,
+          icon: <FiAlertCircle color="#721C24" size={28} />,
         }
       );
       console.log('❌ Default unexpected error toast displayed.');
@@ -235,7 +235,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
         break;
 
       case 'topic-too-long':
-        displayWarningToast('الموضوع طويل جدًا. يرجى تحديده بـ 100 حرف.');
+        displayWarningToast('الموضوع طويل جدًا. يرجى تحديده بـ 50 حرف.');
         break;
 
       case 'file-too-large':

@@ -59,7 +59,7 @@ export function PricingCards({ userId, isPro }: { userId: string | null; isPro: 
 
   return (
     <section className="container flex flex-col items-center text-center">
-      <div className="mx-auto mb-10 flex w-full flex-col gap-5">
+      <div className="mx-auto mt-10 flex w-full flex-col gap-5">
         <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
           الاشتراكات
         </p>
