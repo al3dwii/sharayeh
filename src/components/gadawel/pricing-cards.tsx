@@ -5,7 +5,7 @@
 import { ReactElement } from "react";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import  Button from "@/components/ui/button2";
+import  Button from "@/components/ui/Button2";
 import * as Icons from "@/components/gadawel/icons";
 import { SubscriptionButton } from "@/components/subscription-button";
 
