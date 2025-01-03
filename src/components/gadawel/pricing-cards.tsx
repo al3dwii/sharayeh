@@ -5,7 +5,7 @@
 import { ReactElement } from "react";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import { Button, buttonVariants } from "@/components/ui/button";
+import  Button from "@/components/ui/button2";
 import * as Icons from "@/components/gadawel/icons";
 import { SubscriptionButton } from "@/components/subscription-button";
 
@@ -107,10 +107,7 @@ export function PricingCards({ userId, isPro }: { userId: string | null; isPro: 
                 plan.id === "starter" ? (
                   <Link
                     href="/dashboard"
-                    className={buttonVariants({
-                      className: "w-full button-blue-500",
-                      variant: "default",
-                    })}
+                    
                   >
                      لوحة التحكم
                   </Link>
