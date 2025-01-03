@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import  Button from '@/components/ui/Button2';
 import { Zap } from 'lucide-react';
 import { useProModal } from '@/hooks/useProModal';
 import { toast } from 'react-hot-toast';
@@ -38,7 +38,7 @@ const ProModal: React.FC = () => {
           </DialogTitle>
         </DialogHeader>
         <DialogFooter>
-          <Button disabled={loading} onClick={onSubscribe} size="lg" className="w-full">
+          <Button disabled={loading} onClick={onSubscribe} className="w-full">
             اشترك
             <Zap className="w-4 h-4 ml-2 fill-white" />
           </Button>

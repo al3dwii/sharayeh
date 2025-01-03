@@ -4,23 +4,21 @@
 
 import React from "react";
 import Link from "next/link";
-import {  Button  } from "@/components/ui/Button";
+import Button from "@/components/ui/Button2";
 import * as Icons from "@/components/ui/Icons";
 
 import { Plan } from "@/config/planConfig";
 
 interface PlanCardProps {
   plan: Plan;
-  onSubscribe: (planId: string) => void;
+  onBuy: (planId: string) => void; // Callback prop for buying a package
   currentPlanId: string | null;
-  planHierarchy: string[];
 }
 
 const PlanCard: React.FC<PlanCardProps> = ({
   plan,
-  onSubscribe,
+  onBuy,
   currentPlanId,
-  planHierarchy,
 }) => {
   // Define the Free plan's id
   const freePlanId = "cm4kcbd6t00007ndb3r9dydrc"; // Free plan ID
@@ -31,25 +29,34 @@ const PlanCard: React.FC<PlanCardProps> = ({
   // Determine if this is the Free plan
   const isFreePlan = plan.id === freePlanId;
 
-  // Determine if an upgrade is available for this plan
-  const isUpgradeAvailable = (): boolean => {
-    if (!currentPlanId) {
-      // User is not subscribed; allow subscribing to any paid plan
-      return !isFreePlan;
-    }
-    const currentPlanIndex = planHierarchy.indexOf(currentPlanId);
-    const targetPlanIndex = planHierarchy.indexOf(plan.id);
-    return targetPlanIndex > currentPlanIndex;
-  };
-
   // Button Label Helpers
   const getButtonLabel = () => {
     if (isFreePlan) {
-      return "لوحة التحكم"; // Dashboard
-    } else if (isCurrentPlan) {
-      return `مشترك في   ${plan.title}`; // You are on [Plan]
+      return "لوحة التحكم"; 
     } else {
-      return `ترقية إلى ${plan.title}`; // Upgrade to [Plan]
+      return "اشترِ الآن"; // Buy Now
+    }
+  };
+
+  // Button Action Helpers
+  const getButtonAction = () => {
+    if (isFreePlan || isCurrentPlan) {
+      return (
+        <Link href="/dashboard">
+          <Button className="w-full">
+            {getButtonLabel()}
+          </Button>
+        </Link>
+      );
+    } else {
+      return (
+        <Button
+          className="w-full"
+          onClick={() => onBuy(plan.id)} // Handle buy action
+        >
+          {getButtonLabel()}
+        </Button>
+      );
     }
   };
 
@@ -87,43 +94,141 @@ const PlanCard: React.FC<PlanCardProps> = ({
           ))}
         </ul>
 
-        {isFreePlan ? (
-          <Link href="/dashboard">
-            <Button  className="w-full">
-              {getButtonLabel()}
-            </Button>
-          </Link>
-        ) : currentPlanId ? (
-          isCurrentPlan ? (
-            <Link href="/dashboard">
-              <Button  className="w-full">
-                {getButtonLabel()}
-              </Button>
-            </Link>
-          ) : isUpgradeAvailable() ? (
-            <Button
-             
-              className="w-full"
-              onClick={() => onSubscribe(plan.id)} // Pass plan.id here
-            >
-              {getButtonLabel()}
-            </Button>
-          ) : null
-        ) : (
-          <Button
-           
-            className="w-full"
-            onClick={() => onSubscribe(plan.id)} // Pass plan.id here
-          >
-            اشترك
-          </Button>
-        )}
+        {/* Render the appropriate button based on plan type */}
+        {getButtonAction()}
       </div>
     </div>
   );
 };
 
 export default PlanCard;
+
+// // src/components/pricing/PlanCard.tsx
+
+// "use client";
+
+// import React from "react";
+// import Link from "next/link";
+// import Button from "@/components/ui/Button2";
+// import * as Icons from "@/components/ui/Icons";
+
+// import { Plan } from "@/config/planConfig";
+
+// interface PlanCardProps {
+//   plan: Plan;
+//   onSubscribe: (planId: string) => void;
+//   currentPlanId: string | null;
+//   planHierarchy: string[];
+// }
+
+// const PlanCard: React.FC<PlanCardProps> = ({
+//   plan,
+//   onSubscribe,
+//   currentPlanId,
+//   planHierarchy,
+// }) => {
+//   // Define the Free plan's id
+//   const freePlanId = "cm4kcbd6t00007ndb3r9dydrc"; // Free plan ID
+
+//   // Determine if this is the user's current plan
+//   const isCurrentPlan = plan.id === currentPlanId;
+
+//   // Determine if this is the Free plan
+//   const isFreePlan = plan.id === freePlanId;
+
+//   // Determine if an upgrade is available for this plan
+//   const isUpgradeAvailable = (): boolean => {
+//     if (!currentPlanId) {
+//       // User is not subscribed; allow subscribing to any paid plan
+//       return !isFreePlan;
+//     }
+//     const currentPlanIndex = planHierarchy.indexOf(currentPlanId);
+//     const targetPlanIndex = planHierarchy.indexOf(plan.id);
+//     return targetPlanIndex > currentPlanIndex;
+//   };
+
+//   // Button Label Helpers
+//   const getButtonLabel = () => {
+//     if (isFreePlan) {
+//       return "لوحة التحكم"; // Dashboard
+//     } else if (isCurrentPlan) {
+//       return `مشترك في   ${plan.title}`; // You are on [Plan]
+//     } else {
+//       return `ترقية إلى ${plan.title}`; // Upgrade to [Plan]
+//     }
+//   };
+
+//   return (
+//     <div className="relative flex flex-col overflow-hidden rounded-xl border shadow-sm hover:shadow-md transition-shadow duration-300">
+//       {/* Highlight Current Plan */}
+//       {isCurrentPlan && !isFreePlan && (
+//         <div className="absolute top-2 right-2 bg-green-500 text-white text-l px-2 py-1 rounded">
+//           الباقة الحالية
+//         </div>
+//       )}
+//       <div className="min-h-[150px] bg-blue-200 p-6 flex flex-col justify-between">
+//         <p className="font-tajawal text-l font-bold p-6 uppercase tracking-wider text-black">
+//           {plan.title}
+//         </p>
+//         <div className="flex flex-row items-baseline">
+//           <span className="text-3xl m-2 center font-bold font-tajawal">{plan.price}</span>
+//           <span className="ml-2 text-xl font-medium">{plan.frequency}</span>
+//         </div>
+//       </div>
+
+//       <div className="flex flex-col justify-between gap-6 p-6">
+//         <ul className="space-y-2 text-left text-sm font-medium">
+//           {plan.features.map((feature, idx) => (
+//             <li className="flex items-start" key={idx}>
+//               <Icons.Check className="mr-3 h-5 w-5 text-green-500" />
+//               <span>{feature}</span>
+//             </li>
+//           ))}
+//           {plan.limitations.map((limitation, idx) => (
+//             <li className="flex items-start text-muted-foreground" key={idx}>
+//               <Icons.Close className="mr-3 h-5 w-5 text-red-500" />
+//               <span>{limitation}</span>
+//             </li>
+//           ))}
+//         </ul>
+
+//         {isFreePlan ? (
+//           <Link href="/dashboard">
+//             <Button  className="w-full">
+//               {getButtonLabel()}
+//             </Button>
+//           </Link>
+//         ) : currentPlanId ? (
+//           isCurrentPlan ? (
+//             <Link href="/dashboard">
+//               <Button  className="w-full">
+//                 {getButtonLabel()}
+//               </Button>
+//             </Link>
+//           ) : isUpgradeAvailable() ? (
+//             <Button
+             
+//               className="w-full"
+//               onClick={() => onSubscribe(plan.id)} // Pass plan.id here
+//             >
+//               {getButtonLabel()}
+//             </Button>
+//           ) : null
+//         ) : (
+//           <Button
+           
+//             className="w-full"
+//             onClick={() => onSubscribe(plan.id)} // Pass plan.id here
+//           >
+//             اشترك
+//           </Button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PlanCard;
 
 
 // // src/components/pricing/PlanCard.tsx

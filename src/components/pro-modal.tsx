@@ -14,7 +14,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import  Button from "@/components/ui/Button2";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { tools } from "@/constants";
 import { Card } from "@/components/ui/card";
@@ -66,7 +66,7 @@ export const ProModal = () => {
           </DialogDescription> */}
         </DialogHeader>
         <DialogFooter>
-          <Button disabled={loading} onClick={onSubscribe} size="lg"  className="w-full">
+          <Button disabled={loading} onClick={onSubscribe}  className="w-full">
             اشترك
             <Zap className="w-4 h-4 ml-2 fill-white" />
           </Button>

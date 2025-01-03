@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -54,7 +53,7 @@ model Package {
 
 model UserPackage {
   id                   String     @id @unique @default(cuid())
-  userId               String
+  userId               String     @unique
   packageId            String
   stripeCustomerId     String     @unique
   acquiredAt           DateTime   @default(now())
@@ -85,7 +84,7 @@ model File {
   fileKey          String?           @unique @map("file_key")
   fileUrl          String?           @map("file_url")
   fileName         String            @map("file_name")
-  uniqueName       String            @unique
+  uniqueName       String   @unique
   type             String
   resultedFile     String?           @map("resulted_file")
   resultedFile2    String?           @map("resulted_file2")
@@ -99,7 +98,7 @@ model File {
 }
 
 model FileGeneration {
-  requestId   String         @id @unique @default(cuid())
+  requestId   String         @id @default(cuid())
   fileId      Int
   status      GenerationStatus
   downloadUrl String?

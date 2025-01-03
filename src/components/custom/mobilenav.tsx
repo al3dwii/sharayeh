@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import  Button  from "@/components/ui/Button2";
 import { MobileSidebar } from "./mobile-sidebar";
 import { checkSubscription } from '@/utils/subscription';
 import { getApiLimitCount } from '@/utils/api-limit';

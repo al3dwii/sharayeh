@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/Button2';
 import { Input } from '@/components/ui/input';
 
 export function Header() {
@@ -62,7 +62,7 @@ export function Header() {
       {/* Mobile Navigation */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" className="shrink-0 md:hidden">
+          <Button  className="shrink-0 md:hidden">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>

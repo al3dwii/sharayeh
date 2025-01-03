@@ -2,11 +2,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient
-import prismadb from '@/utils/prismadb'; // Ensure this imports your Prisma client correctly
+import { db } from '@/lib/db';
 
 interface CreateFileBody {
   fileName: string;
   type: string;
+  uniqueName: string;
 }
 
 export const runtime = 'nodejs'; // Ensure Node.js runtime
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     // **Parse the request body**
     console.log('📄 Parsing request body.');
     const body: CreateFileBody = await req.json();
-    const { fileName, type } = body;
+    const { fileName, type, uniqueName } = body;
     console.log('🔍 Parsed body:', { fileName, type });
 
     // **Validate the request body**
@@ -51,11 +52,13 @@ export async function POST(req: NextRequest) {
 
     // **Create the File record with userId**
     console.log('🔄 Creating new File record.');
-    const newFile = await prismadb.file.create({
+    const newFile = await db.file.create({
       data: {
         fileName,
         type,
-        userId, // Directly assign userId without connecting to a User model
+        userId,
+        uniqueName,
+         // Directly assign userId without connecting to a User model
         // Other fields like status are automatically set to their default values
       },
     });
