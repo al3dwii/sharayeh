@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"; // Your Prisma client instance
 import { File, FileStatus, Prisma } from "@prisma/client";
+import { v4 as uuidv4 } from 'uuid'; // Import UUID
 
 interface FileData {
   userId: string;
@@ -12,6 +13,8 @@ interface FileData {
 }
 
 export const addFile = async (fileData: FileData): Promise<File> => {
+  const uniqueName = uuidv4(); // Generate a unique name
+
   const newFile = await db.file.create({
     data: {
       userId: fileData.userId,       
@@ -19,6 +22,7 @@ export const addFile = async (fileData: FileData): Promise<File> => {
       fileUrl: fileData.fileUrl,     
       fileName: fileData.fileName,   
       type: fileData.type,
+      uniqueName: uniqueName, // Set the generated uniqueName
       status: FileStatus.PROCESSING, // Use enum value directly
       // 'results' field is optional and can be omitted if you don't have a value
     },
