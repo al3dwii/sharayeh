@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch user's package using findUnique
-    const userPackage = await db.userPackage.findUnique({
+    const userPackage = await db.userPackage.findFirst({
       where: { userId },
       include: { package: { select: { stripePriceId: true, tier: true } } },
     });
