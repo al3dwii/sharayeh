@@ -227,7 +227,7 @@ export const getAllUsersWithCount = async (page = 1, limit = 10) => {
 export const getUserSubscription = async (userId: string) => {
   try {
     // Fetch the subscription directly using the userId
-    const subscription = await db.userPackage.findUnique({
+    const subscription = await db.userPackage.findFirst({
       where: { userId },
     });
 

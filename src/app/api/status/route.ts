@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch user's package, including the related Package data
-    const userPackage = await db.userPackage.findUnique({
+    const userPackage = await db.userPackage.findFirst({
       where: { userId },
       include: { package: true }, // Include the related Package
     });

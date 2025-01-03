@@ -13,7 +13,7 @@ export const checkPackage = async () => {
   }
 
   // Fetch the user's credits
-  const userPackage = await prismadb.userPackage.findUnique({
+  const userPackage = await prismadb.userPackage.findFirst({
     where: { userId },
     select: {
       stripeCustomerId: true,

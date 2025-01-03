@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const userCredits = await ensureUserCredits(userId);
 
     // Check for UserPackage, including Package relation
-    const userPackage = await db.userPackage.findUnique({
+    const userPackage = await db.userPackage.findFirst({
       where: { userId },
       include: {
         package: true, // include the related Package
