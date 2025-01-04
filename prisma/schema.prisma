@@ -56,7 +56,7 @@ model UserPackage {
   id                   String     @id @unique @default(cuid())
   userId               String
   packageId            String
-  stripeCustomerId     String     @unique
+  stripeCustomerId     String     
   acquiredAt           DateTime   @default(now())
   expiresAt            DateTime?
   createdAt            DateTime   @default(now())

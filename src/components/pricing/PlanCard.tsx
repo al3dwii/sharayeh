@@ -52,7 +52,10 @@ const PlanCard: React.FC<PlanCardProps> = ({
       return (
         <Button
           className="w-full"
-          onClick={() => onBuy(plan.id)} // Handle buy action
+          onClick={() => {
+            console.log(`Buy Now clicked for packageId: ${plan.id}`);
+            onBuy(plan.id); // Handle buy action
+          }}
         >
           {getButtonLabel()}
         </Button>
@@ -102,6 +105,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
 };
 
 export default PlanCard;
+
 
 // // src/components/pricing/PlanCard.tsx
 

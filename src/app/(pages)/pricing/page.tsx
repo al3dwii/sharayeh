@@ -20,23 +20,34 @@ export default async function PricingPage() {
     let currentPlanId: string | null = null;
 
     if (user) {
-      const userPackage = await prismadb.userPackage.findFirst({
+      const userPackages = await prismadb.userPackage.findMany({
         where: { userId: user.id },
-        orderBy: { acquiredAt: 'desc' }, // Get the most recent package
-        include: {
-          package: {
-            select: {
-              stripePriceId: true,
-              tier: true,
-            },
-          },
-        },
+        include: { package: { select: { stripePriceId: true, tier: true } } },
       });
 
-      const stripePriceId = userPackage?.package?.stripePriceId || null;
+      if (userPackages.length > 0) {
+        // Define tier priorities
+        const tiersPriority: Record<string, number> = {
+          super: 4,
+          premium: 3,
+          standard: 2,
+          free: 1,
+        };
 
-      if (stripePriceId) {
-        const currentPlan = pricingPlans.find(p => p.stripePriceId === stripePriceId);
+        let highestTier = 'free';
+        let highestPriority = 1;
+
+        userPackages.forEach(pkg => {
+          const currentTier = pkg.package.tier.toLowerCase();
+          const priority = tiersPriority[currentTier] || 1;
+          if (priority > highestPriority) {
+            highestPriority = priority;
+            highestTier = currentTier;
+          }
+        });
+
+        // Find the plan that matches the highest tier
+        const currentPlan = pricingPlans.find(p => p.tier.toLowerCase() === highestTier);
         currentPlanId = currentPlan ? currentPlan.id : null;
       }
     }
@@ -47,7 +58,6 @@ export default async function PricingPage() {
       <>
         <main className="flex w-full flex-col gap-16 py-8  md:py-12">
           <PricingSection currentPlanId={currentPlanId} />
-          {/* <hr className="container my-8" /> */}
         </main>
         <PricingFaqs />
       </>
@@ -62,6 +72,7 @@ export default async function PricingPage() {
     );
   } 
 }
+
 
 // // src/app/pricing/page.tsx
 

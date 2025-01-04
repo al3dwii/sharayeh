@@ -2,7 +2,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Example packages (previously "subscription plans")
   const packages = [
     {
       id: 'cm4kcbd6t00007ndb3r9dydrc',
@@ -14,7 +13,7 @@ async function main() {
       slidesPerPresentation: 5,
       canAddTransition: true,
       canUploadPDF: false,
-      tier: 'FREE', // corresponds to the enum PackageTier
+      tier: 'FREE', 
     },
     {
       id: 'cm4kcbe5u00017ndbe7dphuoo',
@@ -69,7 +68,7 @@ async function main() {
         tier: pkg.tier,
       },
       create: { 
-        id: pkg.id, // Explicitly set the ID
+        id: pkg.id, 
         name: pkg.name,
         price: pkg.price,
         stripePriceId: pkg.stripePriceId,
