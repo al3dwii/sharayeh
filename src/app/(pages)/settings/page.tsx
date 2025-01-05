@@ -1,13 +1,53 @@
-// src/app/(pages)/settings/page.tsx
-import React from 'react'
-import { Metadata } from 'next'
+
+// src/app/(main)/dashboard/page.tsx
+
+import CreatePresentation from '@/components/custom/CpClientWrapper';
+import { FileTableWithPagination } from '@/components/custom/FileTableWithPagination';
+import { getUserFiles } from '@/lib/queries';
+import { auth } from '@clerk/nextjs';
+import { UserInfo } from "../../(main)/dashboard/UserInfo";
 import UserSettingClient from './UserSettingClient'
 
-export const metadata: Metadata = {
-  title: 'User Settings',
+
+import React from 'react'
+
+const UserSetting = async() => {
+    const { userId } = auth();
+
+
+  if (!userId) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-semibold">Please log in to view this page.</p>
+      </div>
+    );
+  }
+
+  let userFiles: any[] = [];
+  let errorOccurred = false;
+
+  try {
+    userFiles = await getUserFiles(userId);
+  } catch (error) {
+    console.error("Error fetching user files:", error);
+    errorOccurred = true;
+    userFiles = [];
+  }
+
+  const serializedUserFiles = userFiles.map((file) => ({
+    ...file,
+    createdAt: file.createdAt.toISOString(),
+  }));
+  return (
+    <>
+    <div className="m-2 p-2 mt-14">
+    <UserInfo  />
+    <UserSettingClient />
+   
+    <FileTableWithPagination userFiles={serializedUserFiles} />
+    </div>
+    </>
+  )
 }
 
-export default function Page() {
-  // No data fetching here, just return the client component
-  return <UserSettingClient />
-}
+export default UserSetting;

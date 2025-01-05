@@ -19,7 +19,6 @@ enum PackageTier {
   FREE
   STANDARD
   PREMIUM
-  SUPER
 }
 
 model UserCredits {
@@ -36,13 +35,9 @@ model UserCredits {
 model Package {
   id                     String        @id @unique @default(cuid())
   name                   String        @unique
-  price                  Float         // Set to 0 for Free package
+  price                  Float         
   stripePriceId          String        @unique
   credits                Int
-  presentations          Int
-  slidesPerPresentation  Int
-  canAddTransition       Boolean
-  canUploadPDF           Boolean
   tier                   PackageTier
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt

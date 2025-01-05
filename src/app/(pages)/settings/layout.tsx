@@ -1,42 +1,23 @@
-
-import { ReactNode } from 'react';
-import { auth } from '@clerk/nextjs';
+// app/dashboard/layout.tsx
+import React from 'react'
 import { Sidebar } from '@/components/custom/sidebar';
-import MobileNav from '@/components/custom/mobilenav';
-import { checkSubscription } from '@/utils/subscription';
-import { getApiLimitCount } from '@/utils/api-limit';
-import { redirect } from 'next/navigation';
 
-
-const DashboardLayout = async ({ children }: { children: ReactNode }) => {
-  const { userId } = auth();
-
-  if (!userId) {
-    // Handle unauthenticated user
-    // For example, redirect to sign-in page
-    redirect('/sign-in');
-    // throw new Error('User not authenticated');
-  }
-
-  const [isPro, apiLimitCount] = await Promise.all([
-    checkSubscription(userId),
-    getApiLimitCount(userId),
-  ]);
-
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <>
-      <div className="h-full relative">
-        <div className="hidden h-full md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-gray-100">
-          <Sidebar  />
-        </div>
-        <main>
-          <MobileNav />
+    <div className="md:flex min-h-screen">
+      {/* Sidebar (hidden on small screens, expanded on md+) */}
+      <Sidebar />
+
+      {/* Main content area */}
+      <div className="flex flex-1 flex-col">
+        <main className="flex-1 p-4 md:p-6">
           {children}
         </main>
       </div>
-    </>
-  );
-};
-
-export default DashboardLayout;
-
+    </div>
+  )
+}

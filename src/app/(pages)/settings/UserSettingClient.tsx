@@ -106,7 +106,8 @@ export default function UserSettingClient() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <>
+    <div className="max-w-4xl mx-auto mb-8 mt-8 p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-semibold mb-6">إعدادات المستخدم</h2>
 
       {error && <div className="mb-4 text-red-500">{error}</div>}
@@ -145,7 +146,7 @@ export default function UserSettingClient() {
           />
         </div>
 
-        <button
+        {/* <button
           type="submit"
           disabled={loading}
           className={`w-full px-4 py-2 font-semibold text-white rounded-md ${
@@ -153,26 +154,30 @@ export default function UserSettingClient() {
           }`}
         >
           {loading ? 'جارٍ التحديث...' : 'تحديث الملف الشخصي'}
-        </button>
+        </button> */}
       </form>
+<div/>
 
-      {/* Package and Credits Cards */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PackageCard userPackage={user.UserPackage} />
-        <CreditsCard userCredits={user.UserCredits} />
-      </div>
-
-      {/* Credit Transactions Card */}
-      <div className="mt-8">
-        <CreditTransactionsCard transactions={user.CreditTransactions} />
-      </div>
-
-      {showToast && (
-        <ClientToast
-          message="تم تحديث الملف الشخصي بنجاح!"
-          onClose={() => setShowToast(false)}
-        />
-      )}
     </div>
+    <div>
+    {/* Package and Credits Cards */}
+    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <PackageCard userPackage={user.UserPackage} /> */}
+      <CreditsCard userCredits={user.UserCredits} />
+    </div>
+
+    {/* Credit Transactions Card */}
+    <div className="mt-8">
+      <CreditTransactionsCard transactions={user.CreditTransactions} />
+    </div>
+
+    {showToast && (
+      <ClientToast
+        message="تم تحديث الملف الشخصي بنجاح!"
+        onClose={() => setShowToast(false)}
+      />
+    )}
+  </div>
+  </>
   );
 }
