@@ -8,7 +8,7 @@ async function main() {
       name: 'Free',
       price: 0,
       stripePriceId: 'price_1QVtmXAlDgxzsK9aFXzqJmSy',
-      credits: 150,
+      credits: 200,
       tier: 'FREE', 
     },
     {

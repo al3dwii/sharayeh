@@ -1,4 +1,3 @@
-// /app/api/update-status/route.ts
 
 // /api/update-status/route.ts
 
