@@ -9,6 +9,9 @@ import { PricingFaqs } from "@/components/gadawel/pricingfags";
 import { Metadata } from "next";
 import { pricingPlans } from "@/config/planConfig";
 
+export const dynamic = 'force-dynamic';
+
+
 export const metadata: Metadata = {
   title: "Pricing",
   description: "Choose the plan that fits your needs.",

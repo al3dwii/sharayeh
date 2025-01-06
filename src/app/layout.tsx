@@ -13,6 +13,8 @@ import { arSA } from '@clerk/localizations';
 import { ReactNode } from 'react';
 import { db } from "@/lib/db";
 
+export const runtime = 'nodejs'
+
 const tajawal = Tajawal({
   subsets: ["latin", "arabic"], 
   weight: ["400", "500", "700"],

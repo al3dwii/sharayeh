@@ -14,6 +14,12 @@ interface Template {
   category: string;
 }
 
+export const dynamic = 'force-dynamic';
+
+
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 // Define a union type for user tiers
 type Tier = 'free' | 'standard' | 'premium';
 

@@ -9,6 +9,9 @@ import { Prisma } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
 import axios from 'axios';
 
+export const dynamic = 'force-dynamic';
+
+
 // Define a union type for user tiers
 type Tier = 'free' | 'standard' | 'premium' | 'super';
 

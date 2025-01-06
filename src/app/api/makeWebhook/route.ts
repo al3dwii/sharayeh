@@ -8,6 +8,12 @@ import { pricingPlans, Plan } from '@/config/planConfig';
 import FormData from 'form-data';
 import { getHighestUserTier } from '@/utils/getHighestUserTier'; // Import the utility function
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+export const dynamic = 'force-dynamic';
+
+
+
 // Define a union type for user tiers
 type Tier = 'free' | 'standard' | 'premium';
 

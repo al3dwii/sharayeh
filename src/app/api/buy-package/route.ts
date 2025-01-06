@@ -7,6 +7,8 @@ import { absoluteUrl } from '@/lib/utils';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
 // Define schema for request body
 const createPackageSchema = z.object({
   packageId: z.string(),

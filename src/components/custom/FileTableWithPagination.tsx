@@ -17,6 +17,9 @@ import {
 // 1) Import your user data hook
 import { useUserData } from "@/context/UserContext";
 
+export const dynamic = 'force-dynamic';
+
+
 type File = {
   id: string;
   fileName: string;

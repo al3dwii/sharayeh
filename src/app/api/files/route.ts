@@ -4,6 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 interface CreateFileBody {
   fileName: string;
   type: string;

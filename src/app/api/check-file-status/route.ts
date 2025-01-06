@@ -8,6 +8,9 @@ const storage = new Storage();
 
 export const dynamic = 'force-dynamic'; // Ensure dynamic content is fetched at runtime
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

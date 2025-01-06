@@ -4,6 +4,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 export async function PATCH(req: NextRequest) {
   try {
     const { userId, pagesUsed } = await req.json();

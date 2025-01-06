@@ -5,6 +5,9 @@ import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic'; // Ensure dynamic content is fetched at runtime
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

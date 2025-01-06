@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db} from '@/lib/db'; // Assuming prisma client is set up here
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

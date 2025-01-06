@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getAuth } from '@clerk/nextjs/server'; // Import Clerk's getAuth
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 export async function PATCH(req: NextRequest) {
   try {
     const { userId } = getAuth(req); // Retrieve userId from Clerk's authentication

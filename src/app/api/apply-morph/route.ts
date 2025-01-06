@@ -11,6 +11,9 @@ import { getAuth } from '@clerk/nextjs/server';
 import { db } from "@/lib/db"; 
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
+
 // Define your schema
 const schema = z.object({
   resultedFile: z.string().optional(),

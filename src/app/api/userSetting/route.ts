@@ -5,6 +5,9 @@ import { getAuth, clerkClient } from '@clerk/nextjs/server';
 import { db } from '@/lib/db'; // Use consistent Prisma client
 import { z } from 'zod';
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+
 // Define the schema for updating user information
 const UpdateUserSchema = z.object({
   name: z.string().min(1, "Name cannot be empty").optional(),

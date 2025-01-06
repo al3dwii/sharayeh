@@ -7,6 +7,9 @@ import Loading from '@/components/global/loading';
 import useSWR from 'swr';
 import { useAuth } from '@clerk/nextjs';
 
+export const dynamic = 'force-dynamic';
+
+
 interface Template {
   id: string;
   name: string;

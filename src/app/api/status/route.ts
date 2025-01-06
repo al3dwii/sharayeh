@@ -5,6 +5,10 @@ import { getAuth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { pricingPlans, Plan } from '@/config/planConfig'; // Ensure you have access to pricingPlans
 
+export const runtime = 'nodejs'; // Ensure Node.js runtime
+
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { userId } = getAuth(request);

@@ -19,6 +19,8 @@ import { v4 as uuidv4 } from "uuid";
 import { useUserData } from "@/context/UserContext"; // Import the custom useUser hook
 import { useAuth } from "@clerk/nextjs";
 
+export const dynamic = 'force-dynamic';
+
 
 interface Template {
   id: string;
