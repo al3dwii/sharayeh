@@ -1,3 +1,5 @@
+
+
 // src/components/PresentationForm.tsx
 
 import React from 'react';
@@ -19,7 +21,7 @@ interface PresentationFormProps {
   handleTopicChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
-  setIsModalOpen: (value: boolean) => void;
+  setIsTemplateModalOpen: React.Dispatch<React.SetStateAction<boolean>>; // Updated prop name
 }
 
 const PresentationForm: React.FC<PresentationFormProps> = ({
@@ -31,8 +33,31 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
   handleTopicChange,
   handleFileChange,
   handleSubmit,
-  setIsModalOpen
+  setIsTemplateModalOpen // Destructure the updated prop
 }) => {
+// interface PresentationFormProps {
+//   topicValue: string;
+//   documentFile: File | null;
+//   selectedTemplate: Template | null;
+//   isSubmitting: boolean;
+//   isLoading: boolean;
+//   handleTopicChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+//   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+//   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+//   setIsModalOpen: (value: boolean) => void;
+// }
+
+// const PresentationForm: React.FC<PresentationFormProps> = ({
+//   topicValue,
+//   documentFile,
+//   selectedTemplate,
+//   isSubmitting,
+//   isLoading,
+//   handleTopicChange,
+//   handleFileChange,
+//   handleSubmit,
+//   setIsModalOpen
+// }) => {
   return (
     <form onSubmit={handleSubmit}>
       <fieldset disabled={isSubmitting || isLoading} className="w-full">
@@ -66,7 +91,7 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
         <div className="mb-4 flex justify-center">
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsTemplateModalOpen(true)}
             className="md:w-1/4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
           >
             {selectedTemplate ? `تم اختيار القالب: ${selectedTemplate.name}` : 'اختر القالب'}

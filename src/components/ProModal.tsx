@@ -18,7 +18,7 @@ const ProModal: React.FC = () => {
   const onSubscribe = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/stripe');
+      const response = await axios.get('pricing');
       window.location.href = response.data.url; // Redirect to Stripe
     } catch (error) {
       toast.error('Something went wrong');

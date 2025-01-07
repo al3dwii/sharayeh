@@ -9,7 +9,7 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import { ModalProvider } from '@/components/modal-provider';
 import  Navbar from '@/components/custom/Navbar';
 import { Footer } from "@/components/gadawel/footer";
-import ProModal from '@/components/ProModal';
+// import ProModal from '@/components/ProModal';
 import { ToasterProvider } from '@/components/toaster-provider';
 import { Toaster as SonnarToaster } from '@/components/ui/sonner';
 import { CrispProvider } from '@/components/custom/crisp-provider';
@@ -32,7 +32,7 @@ const Providers = ({ children, userData }: ProvidersProps) => {
           <Navbar />
             {children}
           <Footer />
-          <ProModal />
+          {/* <ProModal /> */}
           <ToasterProvider />
           <SonnarToaster position="bottom-left" />
           <CrispProvider />

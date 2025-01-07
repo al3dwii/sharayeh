@@ -32,7 +32,7 @@ const Modal: React.FC<ModalProps> = ({
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <p className="mb-4">{message}</p>
         <div className="flex flex-col items-center">
-          {actionLink ? (
+          {/* {actionLink ? (
             <a
               href={actionLink}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg mb-4"
@@ -52,7 +52,7 @@ const Modal: React.FC<ModalProps> = ({
             className="px-4 py-2 bg-gray-200 rounded-lg"
           >
             Close
-          </button>
+          </button> */}
         </div>
       </div>
     </motion.div>

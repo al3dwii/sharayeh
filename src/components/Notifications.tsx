@@ -97,10 +97,15 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
       };
     };
 
-    const displayErrorToast = (message: string) => {
+
+    const displayErrorToast = (
+      message: string,
+      textSize: string = 'text-base',
+      duration: number | null = null
+    ) => {
       toast.error(
         <div className="flex justify-between items-center">
-          <span>{message}</span>
+          <span className={textSize}>{message}</span> {/* Dynamic text size */}
           <button
             onClick={() => toast.dismiss()}
             className="ml-4 text-red-800 hover:text-red-900"
@@ -110,7 +115,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
         </div>,
         {
           position: 'top-center',
-          duration: 20000,
+          duration: duration, // Dynamic duration
           style: {
             backgroundColor: '#F8D7DA', // Error red background
             color: '#721C24', // Error text color
@@ -121,6 +126,38 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
       );
       console.log('❌ Error toast displayed.');
     };
+
+    const displayInfiniteErrorToast = (message: string) => {
+      displayErrorToast(message, 'text-l'); // Infinite duration with increased text size
+    };
+
+
+
+
+    // const displayErrorToast = (message: string) => {
+    //   toast.error(
+    //     <div className="flex justify-between items-center">
+    //       <span>{message}</span>
+    //       <button
+    //         onClick={() => toast.dismiss()}
+    //         className="ml-4 text-red-800 hover:text-red-900"
+    //       >
+    //         X
+    //       </button>
+    //     </div>,
+    //     {
+    //       position: 'top-center',
+    //       duration: 20000,
+    //       style: {
+    //         backgroundColor: '#F8D7DA', // Error red background
+    //         color: '#721C24', // Error text color
+    //         border: '1px solid #F5C6CB', // Error border color
+    //       },
+    //       icon: <FiAlertCircle color="#721C24" size={28} />,
+    //     }
+    //   );
+    //   console.log('❌ Error toast displayed.');
+    // };
 
     const displayWarningToast = (message: string) => {
       toast.warning(
@@ -150,7 +187,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
     const displayUpgradeRequiredToast = () => {
       toast.info(
         <div className="flex justify-between items-center">
-          <span>هذه الميزة متاحة للمستخدمين المميزين فقط. يرجى ترقية خطتك للاستفادة منها.</span>
+          <span>هذه الميزة متاحة للباقة المميزة فقط. يرجى شراء الباقة للاستفادة منها.</span>
           <button
             onClick={() => toast.dismiss()}
             className="ml-4 text-blue-800 hover:text-blue-900"
@@ -230,9 +267,13 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
         displayErrorToast('غير مصرح لك بالوصول. يرجى تسجيل الدخول مرة أخرى.');
         break;
 
-      case 'timeout-error':
-        displayErrorToast('لم يتم تجهيز الملف في الوقت المحدد. يرجى المحاولة مرة أخرى.');
+        case 'timeout-error':
+        displayInfiniteErrorToast('لم يتم تجهيز الملف في الوقت المحدد. يرجى المحاولة مرة أخرى.');
         break;
+
+      // case 'timeout-error':
+      //   displayErrorToast('لم يتم تجهيز الملف في الوقت المحدد. يرجى المحاولة مرة أخرى.');
+      //   break;
 
       case 'topic-too-long':
         displayWarningToast('الموضوع طويل جدًا. يرجى تحديده بـ 50 حرف.');
