@@ -1,6 +1,6 @@
 // src/config/planConfig.ts
 
-export interface PricingPlan {
+export interface Plan {
   id: string;
   stripePriceId: string;
   title: string;
@@ -26,7 +26,7 @@ export const stripePriceIds: Record<string, string> = {
   "cm4kcbeop00027ndbbg8k20mesuper": process.env.STRIPE_PRICE_ID_SUPER!,
 };
 
-export const pricingPlans: PricingPlan[] = [
+export const pricingPlans: Plan[] = [
   {
     id: "cm4kcbd6t00007ndb3r9dydrc",
     stripePriceId: stripePriceIds["cm4kcbd6t00007ndb3r9dydrc"],
