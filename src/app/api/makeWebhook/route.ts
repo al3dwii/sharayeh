@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import axios from 'axios';
-import { pricingPlans, Plan } from '@/config/planConfig';
+import { pricingPlans } from '@/config/planConfig';
 import FormData from 'form-data';
 import { getHighestUserTier } from '@/utils/getHighestUserTier'; // Import the utility function
 
