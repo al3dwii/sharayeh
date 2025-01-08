@@ -9,6 +9,9 @@ import { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
+export const runtime = 'nodejs'; // Important for Stripe
+
+
 // Define supported Stripe events
 const supportedEvents = new Set(['checkout.session.completed']);
 
@@ -220,6 +223,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   console.log(`✅ One-time purchase completed for user: ${userId}, package: ${packageId}.`);
 }
+
+
 
 
 // // app/api/webhook/route.ts
