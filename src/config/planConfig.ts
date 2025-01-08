@@ -1,4 +1,6 @@
-export interface Plan {
+// src/config/planConfig.ts
+
+export interface PricingPlan {
   id: string;
   stripePriceId: string;
   title: string;
@@ -7,7 +9,6 @@ export interface Plan {
   features: string[];
   limitations: string[];
   tier: "FREE" | "STANDARD" | "PREMIUM" | "SUPER";
-
 }
 
 export const planHierarchy: string[] = [
@@ -17,16 +18,24 @@ export const planHierarchy: string[] = [
   "cm4kcbeop00027ndbbg8k20mesuper", // Super
 ];
 
-export const pricingPlans: Plan[] = [
+// Mapping of package IDs to Stripe Price IDs via environment variables
+export const stripePriceIds: Record<string, string> = {
+  "cm4kcbd6t00007ndb3r9dydrc": process.env.STRIPE_PRICE_ID_FREE!,
+  "cm4kcbe5u00017ndbe7dphuoo": process.env.STRIPE_PRICE_ID_STANDARD!,
+  "cm4kcbeop00027ndbbg8k20me": process.env.STRIPE_PRICE_ID_PREMIUM!,
+  "cm4kcbeop00027ndbbg8k20mesuper": process.env.STRIPE_PRICE_ID_SUPER!,
+};
+
+export const pricingPlans: PricingPlan[] = [
   {
     id: "cm4kcbd6t00007ndb3r9dydrc",
-    stripePriceId: "price_1QVtmXAlDgxzsK9aFXzqJmSy",
+    stripePriceId: stripePriceIds["cm4kcbd6t00007ndb3r9dydrc"],
     title: "الباقة التجريبية",
     price: "0$",
     frequency: "",
     features: [
       "انشاء بوربوينت من 10 شرائح ",
-      "  اضافة الحركات",
+      "اضافة الحركات",
     ],
     limitations: [
       "لا توجد تحليلات متقدمة",
@@ -36,8 +45,8 @@ export const pricingPlans: Plan[] = [
   },
   {
     id: "cm4kcbe5u00017ndbe7dphuoo",
-    stripePriceId: "price_1QaNoBAlDgxzsK9aNcAmhn2W",
-    title: "الباقة الأساسية ",
+    stripePriceId: stripePriceIds["cm4kcbe5u00017ndbe7dphuoo"],
+    title: "الباقة الأساسية",
     price: "10$",
     frequency: " ",
     features: [
@@ -53,7 +62,7 @@ export const pricingPlans: Plan[] = [
   },
   {
     id: "cm4kcbeop00027ndbbg8k20me",
-    stripePriceId: "price_1QaNnAAlDgxzsK9aWdxLeU5U",
+    stripePriceId: stripePriceIds["cm4kcbeop00027ndbbg8k20me"],
     title: "الباقة المميزة",
     price: "25$",
     frequency: " ",
@@ -69,6 +78,83 @@ export const pricingPlans: Plan[] = [
     ],
     tier: "PREMIUM",
   },
+  // Add Super tier if necessary
+];
+
+
+// export interface Plan {
+//   id: string;
+//   stripePriceId: string;
+//   title: string;
+//   price: string;
+//   frequency: string;
+//   features: string[];
+//   limitations: string[];
+//   tier: "FREE" | "STANDARD" | "PREMIUM" | "SUPER";
+
+// }
+
+// export const planHierarchy: string[] = [
+//   "cm4kcbd6t00007ndb3r9dydrc", // Free
+//   "cm4kcbe5u00017ndbe7dphuoo", // Standard
+//   "cm4kcbeop00027ndbbg8k20me", // Premium
+//   "cm4kcbeop00027ndbbg8k20mesuper", // Super
+// ];
+
+// export const pricingPlans: Plan[] = [
+//   {
+//     id: "cm4kcbd6t00007ndb3r9dydrc",
+//     stripePriceId: "price_1QVtmXAlDgxzsK9aFXzqJmSy",
+//     title: "الباقة التجريبية",
+//     price: "0$",
+//     frequency: "",
+//     features: [
+//       "انشاء بوربوينت من 10 شرائح ",
+//       "  اضافة الحركات",
+//     ],
+//     limitations: [
+//       "لا توجد تحليلات متقدمة",
+//       "سعة تخزين محدودة",
+//     ],
+//     tier: "FREE",
+//   },
+//   {
+//     id: "cm4kcbe5u00017ndbe7dphuoo",
+//     stripePriceId: "price_1Qem6ZAlDgxzsK9aDTKSjO2M",
+//     title: "الباقة الأساسية ",
+//     price: "10$",
+//     frequency: " ",
+//     features: [
+//       "رفع 100 مستند شهرياً",
+//       "معالجة OCR متقدمة",
+//       "دعم عبر الدردشة",
+//     ],
+//     limitations: [
+//       "تحليلات محدودة",
+//       "سعة تخزين متوسطة",
+//     ],
+//     tier: "STANDARD",
+//   },
+//   {
+//     id: "cm4kcbeop00027ndbbg8k20me",
+//     stripePriceId: "price_1QemAMAlDgxzsK9a4ErFp0Zs",
+//     title: "الباقة المميزة",
+//     price: "25$",
+//     frequency: " ",
+//     features: [
+//       "رفع مستندات غير محدود",
+//       "معالجة OCR المتقدمة",
+//       "دعم الأولوية",
+//       "الوصول إلى التحليلات الشاملة",
+//     ],
+//     limitations: [
+//       "تحليلات محدودة",
+//       "سعة تخزين متوسطة",
+//     ],
+//     tier: "PREMIUM",
+//   },
+
+
   // {
   //   id: "cm4kcbeop00027ndbbg8k20mesuper",
   //   stripePriceId: "price_1Qc69GAlDgxzsK9aKuQvYr9s",
@@ -84,7 +170,7 @@ export const pricingPlans: Plan[] = [
   //   limitations: [],
   //   tier: "SUPER",
   // },
-];
+
 
 
 

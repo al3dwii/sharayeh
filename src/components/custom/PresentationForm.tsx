@@ -3,7 +3,7 @@
 // src/components/PresentationForm.tsx
 
 import React from 'react';
-import Loading from '@/components/global/loading'
+import Loading from '@/components/global/loadingsm'
 
 interface Template {
   id: string;

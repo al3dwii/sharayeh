@@ -107,63 +107,27 @@ export default function UserSettingClient() {
 
   return (
     <>
-    <div className="max-w-4xl mx-auto mb-8 mt-8 p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-6">إعدادات المستخدم</h2>
+     <div className="p-8 m-4 mx-auto bg-white shadow-md rounded-md p-6">
+      {/* Header */}
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">ملف المستخدم</h2>
 
-      {error && <div className="mb-4 text-red-500">{error}</div>}
+      {/* Name Section */}
+      <div className="mb-4">
+        <h3 className="text-sm font-medium text-gray-700">الاسم</h3>
+        <p className="text-gray-900 mt-1">{formData.name || 'غير متوفر'}</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Name Field */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            الاسم
-          </label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="أدخل اسمك"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+      {/* Email Section */}
+      <div className="mb-4">
+        <h3 className="text-sm font-medium text-gray-700">البريد الإلكتروني</h3>
+        <p className="text-gray-900 mt-1">{formData.email || 'غير متوفر'}</p>
+      </div>
 
-        {/* Email Field */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            البريد الإلكتروني
-          </label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="أدخل بريدك الإلكتروني"
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        {/* <button
-          type="submit"
-          disabled={loading}
-          className={`w-full px-4 py-2 font-semibold text-white rounded-md ${
-            loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-        >
-          {loading ? 'جارٍ التحديث...' : 'تحديث الملف الشخصي'}
-        </button> */}
-      </form>
-<div/>
-
-    </div>
     <div>
     {/* Package and Credits Cards */}
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* <PackageCard userPackage={user.UserPackage} /> */}
-      <CreditsCard userCredits={user.UserCredits} />
+      {/* <CreditsCard userCredits={user.UserCredits} /> */}
     </div>
 
     {/* Credit Transactions Card */}
@@ -178,6 +142,7 @@ export default function UserSettingClient() {
       />
     )}
   </div>
-  </>
+</div>
+    </>
   );
 }
