@@ -13,7 +13,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
-     <Hvideo src="/ge44.mp4" className="w-full m-auto bg-slate-200 flex flex-col md:flex-row justify-around items-center gap-2 p-4 md:p-2 relative" />
+     <Hvideo src="/ge44.mp4" className="lg:w-2/3 m-auto bg-gray-200 flex flex-col md:flex-row justify-around items-center gap-2 p-4 md:p-2 relative" />
       <Faqs /> 
 
       <section className="bg-secondary w-full flex flex-col md:flex-row justify-around items-center gap-2 p-20 relative">

@@ -14,17 +14,17 @@ async function main() {
     {
       id: 'cm4kcbe5u00017ndbe7dphuoo',
       name: 'Standard',
-      price: 10,
-      stripePriceId: 'price_1QaNoBAlDgxzsK9aNcAmhn2W',
-      credits: 300,
+      price: 15,
+      stripePriceId: 'price_1Qem6ZAlDgxzsK9aDTKSjO2M',
+      credits: 400,
       tier: 'STANDARD',
     },
     {
       id: 'cm4kcbeop00027ndbbg8k20me',
       name: 'Premium',
       price: 25,
-      stripePriceId: 'price_1QaNnAAlDgxzsK9aWdxLeU5U',
-      credits: 500,
+      stripePriceId: 'price_1QemAMAlDgxzsK9a4ErFp0Zs',
+      credits: 800,
       tier: 'PREMIUM',
     },
     

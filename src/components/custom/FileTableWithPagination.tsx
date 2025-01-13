@@ -109,8 +109,8 @@ export function FileTableWithPagination({ userFiles }: { userFiles: File[] }) {
       // Optionally, notify the user that processing has started
       setModalContent({
         title: "معالجة الملف",
-        message: "بدأت معالجة الملف.",
-        iconType: "info",
+        message: "بدأت معالجة الملف قد يستغرق الأمر بعض الوقت الرجاء الانتظار.",
+        iconType: "success",
       });
       setIsCustomModalOpen(true);
       console.log("ℹ️ Informational modal displayed for processing.");

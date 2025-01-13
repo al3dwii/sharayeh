@@ -77,15 +77,15 @@ const PricingSection: React.FC<PricingSectionProps> = ({ currentPlanId }) => {
             className="font-medium text-primary hover:underline"
             href="mailto:admin@arabicocr.net"
           >
-            cont@sharayeh.com
+            sibawayhLLC@outlook.com
           </a>{" "}
         </Balancer>
       </p>
-      الواتساب {" "}
+      {/* الواتساب {" "}
       <br/>
       <p className="mb-3 text-left text-base text-muted-foreground">
         0096561007772
-      </p>
+      </p> */}
     </section>
   );
 };
