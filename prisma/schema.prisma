@@ -126,7 +126,6 @@ model StripeEvent {
   @@map("stripe_events")
 }
 
-/** New SuperAdmin Model */
 model SuperAdmin {
   id        Int      @id @default(autoincrement())
   userId    String   @unique
