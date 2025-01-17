@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,18 +21,6 @@ enum PackageTier {
   PREMIUM
 }
 
-enum FileStatus {
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
-enum GenerationStatus {
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
 model UserCredits {
   id          Int      @id @default(autoincrement())
   userId      String   @unique
@@ -44,29 +33,29 @@ model UserCredits {
 }
 
 model Package {
-  id            String        @id @unique @default(cuid())
-  name          String        @unique
-  price         Float         
-  stripePriceId String        @unique
-  credits       Int
-  tier          PackageTier
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @default(now()) @updatedAt
+  id                     String        @id @unique @default(cuid())
+  name                   String        @unique
+  price                  Float         
+  stripePriceId          String        @unique
+  credits                Int
+  tier                   PackageTier
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
-  userPackages  UserPackage[] @relation("PackageUserPackages")
+  userPackages           UserPackage[] @relation("PackageUserPackages")
 
   @@map("packages")
 }
 
 model UserPackage {
-  id               String   @id @unique @default(cuid())
-  userId           String
-  packageId        String
-  stripeCustomerId String     
-  acquiredAt       DateTime @default(now())
-  expiresAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now()) @updatedAt
+  id                   String     @id @unique @default(cuid())
+  userId               String
+  packageId            String
+  stripeCustomerId     String     
+  acquiredAt           DateTime   @default(now())
+  expiresAt            DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   package  Package @relation("PackageUserPackages", fields: [packageId], references: [id])
 
@@ -97,7 +86,7 @@ model File {
   resultedFile2    String?           @map("resulted_file2")
   status           FileStatus        @default(PROCESSING)
   results          Json?
-  
+
   fileGenerations  FileGeneration[]
 
   @@index([userId])
@@ -110,11 +99,23 @@ model FileGeneration {
   status      GenerationStatus
   downloadUrl String?
   createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @default(now()) @updatedAt
+  updatedAt   DateTime       @updatedAt
 
   file File @relation(fields: [fileId], references: [id])
 
   @@map("file_generations")
+}
+
+enum FileStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum GenerationStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 model StripeEvent {
@@ -124,14 +125,4 @@ model StripeEvent {
   createdAt DateTime @default(now())
 
   @@map("stripe_events")
-}
-
-/** New SuperAdmin Model */
-model SuperAdmin {
-  id        Int      @id @default(autoincrement())
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("super_admins")
 }

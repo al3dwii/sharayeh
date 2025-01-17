@@ -16,7 +16,7 @@ export const Faqs = () => {
         <section className={'bg-primary'}>
             <div
                 className={' max-w-7xl mx-auto py-5 px-5 md:py-20 md:px-10 grid grid-cols-1 sm:grid-cols-2 gap-6 align-middle'}>
-                <h1 className={'text-white text-2xl font-[800]'}>الأسئلة المتكررة</h1>
+                <h3 className={'text-white text-2xl font-[800]'}>الأسئلة المتكررة</h3>
                 
                 <div>
                     {faqs.map(faq => (

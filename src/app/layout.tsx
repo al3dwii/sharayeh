@@ -24,8 +24,8 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: 'sharayeh',
-  description: 'Powerpoint by Ai in minutes',
+  title: 'شرايح.كوم',
+  description: 'انشاء عروض بوربوينت بالذكاء الاصطناعي في دقائق',
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
