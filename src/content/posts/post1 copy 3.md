@@ -4,7 +4,7 @@ meta_description: "اكتشف كيف يمكن لخدمة إنشاء عروض Pow
 date: "2024-09-20"
 updated: "2025-01-18"
 published: true
-slug: "powerpoint-creation-service-with-ai-sharayeh"
+slug: "powerpoint-creation-service-with-ai"
 keywords: ["إنشاء عروض PowerPoint بالذكاء الاصطناعي", "تصميم عروض تقديمية احترافية", "خدمات تصميم العروض", "Sharayeh.com", "عروض تقديمية بالذكاء الاصطناعي"]
 ---
     
