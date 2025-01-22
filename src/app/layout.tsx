@@ -68,6 +68,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
           <meta name="google-site-verification" content="eOKcdBbRZYfmlspMg_bdwClFZW6v9uZ9ni5P9psl0Mc" />
 
+          <meta name="trustpilot-one-time-domain-verification-id" content="7db7259e-0557-45de-b6d9-7b74f682e516"/>
+
           {/* You can include other head elements here if necessary */}
         </head>
         <body className={cn("min-h-screen font-sans antialiased", tajawal.className)}>
