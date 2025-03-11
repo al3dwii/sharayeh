@@ -3,7 +3,7 @@ title: " عمل برزنتيشن بالذكاء الاصطناعي عربي با
 "
 date: "2025-03-09"
 published: true
-slug: "best-ai-word-to-ppt-conversion-tool"
+slug: "making-presentation-by-ai-Arabic"
 ---
 
 

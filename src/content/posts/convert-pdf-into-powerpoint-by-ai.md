@@ -3,7 +3,7 @@ title: "تحويل ملف PDF إلى بوربوينت باستخدام Sharayeh.
 "
 date: "2025-03-09"
 published: true
-slug: "best-ai-word-to-ppt-conversion-tool"
+slug: "convert-pdf-to-powerpoint"
 ---
 
 
