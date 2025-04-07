@@ -15,7 +15,7 @@ export const Hero = () => {
                 بوربوينت جاهز بدقة عالية في دقائق <ArrowRight />
             </button>
             <h1 className={'text-white capitalize text-center text-4xl md:text-[60px] z-20 px-10 font-[700] leading-[50px] md:leading-[60px] sm:text-center'}>
-                عروض بوربوينت بالذكاء الصناعي
+            تحويل ملف وورد إلى بوربوينت بالذكاء الاصطناعي
             </h1>
             <p className={'text-slate-300 text-[16px] md:text-[18px] z-20 px-10 text-justify max-w-[920px]'}>       
                 انشاء عروص بوربوينت كاملة باسخدام الذكاء الصناعي باللغة العربية في دقائق

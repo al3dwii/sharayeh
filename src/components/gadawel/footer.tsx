@@ -30,7 +30,7 @@ export const Footer = () => {
     <div className="text-xl  font-semibold">sharayh.com</div>
 
 </div>                    <p className={'text-white'}>
-                        انشاء بوربوينت بالذكاء الصناعي في دقائق
+                           انشاء بوربوينت بالذكاء الصناعي في دقائق من ملف وورد
                     </p>
                     {/* <div className={'flex items-center gap-2'}>
                         {socialLinks.map((item) => (
