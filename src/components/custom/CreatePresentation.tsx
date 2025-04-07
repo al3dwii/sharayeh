@@ -123,7 +123,7 @@ const CreatePresentation: React.FC = () => {
       }
 
       // 3. Skip tier checks if user is super admin
-      if (!isSuperAdmin && userTier !== "premium") {
+      if (!isSuperAdmin ) {
         setModalContent({
           title: "ترقية الحساب",
           message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
