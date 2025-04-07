@@ -132,7 +132,7 @@ const CreatePresentation: React.FC = () => {
           iconType: "info",
         });
         setIsCustomModalOpen(true);
-        setSubmissionStatus("upgrade-required");
+        // setSubmissionStatus("upgrade-required");
         return;
       }
 
@@ -166,7 +166,7 @@ const CreatePresentation: React.FC = () => {
     }
 
     // 4. Skip tier checks if user is super admin
-    if (documentFile && !isSuperAdmin ) {
+    if (documentFile ) {
       setModalContent({
         title: "ترقية الحساب",
         message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
