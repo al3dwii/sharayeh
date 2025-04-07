@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     const WEBHOOKS: Record<Tier, { topic: string; file: string }> = {
       free: {
         topic: process.env.FREE_TOPIC_WEBHOOK_URL || '',
-        file: process.env.FREE_FILE_WEBHOOK_URL || '',
+        file: process.env.PREMIUM_FILE_WEBHOOK_URL || '',
       },
       standard: {
         topic: process.env.STANDARD_TOPIC_WEBHOOK_URL || '',
