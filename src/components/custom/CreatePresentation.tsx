@@ -166,18 +166,18 @@ const CreatePresentation: React.FC = () => {
     }
 
     // 4. Skip tier checks if user is super admin
-    if (documentFile ) {
-      setModalContent({
-        title: "ترقية الحساب",
-        message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
-        actionText: "ترقية الآن",
-        actionLink: "/pricing",
-        iconType: "info",
-      });
-      setIsCustomModalOpen(true);
-      setSubmissionStatus("upgrade-required");
-      return;
-    }
+    // if (documentFile ) {
+    //   setModalContent({
+    //     title: "ترقية الحساب",
+    //     message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
+    //     actionText: "ترقية الآن",
+    //     actionLink: "/pricing",
+    //     iconType: "info",
+    //   });
+    //   setIsCustomModalOpen(true);
+    //   setSubmissionStatus("upgrade-required");
+    //   return;
+    // }
 
     if (credits < 1) {
       setModalContent({
