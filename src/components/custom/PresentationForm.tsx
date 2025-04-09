@@ -62,7 +62,7 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
     <form onSubmit={handleSubmit}>
       <fieldset disabled={isSubmitting || isLoading} className="w-full">
         <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
-          <div className="mb-4 flex-1 lg:mr-2">
+          {/* <div className="mb-4 flex-1 lg:mr-2">
             <input
               type="text"
               name="topic"
@@ -73,8 +73,10 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
               disabled={documentFile !== null}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
-          </div>
-          <div className="flex justify-center px-4 text-xl py-2"> أو </div>
+          </div> */}
+          {/* <div className="flex justify-center px-4 text-xl py-2"> أو </div> */}
+          <div className="flex justify-center p-2 m-auto">
+
           <div className="mb-4 flex-1 lg:ml-2">
             <input
               type="file"
@@ -83,8 +85,9 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
               accept=".docx"
               onChange={handleFileChange}
               disabled={topicValue !== ''}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
+          </div>
           </div>
         </div>
 

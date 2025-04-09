@@ -533,7 +533,7 @@ const CreatePresentation: React.FC = () => {
           <h1>بوربوينت بالذكاء الصناعي</h1>
         </div>
         <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
-          <p>اكتب الموضوع أو حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل</p>
+          <p>   حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل</p>
         </div>
         <div className="bg-white rounded-lg shadow p-2">
           <Card>

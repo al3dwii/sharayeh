@@ -42,9 +42,6 @@ export function UserTable({ users, totalUsers, currentPage, limit }: UserTablePr
                   </Link>
                 </td>
                 <td className="border-b border-gray-200 p-4 text-right">{user.email}</td>
-                <td className="border-b border-gray-200 p-4 text-center">
-                  <button className="rounded-md bg-blue-500 px-3 py-1 text-white">تحميل</button>
-                </td>
               </tr>
             ))}
           </tbody>
