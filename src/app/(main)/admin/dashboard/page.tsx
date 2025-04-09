@@ -1,4 +1,3 @@
-"use client";
 
 import { AdminDashboardCard } from "@/components/admin-dashboard-card";
 import { redirect } from "next/navigation";
