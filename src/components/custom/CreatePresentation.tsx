@@ -122,20 +122,6 @@ const CreatePresentation: React.FC = () => {
         return;
       }
 
-      // 3. Skip tier checks if user is super admin
-      // if (!isSuperAdmin ) {
-      //   setModalContent({
-      //     title: "ترقية الحساب",
-      //     message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
-      //     actionText: "ترقية الآن",
-      //     actionLink: "/pricing",
-      //     iconType: "info",
-      //   });
-      //   setIsCustomModalOpen(true);
-      //   setSubmissionStatus("upgrade-required");
-      //   return;
-      // }
-
       if (submissionStatus) {
         setSubmissionStatus("");
       }
@@ -165,19 +151,6 @@ const CreatePresentation: React.FC = () => {
       return;
     }
 
-    // 4. Skip tier checks if user is super admin
-    // if (documentFile ) {
-    //   setModalContent({
-    //     title: "ترقية الحساب",
-    //     message: "هذه الميزة متاحة للباقة المميزة. يرجى شراء الباقة.",
-    //     actionText: "ترقية الآن",
-    //     actionLink: "/pricing",
-    //     iconType: "info",
-    //   });
-    //   setIsCustomModalOpen(true);
-    //   setSubmissionStatus("upgrade-required");
-    //   return;
-    // }
 
     if (credits < 1) {
       setModalContent({
@@ -393,7 +366,7 @@ const CreatePresentation: React.FC = () => {
 
               await axios.patch(
                 "/api/update-credits",
-                { pointsUsed: 100 },
+                { pointsUsed: 50 },
                 {
                   headers: { Authorization: `Bearer ${token}` },
                 }
