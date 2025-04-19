@@ -38,7 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     // 1) Ensure userCredits exist
     await db.userCredits.upsert({
       where: { userId },
-      create: { userId, credits: 200, usedCredits: 0 },
+      create: { userId, credits: 500, usedCredits: 0 },
       update: {},
     });
 
