@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import { cn } from '@/components/ui/cn';
 import { ClerkProvider } from '@clerk/nextjs';
-import { dark } from '@clerk/themes';
+import { neobrutalism } from '@clerk/themes';
 import Providers from '@/components/Providers';
 import { getAllUserData, UserData } from '../lib/getAllUserData';
 import { auth } from '@clerk/nextjs/server';
@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <ClerkProvider localization={arSA} appearance={{ baseTheme: dark }}>
+    <ClerkProvider localization={arSA} appearance={{ baseTheme: neobrutalism }}>
       <html dir="rtl" lang="ar" suppressHydrationWarning>
         <head>
           {/* Google Tag Manager */}
