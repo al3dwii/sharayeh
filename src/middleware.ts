@@ -1,43 +1,46 @@
 // src/middleware.ts
-import { authMiddleware } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-// 1) Define routes that do NOT require auth:
+/**
+ * Routes that should stay PUBLIC (no auth required)
+ */
 const PUBLIC_ROUTES = [
-  "/",
-  "/pricing",
-  "/blog",
-  "/sign-in",
-  "/sign-up",
-  "/api/save-file",
-  "/api/webhook",
-  "/blog/:path*",    
-  "/terms-of-service",
-  "/privacy-policy",
-  "/api(.*)", 
-
-  // Add other public routes as needed
+  '/',                          // home
+  '/pricing',
+  '/blog/:path*',               // all blog pages
+  '/sign-in',
+  '/sign-up',
+  '/terms-of-service',
+  '/privacy-policy',
+  '/api/save-file',
+  '/api/webhook',
+  '/api(.*)',                   // any other open API routes
 ];
 
-// 2) Export your Clerk middleware:
-export default authMiddleware({
-  publicRoutes: PUBLIC_ROUTES,
-  // Optional: you can define afterAuth or beforeAuth if needed
-  // afterAuth(auth, req) {
-  //   return NextResponse.next();
-  // },
+/**
+ * Helper returns true when the request *matches* a public route.
+ * Any request that does **not** match will be protected.
+ */
+const isPublicRoute = createRouteMatcher(PUBLIC_ROUTES);
+
+export default clerkMiddleware(async (auth, req) => {
+  // Protect every route that is NOT in PUBLIC_ROUTES
+  if (!isPublicRoute(req)) {
+    await auth.protect();       // 401 → sign-in, 404 if you prefer (`{ unauthorized: '/404' }`)
+  }
+  // If you have other middleware (intl, i18n, etc) you can call them here.
 });
 
-// 3) Configure which routes run the middleware:
+/**
+ * Tell Next.js which routes should invoke this middleware.
+ * (Same pattern you already had, just copied over.)
+ */
 export const config = {
   matcher: [
-    // Match all routes except:
-    //  - _next (Next.js internals)
-    //  - static files (any dot extension like .png, .js, .css, etc.)
-    "/((?!.*\\..*|_next).*)",
+    // Skip Next.js internals & static files
+    '/((?!.*\\..*|_next).*)',
   ],
 };
-
 
 // import { authMiddleware } from "@clerk/nextjs";
 
