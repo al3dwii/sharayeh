@@ -27,22 +27,22 @@ export const stripePriceIds: Record<string, string> = {
 };
 
 export const pricingPlans: Plan[] = [
-  {
-    id: "cm4kcbd6t00007ndb3r9dydrc",
-    stripePriceId: stripePriceIds["cm4kcbd6t00007ndb3r9dydrc"],
-    title: "الباقة التجريبية",
-    price: "0$",
-    frequency: "",
-    features: [
-      "انشاء 2 بوربوينت من 10 شرائح ",
-    ],
-    limitations: [
-      "اضافة الحركات ",
-      "من ملف وورد  ",
-       "من ملف بي دي ف  "
-    ],
-    tier: "FREE",
-  },
+  // {
+  //   id: "cm4kcbd6t00007ndb3r9dydrc",
+  //   stripePriceId: stripePriceIds["cm4kcbd6t00007ndb3r9dydrc"],
+  //   title: "الباقة التجريبية",
+  //   price: "0$",
+  //   frequency: "",
+  //   features: [
+  //     "انشاء 2 بوربوينت من 10 شرائح ",
+  //   ],
+  //   limitations: [
+  //     "اضافة الحركات ",
+  //     "من ملف وورد  ",
+  //      "من ملف بي دي ف  "
+  //   ],
+  //   tier: "FREE",
+  // },
   {
     id: "cm4kcbe5u00017ndbe7dphuoo",
     stripePriceId: stripePriceIds["cm4kcbe5u00017ndbe7dphuoo"],
