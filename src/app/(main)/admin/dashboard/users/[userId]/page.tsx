@@ -1,6 +1,5 @@
 // src/app/(main)/admin/dashboard/users/[userId]/page.tsx
 
-// src/app/(main)/admin/dashboard/users/[userId]/page.tsx
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -16,31 +15,31 @@ interface UserDetailPageProps {
   params: { userId: string };
 }
 
-/* ------------------------------------------------------------- */
-/* Helper: fetch everything we need about this user               */
-/* ------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
+/* Helper: fetch everything we need about this user                    */
+/* ------------------------------------------------------------------ */
 async function getUserData(userId: string) {
-  const clerk = await clerkClient();                       // ← initialise SDK
+  const clerk = await clerkClient(); // Clerk v6: function → instance
 
-  const [user, userCredits, userPackages, userFiles] =
-    await Promise.all([
-      clerk.users.getUser(userId).catch(() => null),       // ← use clerk instance
-      db.userCredits.findUnique({ where: { userId } }),
-      db.userPackage.findMany({
-        where: { userId },
-        include: { package: true },
-      }),
-      db.file.findMany({ where: { userId } }),
-    ]);
+  const [user, userCredits, userPackages, userFiles] = await Promise.all([
+    // 🔽 add a return-type annotation so TS knows this yields `null`
+    clerk.users.getUser(userId).catch((): null => null),
+    db.userCredits.findUnique({ where: { userId } }),
+    db.userPackage.findMany({
+      where: { userId },
+      include: { package: true },
+    }),
+    db.file.findMany({ where: { userId } }),
+  ]);
 
   if (!user) notFound();
 
   return { user, userCredits, userPackages, userFiles };
 }
 
-/* ------------------------------------------------------------- */
-/* Page component                                                 */
-/* ------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
+/* Page component                                                      */
+/* ------------------------------------------------------------------ */
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -63,9 +62,9 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
   );
 }
 
-/* ------------------------------------------------------------- */
-/* Child that actually renders the cards once data is ready       */
-/* ------------------------------------------------------------- */
+/* ------------------------------------------------------------------ */
+/* Child that renders the cards once data is ready                     */
+/* ------------------------------------------------------------------ */
 async function UserData({ userId }: { userId: string }) {
   const { user, userCredits, userPackages, userFiles } = await getUserData(userId);
 
