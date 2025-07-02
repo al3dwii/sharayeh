@@ -1,26 +1,23 @@
 // app/layout.tsx
-
 import './globals.css';
 import { Metadata } from 'next';
-import { Tajawal } from "next/font/google"; 
-import { cn } from "@/components/ui/cn";
+import { Tajawal } from 'next/font/google';
+import { cn } from '@/components/ui/cn';
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
-import Providers from '@/components/Providers'; // Import the client Providers component
+import Providers from '@/components/Providers';
 import { getAllUserData, UserData } from '../lib/getAllUserData';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { arSA } from '@clerk/localizations';
 import { ReactNode } from 'react';
-import { db } from "@/lib/db";
+import { db } from '@/lib/db';
+import Script from 'next/script';
 
-import Script from 'next/script'; // Ensure Script is imported
-
-
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
 
 const tajawal = Tajawal({
-  subsets: ["latin", "arabic"], 
-  weight: ["400", "500", "700"],
+  subsets: ['latin', 'arabic'],
+  weight: ['400', '500', '700'],
 });
 
 export const metadata: Metadata = {
@@ -29,13 +26,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const { userId } = auth();
+  /* -------- Clerk v6: auth() is async -------- */
+  const { userId } = await auth();   // ← just add await
 
-  let userData: UserData = null;
+  let userData: UserData | null = null;
 
   if (userId) {
-
-    // 1) Ensure userCredits exist
+    // Ensure credits row exists (creates on first sign-in)
     await db.userCredits.upsert({
       where: { userId },
       create: { userId, credits: 500, usedCredits: 0 },
@@ -49,35 +46,113 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <ClerkProvider localization={arSA} appearance={{ baseTheme: dark }}>
       <html dir="rtl" lang="ar" suppressHydrationWarning>
         <head>
-          {/* Google Tag Manager (gtag.js) - External Script */}
+          {/* Google Tag Manager */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=AW-10933947515"
             strategy="afterInteractive"
           />
-
-          {/* Google Tag Manager (gtag.js) - Initialization Script */}
           <Script id="gtag-init" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-
               gtag('config', 'AW-10933947515');
             `}
           </Script>
 
           <meta name="google-site-verification" content="eOKcdBbRZYfmlspMg_bdwClFZW6v9uZ9ni5P9psl0Mc" />
-
-          <meta name="trustpilot-one-time-domain-verification-id" content="7db7259e-0557-45de-b6d9-7b74f682e516"/>
-
-          {/* You can include other head elements here if necessary */}
+          <meta name="trustpilot-one-time-domain-verification-id" content="7db7259e-0557-45de-b6d9-7b74f682e516" />
         </head>
-        <body className={cn("min-h-screen font-sans antialiased", tajawal.className)}>
-          <Providers userData={userData}>
-            {children}
-          </Providers>
+
+        <body className={cn('min-h-screen font-sans antialiased', tajawal.className)}>
+          <Providers userData={userData}>{children}</Providers>
         </body>
       </html>
     </ClerkProvider>
   );
 }
+
+
+// // app/layout.tsx
+
+// import './globals.css';
+// import { Metadata } from 'next';
+// import { Tajawal } from "next/font/google"; 
+// import { cn } from "@/components/ui/cn";
+// import { ClerkProvider } from '@clerk/nextjs';
+// import { dark } from '@clerk/themes';
+// import Providers from '@/components/Providers'; // Import the client Providers component
+// import { getAllUserData, UserData } from '../lib/getAllUserData';
+// import { auth } from '@clerk/nextjs/server';
+// import { arSA } from '@clerk/localizations';
+// import { ReactNode } from 'react';
+// import { db } from "@/lib/db";
+
+// import Script from 'next/script'; // Ensure Script is imported
+
+
+// export const runtime = 'nodejs'
+
+// const tajawal = Tajawal({
+//   subsets: ["latin", "arabic"], 
+//   weight: ["400", "500", "700"],
+// });
+
+// export const metadata: Metadata = {
+//   title: 'شرايح.كوم',
+//   description: 'تحويل ملف وورد إلى بوربوينت بالذكاء الاصطناعي ',
+// };
+
+// export default async function RootLayout({ children }: { children: ReactNode }) {
+//   const { userId } = auth();
+
+//   let userData: UserData = null;
+
+//   if (userId) {
+
+//     // 1) Ensure userCredits exist
+//     await db.userCredits.upsert({
+//       where: { userId },
+//       create: { userId, credits: 500, usedCredits: 0 },
+//       update: {},
+//     });
+
+//     userData = await getAllUserData(userId);
+//   }
+
+//   return (
+//     <ClerkProvider localization={arSA} appearance={{ baseTheme: dark }}>
+//       <html dir="rtl" lang="ar" suppressHydrationWarning>
+//         <head>
+//           {/* Google Tag Manager (gtag.js) - External Script */}
+//           <Script
+//             src="https://www.googletagmanager.com/gtag/js?id=AW-10933947515"
+//             strategy="afterInteractive"
+//           />
+
+//           {/* Google Tag Manager (gtag.js) - Initialization Script */}
+//           <Script id="gtag-init" strategy="afterInteractive">
+//             {`
+//               window.dataLayer = window.dataLayer || [];
+//               function gtag(){dataLayer.push(arguments);}
+//               gtag('js', new Date());
+
+//               gtag('config', 'AW-10933947515');
+//             `}
+//           </Script>
+
+//           <meta name="google-site-verification" content="eOKcdBbRZYfmlspMg_bdwClFZW6v9uZ9ni5P9psl0Mc" />
+
+//           <meta name="trustpilot-one-time-domain-verification-id" content="7db7259e-0557-45de-b6d9-7b74f682e516"/>
+
+//           {/* You can include other head elements here if necessary */}
+//         </head>
+//         <body className={cn("min-h-screen font-sans antialiased", tajawal.className)}>
+//           <Providers userData={userData}>
+//             {children}
+//           </Providers>
+//         </body>
+//       </html>
+//     </ClerkProvider>
+//   );
+// }

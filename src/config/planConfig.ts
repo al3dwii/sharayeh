@@ -47,7 +47,7 @@ export const pricingPlans: Plan[] = [
     id: "cm4kcbe5u00017ndbe7dphuoo",
     stripePriceId: stripePriceIds["cm4kcbe5u00017ndbe7dphuoo"],
     title: "الباقة الأساسية",
-    price: "15$",
+    price: "5$",
     frequency: " ",
     features: [
       "انشاء 4 بوربوينت من 15 شريحة ",
@@ -63,7 +63,7 @@ export const pricingPlans: Plan[] = [
     id: "cm4kcbeop00027ndbbg8k20me",
     stripePriceId: stripePriceIds["cm4kcbeop00027ndbbg8k20me"],
     title: "الباقة المميزة",
-    price: "25$",
+    price: "10$",
     frequency: " ",
     features: [
       "انشاء 8 بوربوينت من 25 شريحة   ",
