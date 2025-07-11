@@ -1,21 +1,15 @@
-const {routing} = require('./src/i18n.config');
+const {locales, defaultLocale, routing} = require('./i18n.cjs');
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-    
-      
-    domains: [
-      'uploadthing.com',
-      'utfs.io',
-      'img.clerk.com',
-      'subdomain',
-      'files.stripe.com',
-      'lh3.googleusercontent.com'
-    ],
-  },
-  reactStrictMode: false,
-  i18n: routing,
-};
+
+ /** @type {import('next').NextConfig} */
+ const nextConfig = {
+   reactStrictMode: false,
+   // ✅ pass ONLY the keys Next understands
+   i18n: {
+     locales: routing.locales,
+     defaultLocale: routing.defaultLocale
+     // leave localeDetection undefined (default=true)
+   }
+ };
 
 module.exports = nextConfig;

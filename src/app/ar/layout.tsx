@@ -1,6 +1,6 @@
 import '../globals.css';
 import {NextIntlClientProvider, useMessages} from 'next-intl';
-import {routing} from '@/i18n.config';
+import {routing} from '../../../i18n.js';
 import {ReactNode} from 'react';
 import {Tajawal} from 'next/font/google';
 import {cn} from '@/components/ui/cn';

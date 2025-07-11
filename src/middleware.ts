@@ -1,6 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createIntlMiddleware from 'next-intl/middleware';
-import { routing } from './i18n.config';
+import {routing} from '../i18n.cjs';
+
+
 
 const PUBLIC_ROUTES = [
   '/',
