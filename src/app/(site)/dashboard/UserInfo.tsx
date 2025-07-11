@@ -13,7 +13,7 @@ import { useGlobalStore } from "@/store/useGlobalStore";
 
 import Link from "next/link";
 import Skel from "@/components/global/Skeleton";
-import { useUserData } from "../../../../context/UserContext";
+import { useUserData } from "../../../context/UserContext";
 
 export const UserInfo = () => {
   const [mounted, setMounted] = useState(false);
