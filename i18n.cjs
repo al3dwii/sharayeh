@@ -4,7 +4,7 @@ const {defineRouting} = require('next-intl/routing');
 const locales       = ['en', 'ar'];
 const defaultLocale = 'en';
 const localePrefix  = 'as-needed';
-const localeDetection = true;
+const localeDetection = false;
 
 const routing = defineRouting({
   locales,

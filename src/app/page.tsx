@@ -1,2 +1,9 @@
-import Home from './ar/(main)/page';   // ⬅ adjusts if your file is elsewhere
-export default Home;
+// src/app/page.tsx
+export default function HomePage() {
+  return (
+    <main>
+      <h1>Welcome to Sharayeh.com</h1>
+      {/* …your English homepage content/component… */}
+    </main>
+  );
+}

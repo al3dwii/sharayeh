@@ -1,23 +1,14 @@
-const {defineRouting} = require('next-intl/routing');
+// next-intl.config.js  ✨ MUST use ESM, not require()
+import {defineRouting} from 'next-intl/routing';
 
-const locales       = ['en', 'ar'];   // add 'es', 'fr', … later
-const defaultLocale = 'en';
+export const locales       = ['en', 'ar'];   // add 'fr' when ready
+export const defaultLocale = 'en';
+export const localePrefix  = 'as-needed';
+export const localeDetection = false;
 
-// Optional extras you already use
-const localePrefix    = 'as-needed';
-const localeDetection = true;
-
-const routing = defineRouting({
+export const routing = defineRouting({
   locales,
   defaultLocale,
   localePrefix,
   localeDetection
 });
-
-module.exports = {
-  locales,
-  defaultLocale,
-  localePrefix,
-  localeDetection,
-  routing
-};

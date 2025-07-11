@@ -1,6 +1,6 @@
 'use client';
 import {usePathname, useRouter} from 'next/navigation';
-import {routing} from '@/i18n.config';
+import { routing } from '../i18n/routing';   // ← ADD THIS LINE
 
 export default function LocaleToggle() {
   const pathname = usePathname();

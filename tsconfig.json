@@ -43,7 +43,6 @@
     ".next/types/**/*.ts",
     "src/app/(main)/subaccount/[subaccountId]/launchpad"
 , "i18n.cjs"  ],
-  ],
   "exclude": [
     "node_modules",
     ".turbo",

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://sharayeh.com
+
+# Sitemaps
+Sitemap: https://sharayeh.com/sitemap.xml

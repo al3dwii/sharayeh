@@ -1,0 +1,43 @@
+/* src/app/(pages)/blog/[slug]/post.module.css */
+
+.postContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 50px;
+  }
+  
+  .postTitle {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+  }
+  
+  .postDate {
+    color: #888;
+    font-size: 1em;
+    margin-bottom: 20px;
+  }
+  
+  .postContent {
+    font-size: 1.1em;
+    line-height: 1.6;
+  }
+  
+  .postContent h2 {
+    margin-top: 30px;
+    font-size: 1.8em;
+  }
+  
+  .postContent p {
+    margin-bottom: 20px;
+  }
+  
+  .postContent a {
+    color: #0070f3;
+    text-decoration: none;
+  }
+  
+  .postContent a:hover {
+    text-decoration: underline;
+  }
+  

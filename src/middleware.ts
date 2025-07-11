@@ -1,32 +1,21 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+// src/middleware.ts
+import { NextResponse, type NextRequest, type NextFetchEvent } from 'next/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 import createIntlMiddleware from 'next-intl/middleware';
-import {routing} from '../i18n.cjs';
+import { routing } from './i18n/routing';
 
-
-
-const PUBLIC_ROUTES = [
-  '/',
-  '/pricing',
-  '/blog/:path*',
-  '/sign-in',
-  '/sign-up',
-  '/terms-of-service',
-  '/privacy-policy',
-  '/api/save-file',
-  '/api/webhook',
-  '/api(.*)',
-];
-
-const isPublicRoute = createRouteMatcher(PUBLIC_ROUTES);
+// 1) Next-intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-  return intlMiddleware(req);
-});
+export default function middleware(req: NextRequest, ev: NextFetchEvent) {
+  // run i18n first
+  const i18nResponse = intlMiddleware(req);
+
+  // then run Clerk
+  return clerkMiddleware(() => i18nResponse)(req, ev);
+}
 
 export const config = {
-  matcher: ['/', '/((?!_next|.*\\..*).*)'],
+  // apply to all page routes (skip API, _next, etc.)
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']
 };
