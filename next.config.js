@@ -1,3 +1,5 @@
+const {routing} = require('./src/i18n.config');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -13,7 +15,7 @@ const nextConfig = {
     ],
   },
   reactStrictMode: false,
-  
-}
+  i18n: routing,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
