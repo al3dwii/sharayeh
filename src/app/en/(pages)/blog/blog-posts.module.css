@@ -1,0 +1,104 @@
+/* src/app/(pages)/blog/blog-posts.module.css */
+
+.postsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 30px
+  }
+  
+  .postCard {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: calc(33.333% - 20px);
+  }
+  
+  .postTitle {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .postDate {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+  }
+  
+  .postExcerpt {
+    font-size: 1em;
+    margin-bottom: 20px;
+  }
+  
+  .readMoreLink {
+    color: #0070f3;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .readMoreLink:hover {
+    text-decoration: underline;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+
+/* blog-posts.module.css */
+.postsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+  margin: 0 auto;
+  max-width: 1200px; /* Ensures content width is limited on large screens */
+}
+
+.postCard {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left; /* Better readability for text-heavy cards */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.postCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.postTitle {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.postDate {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.postExcerpt {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+.readMoreLink {
+  color: #0070f3;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.readMoreLink:hover {
+  text-decoration: underline;
+}
