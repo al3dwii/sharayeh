@@ -3,7 +3,7 @@ import CreatePresentation from '@/components/custom/CpClientWrapper';
 import { FileTableWithPagination } from '@/components/custom/FileTableWithPagination';
 import { getUserFiles } from '@/lib/queries';
 import { auth } from '@clerk/nextjs/server';
-import { UserInfo } from '../../(main)/dashboard/UserInfo';
+import { UserInfo } from '../../(site)/dashboard/UserInfo';
 import UserSettingClient from './UserSettingClient';
 import React from 'react';
 
