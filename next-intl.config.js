@@ -1,15 +1,23 @@
-import {defineRouting} from 'next-intl/routing';
+const {defineRouting} = require('next-intl/routing');
 
-export const locales       = ['en', 'ar'];   // add 'es', 'fr', … later
-export const defaultLocale = 'en';
+const locales       = ['en', 'ar'];   // add 'es', 'fr', … later
+const defaultLocale = 'en';
 
 // Optional extras you already use
-export const localePrefix     = 'as-needed';
-export const localeDetection  = true;
+const localePrefix    = 'as-needed';
+const localeDetection = true;
 
-export const routing = defineRouting({
+const routing = defineRouting({
   locales,
   defaultLocale,
   localePrefix,
   localeDetection
 });
+
+module.exports = {
+  locales,
+  defaultLocale,
+  localePrefix,
+  localeDetection,
+  routing
+};
