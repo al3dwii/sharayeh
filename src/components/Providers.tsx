@@ -23,9 +23,9 @@ const Providers = ({ children, userData }: ProvidersProps) => {
   return (
     <UserContext.Provider value={userData}>
         <ThemeProvider
-          attribute="class"
+          // attribute="class"
           defaultTheme="light"
-          enableSystem
+          enableSystem={false}      // ← ignore OS preference
           disableTransitionOnChange
         >
           <ModalProvider />

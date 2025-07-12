@@ -1,19 +1,41 @@
+// src/components/LocaleToggle.tsx
 'use client';
-import {usePathname, useRouter} from 'next/navigation';
-import { routing } from '../i18n/routing';   // ← ADD THIS LINE
 
-export default function LocaleToggle() {
-  const pathname = usePathname();
+import { usePathname, useRouter } from 'next/navigation';
+import { defaultLocale, locales } from '@/i18n/routing';
+import { cn } from '@/components/ui/cn';
+
+export function LocaleToggle() {
+  const pathname = usePathname() || '/';
   const router = useRouter();
 
   function switchLocale(lng: string) {
-    const url = lng === routing.defaultLocale
-      ? pathname.replace(/^\/(en|ar)/, '')
-      : `/${lng}${pathname}`;
-    router.push(url);
+    const newPath = pathname.replace(/^\/(en|ar|fr)/, '');
+    const prefix = lng === defaultLocale ? '' : `/${lng}`;
+    router.push(`${prefix}${newPath}`);
   }
 
   return (
-    <button onClick={() => switchLocale('ar')}>العربية</button>
+    <div className="flex items-center space-x-2">
+      {locales.map((lng) => {
+        const isActive = lng === defaultLocale
+          ? !pathname.startsWith(`/${lng}`)
+          : pathname.startsWith(`/${lng}`);
+        return (
+          <button
+            key={lng}
+            onClick={() => switchLocale(lng)}
+            className={cn(
+              'py-1 px-4  rounded text-white text-sm',
+              isActive
+                ? 'text-white font-semibold'
+                : ' text-white '
+            )}
+          >
+            {lng.toUpperCase()}
+          </button>
+        );
+      })}
+    </div>
   );
 }
