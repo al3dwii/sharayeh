@@ -1,0 +1,157 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sharayeh Word→PPT Converter API",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://sharayeh.com" }],
+  "paths": {
+    "/api/add-file": {
+      "post": {
+        "operationId": "addFile",
+        "summary": "Upload a DOCX file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileUrl": { "type": "string", "format": "uri" },
+                  "template": { "type": "string", "enum": ["business", "academic", "tech"] }
+                },
+                "required": ["fileUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": { "type": "string" }
+                  },
+                  "required": ["jobId"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/check-file-status": {
+      "get": {
+        "operationId": "checkStatus",
+        "summary": "Check job status",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "enum": ["queued", "processing", "ready", "error"] },
+                    "downloadUrl": { "type": "string", "format": "uri", "nullable": true },
+                    "creditsRemaining": { "type": "integer" }
+                  },
+                  "required": ["status", "creditsRemaining"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/update-resulted-file": {
+      "patch": {
+        "operationId": "finalizeJob",
+        "summary": "Mark job complete & return signed URL",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jobId": { "type": "string" }
+                },
+                "required": ["jobId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "downloadUrl": { "type": "string", "format": "uri" }
+                  },
+                  "required": ["downloadUrl"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/convert-word-to-ppt": {
+      "post": {
+        "operationId": "convertWordToPpt",
+        "summary": "One-shot DOCX→PPTX conversion",
+        "description": "Behind the scenes this calls addFile, polls checkStatus until ready, then returns the download URL.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileUrl": { "type": "string", "format": "uri" },
+                  "template": { "type": "string", "enum": ["business", "academic", "tech"] }
+                },
+                "required": ["fileUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "downloadUrl": { "type": "string", "format": "uri" },
+                    "creditsRemaining": { "type": "integer" }
+                  },
+                  "required": ["downloadUrl", "creditsRemaining"]
+                }
+              }
+            }
+          },
+          "402": { "description": "Out of credits" },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    }
+  }
+}
+

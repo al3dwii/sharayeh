@@ -2,7 +2,7 @@ import { withUt } from 'uploadthing/tw'
 import colors from 'tailwindcss/colors'
 
 module.exports = withUt({
-  darkMode: ['class'],
+  // darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',

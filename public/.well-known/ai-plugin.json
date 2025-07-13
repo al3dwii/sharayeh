@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Sharayeh Converter",
+  "name_for_model": "sharayeh",
+  "description_for_human": "Convert Word (DOCX) files into PowerPoint slides in seconds.",
+  "description_for_model": "Use this plugin to turn DOCX files into downloadable PPTX presentations. Pass a publicly accessible DOCX URL or raw bytes; receive a signed download URL when ready.",
+  "auth": {
+    "type": "user_http",
+    "authorization_type": "bearer"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://sharayeh.com/openapi.json"
+  },
+  "logo_url": "https://sharayeh.com/icon.png",
+  "contact_email": "support@sharayeh.com",
+  "legal_info_url": "https://sharayeh.com/legal"
+}
