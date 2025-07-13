@@ -1,23 +1,33 @@
 // next.config.js
-const path = require('path');
-const createNextIntlPlugin = require('next-intl/plugin');
-const withNextIntl = createNextIntlPlugin();  // ← auto-discovers next-intl.config.js & i18n/request.ts
+const path = require("path");
+const createNextIntlPlugin = require("next-intl/plugin");
+const withNextIntl = createNextIntlPlugin(); // ← auto-discovers your intl config
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
 
-  // your existing webpack alias (so "@/foo" maps to "src/foo")
+  images: {
+    // whitelist Google User Content via a remotePattern
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
+
   webpack(config) {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    config.resolve.alias["@"] = path.resolve(__dirname, "src");
     return config;
   },
 
-  // any other Next.js options you already had can stay here…
+  // you can keep any other Next.js settings you already had…
 };
 
 module.exports = withNextIntl(nextConfig);
-
 
 // // next.config.js
 // const createNextIntlPlugin = require('next-intl/plugin');
