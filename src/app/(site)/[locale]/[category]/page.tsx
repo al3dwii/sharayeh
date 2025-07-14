@@ -5,19 +5,7 @@ import { Metadata } from "next";
 import Converter from "@/components/Converter";
 import Script from "next/script";
 
-<Script
-  id="ld-json"
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{
-    __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: cfg.h1[params.locale],
-      applicationCategory: "BusinessApplication",
-      offers: { "@type": "Offer", price: "0.0", priceCurrency: "USD" }
-    })
-  }}
-/>
+
 
 
 const MAP = {
@@ -56,6 +44,19 @@ export default async function CategoryPage({ params }: { params: Params }) {
 
   return (
     <main className="mx-auto max-w-3xl py-16 px-4">
+      <Script
+  id="ld-json"
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: cfg.h1[params.locale],
+      applicationCategory: "BusinessApplication",
+      offers: { "@type": "Offer", price: "0.0", priceCurrency: "USD" }
+    })
+  }}
+/>
       <h1 className="text-3xl font-bold mb-6 text-center">
         {cfg.h1[params.locale]}
       </h1>
