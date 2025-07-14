@@ -6,6 +6,10 @@ import Converter from "@/components/Converter";
 import Script from "next/script";
 
 
+import FeatureSectionAr from "@/components/landing/FeatureSectionAr";
+import LandingCopyAr    from "@/components/landing/LandingCopyAr";
+import FaqAr            from "@/components/landing/FaqAr";
+
 
 
 const MAP = {
@@ -67,6 +71,10 @@ export default async function CategoryPage({ params }: { params: Params }) {
         proxyPath={cfg.proxy}
         templateGalleryPath="/templates"
       />
+
+      <FeatureSectionAr />
+           <LandingCopyAr />
+        <FaqAr />
 
       {/* Optional marketing copy */}
       <section className="mt-12 prose prose-slate dark:prose-invert">

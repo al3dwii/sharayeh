@@ -180,8 +180,9 @@ export async function POST(req: NextRequest) {
     const parsedBody = ApplyMorphSchema.safeParse(await req.json());
 
     if (!parsedBody.success) {
-      const error = (parsedBody as z.SafeParseError<typeof schema>).error;
-      console.error('❌ Invalid request body:', error.errors);
+      const { error } = parsedBody;          // parsedBody is already the error branch
+
+      console.error('❌ Invalid request body:', error);
       return NextResponse.json(
         { success: false, error: 'Invalid request data.' },
         { status: 400 }

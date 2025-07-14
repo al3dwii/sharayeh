@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
     const parse      = UpdateUserSchema.safeParse(body);
     if (!parse.success) {
       return NextResponse.json(
-        { error: 'Invalid request data.', details: parse.error.errors },
+        { error: 'Invalid request data.', details: parse.error },
         { status: 400 }
       );
     }
