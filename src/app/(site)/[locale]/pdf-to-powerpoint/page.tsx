@@ -30,8 +30,8 @@ export default function Page({ params }: { params: { locale: string; slug_en: st
 
   const isAr = params.locale === "ar";
   return (
-    <main className="container mx-auto py-12 space-y-12">
-      <h1 className="text-3xl font-bold text-center">
+    <main className="container mx-auto  py-12 space-y-12">
+      <h1 className="text-3xl mt-12 font-bold text-center">
         {isAr ? row.label_ar : row.label_en}
       </h1>
       <Converter conversion={row.dir} />
