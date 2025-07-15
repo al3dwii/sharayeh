@@ -14,7 +14,7 @@ import LandingCopyAr    from "@/components/landing/LandingCopyAr";
 import FaqAr            from "@/components/landing/FaqAr";
 
 /* ---------- Category dictionary ---------- */
-export const MAP = {
+const MAP = {
   "pdf-to-powerpoint": {
     h1: { en: "Convert PDF to PowerPoint",            ar: "حوّل PDF إلى بوربوينت" },
     proxy: "/api/proxy/pdf-to-deck",
