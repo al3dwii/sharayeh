@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
     console.log('📄 Parsing and validating request body');
     const parsedBody = ApplyMorphSchema.safeParse(await req.json());
 
-    if (!parsedBody.success) {
+    if (!parsedBody.success && "error" in parsedBody) {
       const { error } = parsedBody;          // parsedBody is already the error branch
 
       console.error('❌ Invalid request body:', error);
