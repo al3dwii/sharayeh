@@ -48,7 +48,7 @@ const EXTRA_JSON_PATH = path.join(
 function parseCsvLine(line: string): string[] {
   return (
     line
-      .match(/("([^"]|"")*"|[^,]+)(?=,|\s*$)/g) // keep quoted substrings intact
+      .match(/("([^"]|"")*"|[^,]+)(?=,|\s*$)/gu)   // add "u" flag for Unicode
       ?.map((cell) => cell.replace(/^"|"$/g, "").trim()) ?? []
   );
 }

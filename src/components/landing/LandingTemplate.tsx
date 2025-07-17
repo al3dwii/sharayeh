@@ -37,7 +37,12 @@ export default function LandingTemplate({ locale, row }: LandingTemplateProps) {
       </header>
 
       {/* Converter takes no props in current codebase */}
-      <Converter />
+      <Converter 
+      locale={locale}
+      proxyPath={`/api/ai/${row.slug_en}`}
+      templateGalleryPath="/templates"
+      
+      />
 
       {isAr && (
         <>

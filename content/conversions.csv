@@ -1,4 +1,4 @@
-# slug_en,slug_ar,dir,label_en,label_ar,search_vol,icon,avg_time_iso,steps_id
+slug_en,slug_ar,dir,label_en,label_ar,search_vol,icon,avg_time_iso,steps_id
 word-to-powerpoint,تحويل-وورد-بوربوينت,DOCX→PPT,Convert Word to PowerPoint,تحويل وورد إلى بوربوينت,550,word-ppt.svg,PT30S,word_to_ppt
 powerpoint-to-pdf,تحويل-بوربوينت-بي-دي-اف,PPT→PDF,Convert PowerPoint to PDF,تحويل بوربوينت إلى PDF,500,ppt-pdf.svg,PT25S,ppt_to_pdf
 pdf-to-powerpoint,تحويل-بي-دي-اف-بوربوينت,PDF→PPT,Convert PDF to PowerPoint,تحويل PDF إلى بوربوينت,480,pdf-ppt.svg,PT45S,pdf_to_ppt
