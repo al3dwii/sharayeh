@@ -2,10 +2,18 @@
 import { useState } from "react";
 
 export interface ConverterProps {
-  locale: "en" | "ar";
-  proxyPath: string;
-  templateGalleryPath: string;
+  locale?: "en" | "ar";
+  proxyPath?: string;
+  templateGalleryPath?: string;
 }
+
+
+// export interface ConverterProps {
+//   locale: "en" | "ar";
+//   proxyPath: string;
+//   templateGalleryPath: string;
+// }
+
 
 /* ✅ return value must be JSX: ReactElement | null */
 export default function Converter({

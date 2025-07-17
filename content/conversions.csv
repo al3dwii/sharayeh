@@ -1,6 +1,11 @@
-# slug_en,slug_ar,dir,label_en,label_ar,search_vol
-pdf-to-powerpoint,تحويل-pdf-بوربوينت,PDF→PPT,Convert PDF to PowerPoint,تحويل PDF إلى بوربوينت,1300
-powerpoint-to-pdf,تحويل-بوربوينت-pdf,PPT→PDF,Convert PowerPoint to PDF,تحويل بوربوينت إلى PDF,1600
-powerpoint-to-word,تحويل-بوربوينت-وورد,PPT→DOCX,Convert PowerPoint to Word,تحويل بوربوينت إلى وورد,650
-word-to-powerpoint,تحويل-وورد-بوربوينت,DOCX→PPT,Convert Word to PowerPoint,تحويل وورد إلى بوربوينت,550
-powerpoint-to-image,تحويل-بوربوينت-صورة,PPT→PNG,Convert PowerPoint to Image,تحويل بوربوينت إلى صورة,320
+# slug_en,slug_ar,dir,label_en,label_ar,search_vol,icon,avg_time_iso,steps_id
+word-to-powerpoint,تحويل-وورد-بوربوينت,DOCX→PPT,Convert Word to PowerPoint,تحويل وورد إلى بوربوينت,550,word-ppt.svg,PT30S,word_to_ppt
+powerpoint-to-pdf,تحويل-بوربوينت-بي-دي-اف,PPT→PDF,Convert PowerPoint to PDF,تحويل بوربوينت إلى PDF,500,ppt-pdf.svg,PT25S,ppt_to_pdf
+pdf-to-powerpoint,تحويل-بي-دي-اف-بوربوينت,PDF→PPT,Convert PDF to PowerPoint,تحويل PDF إلى بوربوينت,480,pdf-ppt.svg,PT45S,pdf_to_ppt
+powerpoint-to-word,تحويل-بوربوينت-وورد,PPT→DOCX,Convert PowerPoint to Word,تحويل بوربوينت إلى وورد,350,ppt-word.svg,PT40S,ppt_to_word
+word-to-pdf,تحويل-وورد-بي-دي-اف,DOCX→PDF,Convert Word to PDF,تحويل وورد إلى PDF,750,word-pdf.svg,PT20S,word_to_pdf
+excel-to-powerpoint,تحويل-اكسل-بوربوينت,XLSX→PPT,Convert Excel to PowerPoint,تحويل اكسل إلى بوربوينت,120,excel-ppt.svg,PT40S,excel_to_ppt
+powerpoint-to-google-slides,تحويل-بوربوينت-جوجل-سلايد,PPT→GSLIDES,Convert PowerPoint to Google Slides,تحويل بوربوينت إلى جوجل سلايد,220,ppt-gslides.svg,PT35S,ppt_to_gslides
+google-slides-to-powerpoint,تحويل-جوجل-سلايد-بوربوينت,GSLIDES→PPT,Convert Google Slides to PowerPoint,تحويل جوجل سلايد إلى بوربوينت,210,gslides-ppt.svg,PT30S,gslides_to_ppt
+powerpoint-to-jpeg,تحويل-بوربوينت-صور,PPT→JPG,Convert PowerPoint to Images,تحويل بوربوينت إلى صور,140,ppt-jpg.svg,PT25S,ppt_to_jpg
+ppt-to-video,تحويل-بوربوينت-فيديو,PPT→MP4,Convert PowerPoint to Video,تحويل بوربوينت إلى فيديو,160,ppt-video.svg,PT90S,ppt_to_video

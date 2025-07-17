@@ -1,0 +1,131 @@
+{
+  "word_to_ppt": {
+    "ar": [
+      "اضغط «اختر ملفك» وارفع مستند DOCX",
+      "اضغط «حوِّل» وانتظر أقل من ٣٠ ثانية",
+      "نزّل ملف PPTX أو شاركه"
+    ],
+    "en": [
+      "Click “Choose File” and upload your DOCX",
+      "Hit “Convert” — takes <30 s",
+      "Download the PPTX or share a link"
+    ]
+  },
+
+  "ppt_to_pdf": {
+    "ar": [
+      "حمِّل ملف بوربوينت (PPT أو PPTX)",
+      "اضغط «حوِّل إلى PDF» وانتظر لحظات",
+      "نزّل ملف PDF عالي الجودة"
+    ],
+    "en": [
+      "Upload your PowerPoint (PPT/PPTX)",
+      "Click “Convert to PDF” and wait a few seconds",
+      "Download the high‑quality PDF"
+    ]
+  },
+
+  "pdf_to_ppt": {
+    "ar": [
+      "ارفع ملف PDF المطلوب",
+      "اضغط «حوِّل إلى بوربوينت» وانتظر أقل من دقيقة",
+      "احصل على ملف PPTX قابل للتعديل"
+    ],
+    "en": [
+      "Upload the PDF you need",
+      "Click “Convert to PowerPoint” — takes under a minute",
+      "Receive an editable PPTX"
+    ]
+  },
+
+  "ppt_to_word": {
+    "ar": [
+      "حمِّل العرض التقديمي بوربوينت",
+      "اضغط «حوِّل إلى وورد»",
+      "نزّل مستند DOCX منسّق"
+    ],
+    "en": [
+      "Upload your PowerPoint deck",
+      "Press “Convert to Word”",
+      "Download the nicely‑formatted DOCX"
+    ]
+  },
+
+  "word_to_pdf": {
+    "ar": [
+      "اضغط «اختر ملفك» وارفع مستند وورد",
+      "اضغط «حوِّل إلى PDF» فورًا",
+      "نزّل ملف PDF قابل للمشاركة"
+    ],
+    "en": [
+      "Choose and upload your Word document",
+      "Click “Convert to PDF” instantly",
+      "Download the share‑ready PDF"
+    ]
+  },
+
+  "excel_to_ppt": {
+    "ar": [
+      "ارفع ملف Excel (XLSX)",
+      "حدد عدد الشرائح المطلوبة ثم اضغط «حوِّل»",
+      "نزّل شرائح بوربوينت تحوي الجداول والرسوم"
+    ],
+    "en": [
+      "Upload your Excel workbook (XLSX)",
+      "Set desired slide count and click “Convert”",
+      "Download a PowerPoint deck with tables & charts"
+    ]
+  },
+
+  "ppt_to_gslides": {
+    "ar": [
+      "حمِّل ملف بوربوينت",
+      "اضغط «حول إلى Google Slides»",
+      "افتح العرض مباشرة في حساب جوجل درايف"
+    ],
+    "en": [
+      "Upload your PowerPoint file",
+      "Click “Convert to Google Slides”",
+      "Open the deck directly in your Google Drive"
+    ]
+  },
+
+  "gslides_to_ppt": {
+    "ar": [
+      "الصق رابط Google Slides أو حمِّله كملف",
+      "اضغط «حوِّل إلى PPTX»",
+      "نزّل العرض التقديمي بوربوينت"
+    ],
+    "en": [
+      "Paste the Google Slides link or upload file",
+      "Press “Convert to PPTX”",
+      "Download the PowerPoint presentation"
+    ]
+  },
+
+  "ppt_to_jpg": {
+    "ar": [
+      "ارفع ملف بوربوينت",
+      "اختر الدقة واضغط «حوِّل»",
+      "نزّل الشرائح كصور JPG فردية"
+    ],
+    "en": [
+      "Upload your PowerPoint",
+      "Select resolution and click “Convert”",
+      "Download each slide as separate JPG images"
+    ]
+  },
+
+  "ppt_to_video": {
+    "ar": [
+      "حمِّل ملف بوربوينت الخاص بك",
+      "اختر جودة الفيديو واضغط «حوِّل إلى فيديو»",
+      "احصل على ملف MP4 جاهز للمشاركة"
+    ],
+    "en": [
+      "Upload your PowerPoint deck",
+      "Select video quality and click “Convert to Video”",
+      "Receive a shareable MP4 file"
+    ]
+  }
+}
