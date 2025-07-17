@@ -1,8 +1,22 @@
-import { SignIn } from '@clerk/nextjs'
-import React from 'react'
+// app/sign-up/page.tsx
+'use client';
 
-const Page = () => {
-  return <SignIn />
+import { SignIn } from '@clerk/nextjs';
+
+export default function SignInPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <SignIn />
+    </div>
+  );
 }
 
-export default Page
+
+// import { SignIn } from '@clerk/nextjs'
+// import React from 'react'
+
+// const Page = () => {
+//   return <SignIn />
+// }
+
+// export default Page
