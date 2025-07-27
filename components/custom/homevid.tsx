@@ -9,7 +9,7 @@ interface RepeatingVideoProps {
 const Hvideo: React.FC<RepeatingVideoProps> = ({ src, className }) => {
     return (
         <div className={className}>
-            <video src={src} className="max-w-full h-auto" loop autoPlay muted playsInline loading="lazy" decoding="async">
+            <video src={src} className="max-w-full h-auto" loop autoPlay muted playsInline >
                 Your browser does not support the video tag.
             </video>
         </div>

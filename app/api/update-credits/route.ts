@@ -50,8 +50,8 @@ export async function PATCH(req: NextRequest) {
       });
       console.log('✅ Updated User Credits:', updatedUserCredits);
 
-      if (updatedUserCredits.credits < pointsUsed) {
-        console.log('⚠️ Insufficient credits after initialization:', updatedUserCredits.credits);
+      if (updatedUserCredits!.credits < pointsUsed) {
+        console.log('⚠️ Insufficient credits after initialization:', updatedUserCredits!.credits);
         return NextResponse.json({ error: 'Insufficient credits' }, { status: 400 });
       }
     }
@@ -63,8 +63,8 @@ export async function PATCH(req: NextRequest) {
     console.log('📈 Final User Credits:', finalUserCredits);
 
     // Check if user has enough credits
-    if (finalUserCredits.credits < pointsUsed) {
-      console.log('⚠️ Insufficient credits:', finalUserCredits.credits);
+    if (finalUserCredits!.credits < pointsUsed) {
+      console.log('⚠️ Insufficient credits:', finalUserCredits!.credits);
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 400 });
     }
 

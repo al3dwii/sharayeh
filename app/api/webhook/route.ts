@@ -69,12 +69,18 @@ export async function POST(request: NextRequest) {
     if (!supportedEvents.has(event.type)) {
       console.log(`Unhandled event type ${event.type}`);
 
+    const rawObject = event.data.object;
+
+// 1. Round‑trip through JSON to strip any `undefined` and ensure no top‑level null
+    const payload = JSON.parse(JSON.stringify(rawObject)) as Prisma.InputJsonValue;
+
+
       // Optionally, store unhandled events to prevent reprocessing
       await db.stripeEvent.create({
         data: {
           id: event.id,
           type: event.type,
-          data: event.data.object as Prisma.JsonValue,
+          data: payload,
         },
       });
 
@@ -88,12 +94,19 @@ export async function POST(request: NextRequest) {
       await handleCheckoutSessionCompleted(session);
     }
 
+        // Immediately after you verify/parse the Stripe event:
+    const rawObject = event.data.object;
+
+    // 1. Round‑trip through JSON to strip any `undefined` and ensure no top‑level null
+    const payload = JSON.parse(JSON.stringify(rawObject)) as Prisma.InputJsonValue;
+
+
     // Store the event to ensure idempotency
     await db.stripeEvent.create({
       data: {
         id: event.id,
         type: event.type,
-        data: event.data.object as Prisma.JsonValue,
+        data: payload,
       },
     });
 

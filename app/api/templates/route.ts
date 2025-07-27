@@ -72,11 +72,13 @@ export async function GET(req: NextRequest) {
 
     const categories =
       foldersResponse.data.files?.map((folder) => ({
-        name: folder.name.toLowerCase(),
+        name: folder.name!.toLowerCase(),
         folderId: folder.id,
       })) || [];
 
     console.log('📂 Retrieved Categories:', categories);
+
+  
 
     // 6. For Each Category Sub-Folder, Fetch Presentation Files
     let templates: Template[] = [];
@@ -87,9 +89,20 @@ export async function GET(req: NextRequest) {
         q: `mimeType='application/vnd.google-apps.presentation' and '${category.folderId}' in parents`,
         fields: 'files(id, name, thumbnailLink)',
       });
+      // 2. default
+      const files = response.data.files ?? [];
 
-      const categoryTemplates: Template[] =
-        response.data.files?.map((file) => ({
+      // 3. filter out any missing ids/names
+      const validFiles = files.filter(
+        (f): f is { id: string; name: string; thumbnailLink?: string } =>
+          typeof f.id === 'string' && typeof f.name === 'string'
+      );
+
+
+      const categoryTemplates: Template[] = validFiles.map((file) => ({
+
+      // const categoryTemplates: Template[] =
+      //   response.data.files?.map((file) => ({
           id: file.id,
           name: file.name,
           preview: file.thumbnailLink || '',
