@@ -43,7 +43,6 @@ export default async function Breadcrumbs({
         </ol>
       </nav>
       <StructuredData
-        type="BreadcrumbList"                 
         data={{
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',

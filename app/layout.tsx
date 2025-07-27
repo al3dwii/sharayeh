@@ -35,7 +35,6 @@ export default async function RootLayout({
 
         {/* Global WebSite schema */}
         <StructuredData
-          type="WebSite"
           data={{
             '@context': 'https://schema.org',
             '@type': 'WebSite',
