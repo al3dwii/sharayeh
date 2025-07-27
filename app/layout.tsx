@@ -1,33 +1,41 @@
 // app/layout.tsx
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
-import { siteUrl, siteName, defaultDescription, ogImage } from '@/utils/seo';
+import { siteUrl, siteName, defaultDescription } from '@/utils/seo';
 import { getAllTools } from '@/lib/tools';
 import StructuredData from '@/components/StructuredData';
 
+/** RTL languages your site supports */
+const RTL_LOCALES = ['ar', 'he', 'fa', 'ur'];
+
+/** Site‑wide <head> via the Metadata API */
+export const metadata = {
+  title: { default: siteName, template: `%s | ${siteName}` },
+  description: defaultDescription,
+};
+
 export default async function RootLayout({
   children,
-  params: { locale },
+  params: { locale = 'en' },            // ← Next.js injects route params
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: { locale?: string };
 }) {
-  // Determine whether the current locale uses right‑to‑left text direction
+  const isRTL = RTL_LOCALES.includes(locale);
+
+  /* JSON‑LD for all tools (runs once per request) */
+  const tools = await getAllTools();
 
   return (
-    <ClerkProvider>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
       <head>
         <meta charSet="utf-8" />
-        <meta
-          name="viewport"
-          content="width=device-width,initial-scale=1,maximum-scale=5"
-        />
-        {/* new default description */}
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
 
-        {/* Global WebSite JSON-LD: include all tools */}
+        {/* Global WebSite schema */}
         <StructuredData
-          type="WebSite"                         // ✅ add this line
+          type="WebSite"
           data={{
             '@context': 'https://schema.org',
             '@type': 'WebSite',
@@ -42,22 +50,86 @@ export default async function RootLayout({
             },
             hasPart: {
               '@type': 'ItemList',
-              name: 'Available Automation Tools',
-              itemListElement: (await getAllTools()).map((tool, i) => ({
+              itemListElement: tools.map((t, i) => ({
                 '@type': 'SoftwareApplication',
                 position: i + 1,
-                name: tool.label_en,
-                applicationCategory: tool.dir.replace('→', ' to '),
-                url: `${siteUrl}/tools/${tool.slug_en}`,
+                name: t.label_en,
+                applicationCategory: t.dir.replace('→', ' to '),
+                url: `${siteUrl}/tools/${t.slug_en}`,
               })),
             },
           }}
         />
       </head>
-      <body>{children}</body>
-    </ClerkProvider>
+
+      <body>
+        <ClerkProvider>{children}</ClerkProvider>
+      </body>
+    </html>
   );
 }
+
+
+// // app/layout.tsx
+// import './globals.css';
+// import { ClerkProvider } from '@clerk/nextjs';
+// import { siteUrl, siteName, defaultDescription, ogImage } from '@/utils/seo';
+// import { getAllTools } from '@/lib/tools';
+// import StructuredData from '@/components/StructuredData';
+
+// export default async function RootLayout({
+//   children,
+//   params: { locale },
+// }: {
+//   children: React.ReactNode;
+//   params: { locale: string };
+// }) {
+//   // Determine whether the current locale uses right‑to‑left text direction
+
+//   return (
+//     <ClerkProvider>
+//       <head>
+//         <meta charSet="utf-8" />
+//         <meta
+//           name="viewport"
+//           content="width=device-width,initial-scale=1,maximum-scale=5"
+//         />
+//         {/* new default description */}
+//         <link rel="icon" href="/favicon.ico" />
+
+//         {/* Global WebSite JSON-LD: include all tools */}
+//         <StructuredData
+//           type="WebSite"                         // ✅ add this line
+//           data={{
+//             '@context': 'https://schema.org',
+//             '@type': 'WebSite',
+//             name: siteName,
+//             url: siteUrl,
+//             description: defaultDescription,
+//             inLanguage: ['en', 'ar'],
+//             potentialAction: {
+//               '@type': 'SearchAction',
+//               target: `${siteUrl}/search?q={search_term_string}`,
+//               'query-input': 'required name=search_term_string',
+//             },
+//             hasPart: {
+//               '@type': 'ItemList',
+//               name: 'Available Automation Tools',
+//               itemListElement: (await getAllTools()).map((tool, i) => ({
+//                 '@type': 'SoftwareApplication',
+//                 position: i + 1,
+//                 name: tool.label_en,
+//                 applicationCategory: tool.dir.replace('→', ' to '),
+//                 url: `${siteUrl}/tools/${tool.slug_en}`,
+//               })),
+//             },
+//           }}
+//         />
+//       </head>
+//       <body>{children}</body>
+//     </ClerkProvider>
+//   );
+// }
 
 
 // // app/layout.tsx
