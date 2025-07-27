@@ -504,7 +504,6 @@ const CreatePresentation: React.FC = () => {
 
       <div className="max-w-6xl mx-auto bg-gray-100 mt-4 rounded-lg shadow-lg p-4">
         <div className="flex flex-col items-center text-xl justify-center text-slate-900 pb-4 gap-4">
-          <h1>بوربوينت بالذكاء الصناعي</h1>
         </div>
         <div className="flex flex-col items-center justify-center text-slate-600 pb-4 gap-4">
           <p>   حمل ملف وورد ثم اختر القالب لإنشاء بوربوينت بالذكاء الصناعي قابل للتعديل</p>
