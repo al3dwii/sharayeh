@@ -1,41 +1,79 @@
 import type { Metadata } from 'next';
 import HomeTemplate from '@/components/landing/HomeTemplate';
 import { LOCALES } from '@/utils/i18n';
-import { siteUrl, siteName, defaultTitle, defaultDescription, ogImage } from '@/utils/seo';
+import {
+  siteUrl,
+  siteName,
+  defaultTitle,
+  defaultDescription,
+  ogImage,
+} from '@/utils/seo';
 
 type Props = { params: { locale: (typeof LOCALES)[number] } };
 
+/* ------------------------------------------------------------------ */
+/* ① generateMetadata – now fully indexable & locale‑aware            */
+/* ------------------------------------------------------------------ */
 export function generateMetadata({ params }: Props): Metadata {
   const { locale } = params;
-  const url = `${siteUrl}/${locale}`;
+
+  /* Self‑canonical URL for the current locale */
+  const canonical = `${siteUrl}/${locale}`;
+
+  /* Localised meta */
   const title =
     locale === 'ar'
-      ? ' تحويل الملفات وإنشاء المحتوى بالذكاء الصناعي '
+      ? 'تحويل الملفات وإنشاء المحتوى بالذكاء الاصطناعي'
       : defaultTitle;
+
   const description =
     locale === 'ar'
       ? 'حوِّل المستندات، الفيديوهات، العروض التقديمية والصور في خطوة واحدة.'
       : defaultDescription;
 
   return {
+    /** ----------------------------------------------------------------
+     * BASIC TAGS
+     * ---------------------------------------------------------------- */
     title,
     description,
+
+    /** ----------------------------------------------------------------
+     * ROBOTS – explicitly allow indexing & following
+     * ---------------------------------------------------------------- */
+    robots: {
+      index: true,
+      follow: true,
+    },
+
+    /** ----------------------------------------------------------------
+     * ALTERNATES – self‑canonical + hreflangs (+ x‑default for Google)
+     * ---------------------------------------------------------------- */
     alternates: {
-      canonical: url,
+      canonical,                  // Self‑canonical
       languages: {
-        'en': `${siteUrl}/en`,
-        'ar': `${siteUrl}/ar`,
+        en: `${siteUrl}/en`,
+        ar: `${siteUrl}/ar`,
+        'x-default': siteUrl,     // Fallback if locale unknown
       },
     },
+
+    /** ----------------------------------------------------------------
+     * OPEN GRAPH
+     * ---------------------------------------------------------------- */
     openGraph: {
+      type: 'website',
+      url: canonical,
       title,
       description,
-      url,
-      locale,
       siteName,
-      images: ogImage(),
-      type: 'website',
+      locale,
+      images: ogImage(),          // expects [{ url, width, height, alt }]
     },
+
+    /** ----------------------------------------------------------------
+     * TWITTER CARDS
+     * ---------------------------------------------------------------- */
     twitter: {
       card: 'summary_large_image',
       title,
@@ -45,9 +83,63 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
+/* ------------------------------------------------------------------ */
+/* ② Page component – unchanged                                       */
+/* ------------------------------------------------------------------ */
 export default function Page({ params }: Props) {
   return <HomeTemplate locale={params.locale} />;
 }
+
+// import type { Metadata } from 'next';
+// import HomeTemplate from '@/components/landing/HomeTemplate';
+// import { LOCALES } from '@/utils/i18n';
+// import { siteUrl, siteName, defaultTitle, defaultDescription, ogImage } from '@/utils/seo';
+
+// type Props = { params: { locale: (typeof LOCALES)[number] } };
+
+// export function generateMetadata({ params }: Props): Metadata {
+//   const { locale } = params;
+//   const url = `${siteUrl}/${locale}`;
+//   const title =
+//     locale === 'ar'
+//       ? ' تحويل الملفات وإنشاء المحتوى بالذكاء الصناعي '
+//       : defaultTitle;
+//   const description =
+//     locale === 'ar'
+//       ? 'حوِّل المستندات، الفيديوهات، العروض التقديمية والصور في خطوة واحدة.'
+//       : defaultDescription;
+
+//   return {
+//     title,
+//     description,
+//     alternates: {
+//       canonical: url,
+//       languages: {
+//         'en': `${siteUrl}/en`,
+//         'ar': `${siteUrl}/ar`,
+//       },
+//     },
+//     openGraph: {
+//       title,
+//       description,
+//       url,
+//       locale,
+//       siteName,
+//       images: ogImage(),
+//       type: 'website',
+//     },
+//     twitter: {
+//       card: 'summary_large_image',
+//       title,
+//       description,
+//       images: ogImage().map((img) => img.url),
+//     },
+//   };
+// }
+
+// export default function Page({ params }: Props) {
+//   return <HomeTemplate locale={params.locale} />;
+// }
 
 
 // import Link from 'next/link'
