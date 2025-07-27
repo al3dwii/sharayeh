@@ -1,70 +1,74 @@
-// app/(public)/[locale]/tools/[slug]/page.tsx
 
-import { notFound } from 'next/navigation';
+// app/(public)/[locale]/tools/[slug]/page.tsx
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
 import Breadcrumbs from '@/components/Breadcrumbs';
 import LandingTemplate from '@/components/landing/LandingTemplate';
+import StructuredData from '@/components/StructuredData';
+
 import { LOCALES } from '@/utils/i18n';
 import { siteUrl } from '@/utils/seo';
-import { getConverters, getConverter, getRelatedConverters } from '@/lib/server/converters';
+import {
+  getConverters,
+  getConverter,
+  getRelatedConverters,
+} from '@/lib/server/converters';
 
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
+type PageParams = { locale: 'en' | 'ar'; slug: string };
 
-type PageParams = {
-  locale: 'en' | 'ar';
-  slug: string; // always the English slug
-};
+/* ------------------------------------------------------------------ */
+/* Rendering strategy                                                  */
+/* ------------------------------------------------------------------ */
+export const dynamic = 'auto'; // Static if in generateStaticParams()
 
-/* ---------- Static params ---------- */
+/* ------------------------------------------------------------------ */
+/* Static params                                                       */
+/* ------------------------------------------------------------------ */
+const converters = getConverters(); // one CSV read at build time
+
 export async function generateStaticParams() {
   return LOCALES.flatMap((locale) =>
-    getConverters().map((c) => ({
-      locale,
-      slug: c.slug_en,
-    }))
+    converters.map((c) => ({ locale, slug: c.slug_en }))
   );
 }
 
-/* ---------- Metadata ---------- */
-export async function generateMetadata(
-  { params }: { params: PageParams }
-): Promise<Metadata> {
+/* ------------------------------------------------------------------ */
+/* Metadata                                                            */
+/* ------------------------------------------------------------------ */
+export async function generateMetadata({
+  params,
+}: {
+  params: PageParams;
+}): Promise<Metadata> {
   const { locale, slug } = params;
   const converter = getConverter(slug);
-  if (!converter) return {};
+  if (!converter) notFound();
 
-  const isAr = locale === 'ar';
   const [fromExt, toExt] = converter.dir.split('→');
+  const isAr = locale === 'ar';
 
-  // Dynamic title
   const title = isAr
     ? `${converter.label_ar} | Sharayeh`
     : `${converter.label_en} | Sharayeh`;
 
-  // Dynamic description
   const description = isAr
     ? `أداة سحابية مجانية وسهلة ${converter.label_ar} – حول ملفات ${fromExt} إلى ${toExt} في ثوانٍ مع الحفاظ على التنسيق والصور.`
     : `Free online tool for ${converter.label_en}. Convert ${fromExt} to ${toExt} quickly and keep fonts, images and formatting intact.`;
 
-  // Dynamic keywords
-  const keywords = isAr
-    ? [
-        converter.label_ar,
-        `${fromExt} إلى ${toExt}`,
-        `تحويل ${fromExt} إلى ${toExt}`,
-        `تحويل ملف ${fromExt} إلى ${toExt}`,
-      ]
-    : [
-        converter.label_en,
-        `${fromExt} to ${toExt}`,
-        `${fromExt} to ${toExt} converter`,
-      ];
-
   const canonical = `${siteUrl}/${locale}/tools/${converter.slug_en}`;
+
+  const keywords = isAr
+    ? [`${fromExt} إلى ${toExt}`, `تحويل ${fromExt} إلى ${toExt}`]
+    : [`${fromExt} to ${toExt}`, `${fromExt}‑to‑${toExt} converter`];
 
   return {
     title,
     description,
-    keywords,
+    ...(keywords.length ? { keywords } : {}),
     alternates: {
       canonical,
       languages: {
@@ -73,10 +77,10 @@ export async function generateMetadata(
       },
     },
     openGraph: {
+      type: 'website', // tool landing page
+      url: canonical,
       title,
       description,
-      url: canonical,
-      type: 'article',
       images: [
         {
           url: `${siteUrl}/og/${converter.slug_en}.png`,
@@ -93,22 +97,159 @@ export async function generateMetadata(
   };
 }
 
-/* ---------- Page ---------- */
+/* ------------------------------------------------------------------ */
+/* Page component                                                      */
+/* ------------------------------------------------------------------ */
 export default async function Page({ params }: { params: PageParams }) {
   const row = getConverter(params.slug);
   if (!row) return notFound();
 
-  // Compute related converters on the server; pass as prop
   const related =
     params.locale === 'ar' ? getRelatedConverters(params.slug) : [];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: row.label_en,
+    alternateName: row.label_ar,
+    applicationCategory: 'FileConversionTool',
+    operatingSystem: 'All',
+    url: `${siteUrl}/${params.locale}/tools/${row.slug_en}`,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    inLanguage: params.locale,
+  };
+
   return (
     <>
+      {/* Per‑tool structured data */}
+      <StructuredData data={jsonLd} />
+
       <Breadcrumbs locale={params.locale} slug={params.slug} />
-      <LandingTemplate locale={params.locale} row={row} related={related} />
+
+      <LandingTemplate
+        locale={params.locale}
+        row={row}
+        related={related}
+      />
     </>
   );
 }
+
+// // app/(public)/[locale]/tools/[slug]/page.tsx
+
+// import { notFound } from 'next/navigation';
+// import type { Metadata } from 'next';
+// import Breadcrumbs from '@/components/Breadcrumbs';
+// import LandingTemplate from '@/components/landing/LandingTemplate';
+// import { LOCALES } from '@/utils/i18n';
+// import { siteUrl } from '@/utils/seo';
+// import { getConverters, getConverter, getRelatedConverters } from '@/lib/server/converters';
+
+
+// type PageParams = {
+//   locale: 'en' | 'ar';
+//   slug: string; // always the English slug
+// };
+
+// /* ---------- Static params ---------- */
+// export async function generateStaticParams() {
+//   return LOCALES.flatMap((locale) =>
+//     getConverters().map((c) => ({
+//       locale,
+//       slug: c.slug_en,
+//     }))
+//   );
+// }
+
+// /* ---------- Metadata ---------- */
+// export async function generateMetadata(
+//   { params }: { params: PageParams }
+// ): Promise<Metadata> {
+//   const { locale, slug } = params;
+//   const converter = getConverter(slug);
+//   if (!converter) return {};
+
+//   const isAr = locale === 'ar';
+//   const [fromExt, toExt] = converter.dir.split('→');
+
+//   // Dynamic title
+//   const title = isAr
+//     ? `${converter.label_ar} | Sharayeh`
+//     : `${converter.label_en} | Sharayeh`;
+
+//   // Dynamic description
+//   const description = isAr
+//     ? `أداة سحابية مجانية وسهلة ${converter.label_ar} – حول ملفات ${fromExt} إلى ${toExt} في ثوانٍ مع الحفاظ على التنسيق والصور.`
+//     : `Free online tool for ${converter.label_en}. Convert ${fromExt} to ${toExt} quickly and keep fonts, images and formatting intact.`;
+
+//   // Dynamic keywords
+//   const keywords = isAr
+//     ? [
+//         converter.label_ar,
+//         `${fromExt} إلى ${toExt}`,
+//         `تحويل ${fromExt} إلى ${toExt}`,
+//         `تحويل ملف ${fromExt} إلى ${toExt}`,
+//       ]
+//     : [
+//         converter.label_en,
+//         `${fromExt} to ${toExt}`,
+//         `${fromExt} to ${toExt} converter`,
+//       ];
+
+//   const canonical = `${siteUrl}/${locale}/tools/${converter.slug_en}`;
+
+//   return {
+//     title,
+//     description,
+//     keywords,
+//     alternates: {
+//       canonical,
+//       languages: {
+//         en: `${siteUrl}/en/tools/${converter.slug_en}`,
+//         ar: `${siteUrl}/ar/tools/${converter.slug_ar}`,
+//       },
+//     },
+//     openGraph: {
+//       title,
+//       description,
+//       url: canonical,
+//       type: 'article',
+//       images: [
+//         {
+//           url: `${siteUrl}/og/${converter.slug_en}.png`,
+//           alt: title,
+//         },
+//       ],
+//     },
+//     twitter: {
+//       card: 'summary_large_image',
+//       title,
+//       description,
+//       images: [`${siteUrl}/og/${converter.slug_en}.png`],
+//     },
+//   };
+// }
+
+// /* ---------- Page ---------- */
+// export default async function Page({ params }: { params: PageParams }) {
+//   const row = getConverter(params.slug);
+//   if (!row) return notFound();
+
+//   // Compute related converters on the server; pass as prop
+//   const related =
+//     params.locale === 'ar' ? getRelatedConverters(params.slug) : [];
+
+//   return (
+//     <>
+//       <Breadcrumbs locale={params.locale} slug={params.slug} />
+//       <LandingTemplate locale={params.locale} row={row} related={related} />
+//     </>
+//   );
+// }
 
 // // app/(public)/[locale]/tools/[slug]/page.tsx
 // import { notFound } from 'next/navigation';

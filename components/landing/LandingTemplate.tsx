@@ -101,10 +101,8 @@ export default function LandingTemplate({
       )}
 
       {/* Structured data for HowTo schema */}
-      <StructuredData
-        type="HowTo"
-        data={buildHowToSchema(row, locale)}
-      />
+      <StructuredData data={buildHowToSchema(row, locale)} />
+
     </main>
   );
 }

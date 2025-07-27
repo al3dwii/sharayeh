@@ -31,7 +31,7 @@ export default function FaqAr({ row }: Props) {
 
   return (
     <section dir="rtl" className="max-w-3xl mx-auto space-y-4">
-      <h2 className="text-xl font-bold text-center">الأسئلة الشائعة</h2>
+      <h3 className="text-xl font-bold text-center">الأسئلة الشائعة</h3>
       {faqs.map(({ q, a }) => (
         <details key={q} className="p-4 border rounded">
           <summary className="font-medium cursor-pointer">{q}</summary>

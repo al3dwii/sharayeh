@@ -1,33 +1,31 @@
-import React from "react";
-import type { ConverterRow } from "@/lib/tools";
+// components/StructuredData.tsx
+import React from 'react';
+import type { ConverterRow } from '@/lib/tools';
+import { siteUrl } from '@/utils/seo'; // single source of truth for hostname
 
 /* -------------------------------------------------------------------------- */
 /*  Helper: buildHowToSchema                                                  */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Build a Schema.org HowTo object for the current converter page.
- * @param row    The tool record (en+ar labels & slugs)
- * @param locale "en" | "ar"
+ * Build a Schema.org HowTo for this converter page.
  */
 export function buildHowToSchema(
   row: ConverterRow,
-  locale: "en" | "ar"
+  locale: 'en' | 'ar'
 ): Record<string, unknown> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    "https://example.com"; /* fallback during dev */
-
   const pageUrl =
-    locale === "ar"
-      ? `${baseUrl}/ar/tools/${row.slug_ar}`
-      : `${baseUrl}/en/tools/${row.slug_en}`;
+    locale === 'ar'
+      ? `${siteUrl}/ar/tools/${row.slug_ar}`
+      : `${siteUrl}/en/tools/${row.slug_en}`;
 
-  const name = locale === "ar" ? row.label_ar : row.label_en;
-  const direction = locale === "ar"
-    ? row.dir.replace("→", " إلى ")
-    : row.dir.replace("→", " to ");
+  const name = locale === 'ar' ? row.label_ar : row.label_en;
+  const direction =
+    locale === 'ar'
+      ? row.dir.replace('→', ' إلى ')
+      : row.dir.replace('→', ' to ');
 
+  /* Hand‑crafted variant for the Word→PowerPoint tool in Arabic */
   if (locale === 'ar' && row.slug_en === 'word-to-powerpoint') {
     return {
       '@context': 'https://schema.org',
@@ -38,80 +36,215 @@ export function buildHowToSchema(
       supply: [],
       tool: [],
       step: [
-        { '@type':'HowToStep', position:1, name:'رفع ملف DOCX', url:`${pageUrl}#step1`, text:'اضغط زر رفع الملف واختر المستند.' },
-        { '@type':'HowToStep', position:2, name:'التحويل التلقائي', url:`${pageUrl}#step2`, text:'تبدأ الخدمة تحويل وورد إلى بوربوينت تلقائياً.' },
-        { '@type':'HowToStep', position:3, name:'تنزيل العرض', url:`${pageUrl}#step3`, text:'نزّل ملف بوربوينت الجاهز.' },
+        {
+          '@type': 'HowToStep',
+          position: 1,
+          name: 'رفع ملف DOCX',
+          url: `${pageUrl}#step1`,
+          text: 'اضغط زر رفع الملف واختر المستند.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 2,
+          name: 'التحويل التلقائي',
+          url: `${pageUrl}#step2`,
+          text: 'تبدأ الخدمة تحويل وورد إلى بوربوينت تلقائياً.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 3,
+          name: 'تنزيل العرض',
+          url: `${pageUrl}#step3`,
+          text: 'نزّل ملف بوربوينت الجاهز.',
+        },
       ],
     };
   }
 
+  /* Default HowTo schema for every other tool */
   return {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
     name,
     description:
-      locale === "ar"
+      locale === 'ar'
         ? `دليل خطوة بخطوة لـ ${name} (${direction}).`
         : `Step‑by‑step guide to ${name} (${direction}).`,
-    totalTime: "PT30S",
+    totalTime: 'PT30S',
     supply: [],
     tool: [],
     step: [
       {
-        "@type": "HowToStep",
+        '@type': 'HowToStep',
         position: 1,
-        name: locale === "ar" ? "رفع الملف" : "Upload file",
+        name: locale === 'ar' ? 'رفع الملف' : 'Upload file',
         url: `${pageUrl}#step1`,
         text:
-          locale === "ar"
-            ? "اضغط زر رفع الملف واختر المستند من جهازك."
-            : "Click the upload button and choose your document."
+          locale === 'ar'
+            ? 'اضغط زر رفع الملف واختر المستند من جهازك.'
+            : 'Click the upload button and choose your document.',
       },
       {
-        "@type": "HowToStep",
+        '@type': 'HowToStep',
         position: 2,
-        name: locale === "ar" ? "التحويل التلقائي" : "Automatic convert",
+        name: locale === 'ar' ? 'التحويل التلقائي' : 'Automatic convert',
         url: `${pageUrl}#step2`,
         text:
-          locale === "ar"
-            ? "تبدأ الأداة التحويل تلقائيًا في غضون ثوانٍ."
-            : "The converter starts automatically within seconds."
+          locale === 'ar'
+            ? 'تبدأ الأداة التحويل تلقائيًا في غضون ثوانٍ.'
+            : 'The converter starts automatically within seconds.',
       },
       {
-        "@type": "HowToStep",
+        '@type': 'HowToStep',
         position: 3,
-        name: locale === "ar" ? "تنزيل الملف" : "Download result",
+        name: locale === 'ar' ? 'تنزيل الملف' : 'Download result',
         url: `${pageUrl}#step3`,
         text:
-          locale === "ar"
-            ? "نزّل العرض التقديمي أو المستند المحول فورًا."
-            : "Download your converted presentation or document."
-      }
-    ]
+          locale === 'ar'
+            ? 'نزّل العرض التقديمي أو المستند المحول فورًا.'
+            : 'Download your converted presentation or document.',
+      },
+    ],
   };
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Component: inject JSON‑LD into <head>                                     */
+/*  Component: inject JSON‑LD                                                 */
 /* -------------------------------------------------------------------------- */
 
 interface StructuredDataProps {
-  /** Schema.org type, e.g. HowTo, FAQPage, Product */
-  type: string;
-  /** Pre‑built JSON‑LD object */
+  /** Pre‑built Schema.org object */
   data: Record<string, unknown>;
 }
 
+/**
+ * Renders a single <script type="application/ld+json"> tag.
+ * Place it anywhere in your React tree; head or body are both valid.
+ */
 export default function StructuredData({ data }: StructuredDataProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(data, null, 0)
-      }}
+      // stringify without whitespace to keep payload tiny
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
 }
+
+// import React from "react";
+// import type { ConverterRow } from "@/lib/tools";
+
+// /* -------------------------------------------------------------------------- */
+// /*  Helper: buildHowToSchema                                                  */
+// /* -------------------------------------------------------------------------- */
+
+// /**
+//  * Build a Schema.org HowTo object for the current converter page.
+//  * @param row    The tool record (en+ar labels & slugs)
+//  * @param locale "en" | "ar"
+//  */
+// export function buildHowToSchema(
+//   row: ConverterRow,
+//   locale: "en" | "ar"
+// ): Record<string, unknown> {
+//   const baseUrl =
+//     process.env.NEXT_PUBLIC_SITE_URL ??
+//     "https://example.com"; /* fallback during dev */
+
+//   const pageUrl =
+//     locale === "ar"
+//       ? `${baseUrl}/ar/tools/${row.slug_ar}`
+//       : `${baseUrl}/en/tools/${row.slug_en}`;
+
+//   const name = locale === "ar" ? row.label_ar : row.label_en;
+//   const direction = locale === "ar"
+//     ? row.dir.replace("→", " إلى ")
+//     : row.dir.replace("→", " to ");
+
+//   if (locale === 'ar' && row.slug_en === 'word-to-powerpoint') {
+//     return {
+//       '@context': 'https://schema.org',
+//       '@type': 'HowTo',
+//       name: 'تحويل ملف وورد إلى بوربوينت',
+//       description: 'دليل خطوة بخطوة لتحويل ملف وورد إلى بوربوينت بدون برامج.',
+//       totalTime: 'PT30S',
+//       supply: [],
+//       tool: [],
+//       step: [
+//         { '@type':'HowToStep', position:1, name:'رفع ملف DOCX', url:`${pageUrl}#step1`, text:'اضغط زر رفع الملف واختر المستند.' },
+//         { '@type':'HowToStep', position:2, name:'التحويل التلقائي', url:`${pageUrl}#step2`, text:'تبدأ الخدمة تحويل وورد إلى بوربوينت تلقائياً.' },
+//         { '@type':'HowToStep', position:3, name:'تنزيل العرض', url:`${pageUrl}#step3`, text:'نزّل ملف بوربوينت الجاهز.' },
+//       ],
+//     };
+//   }
+
+//   return {
+//     "@context": "https://schema.org",
+//     "@type": "HowTo",
+//     name,
+//     description:
+//       locale === "ar"
+//         ? `دليل خطوة بخطوة لـ ${name} (${direction}).`
+//         : `Step‑by‑step guide to ${name} (${direction}).`,
+//     totalTime: "PT30S",
+//     supply: [],
+//     tool: [],
+//     step: [
+//       {
+//         "@type": "HowToStep",
+//         position: 1,
+//         name: locale === "ar" ? "رفع الملف" : "Upload file",
+//         url: `${pageUrl}#step1`,
+//         text:
+//           locale === "ar"
+//             ? "اضغط زر رفع الملف واختر المستند من جهازك."
+//             : "Click the upload button and choose your document."
+//       },
+//       {
+//         "@type": "HowToStep",
+//         position: 2,
+//         name: locale === "ar" ? "التحويل التلقائي" : "Automatic convert",
+//         url: `${pageUrl}#step2`,
+//         text:
+//           locale === "ar"
+//             ? "تبدأ الأداة التحويل تلقائيًا في غضون ثوانٍ."
+//             : "The converter starts automatically within seconds."
+//       },
+//       {
+//         "@type": "HowToStep",
+//         position: 3,
+//         name: locale === "ar" ? "تنزيل الملف" : "Download result",
+//         url: `${pageUrl}#step3`,
+//         text:
+//           locale === "ar"
+//             ? "نزّل العرض التقديمي أو المستند المحول فورًا."
+//             : "Download your converted presentation or document."
+//       }
+//     ]
+//   };
+// }
+
+// /* -------------------------------------------------------------------------- */
+// /*  Component: inject JSON‑LD into <head>                                     */
+// /* -------------------------------------------------------------------------- */
+
+// interface StructuredDataProps {
+//   /** Schema.org type, e.g. HowTo, FAQPage, Product */
+//   type: string;
+//   /** Pre‑built JSON‑LD object */
+//   data: Record<string, unknown>;
+// }
+
+// export default function StructuredData({ data }: StructuredDataProps) {
+//   return (
+//     <script
+//       type="application/ld+json"
+//       dangerouslySetInnerHTML={{
+//         __html: JSON.stringify(data, null, 0)
+//       }}
+//     />
+//   );
+// }
 
 // interface Props {
 //   data: Record<string, any>;
