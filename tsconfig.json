@@ -1,35 +1,33 @@
 {
   "compilerOptions": {
-    "target": "es2020", // Upgrade to ES2020 for better features and compatibility
+    "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+
+      
     ],
-    "allowJs": true,
+    "noImplicitAny": false,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",   
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".", // Explicitly define the base URL for better clarity
+    "baseUrl": ".", 
     "paths": {
-      "@/*": [
-        "src/*"
-      ] // Alias for your `src` directory
-    },
-    "forceConsistentCasingInFileNames": false, // Enforce consistent file casing
-    "strictNullChecks": false, // Enable strict null checks for better type safety
-    "noUnusedLocals": false, // Report unused local variables
-    "noUnusedParameters": false, // Report unused parameters
-    "noImplicitReturns": false, // Ensure functions return explicitly
-    "noFallthroughCasesInSwitch": false // Prevent fallthrough cases in switch statements
-    ,
+      "@/*": ["./*"],
+          },
+
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
     "plugins": [
       {
         "name": "next"
@@ -40,39 +38,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/app/(main)/subaccount/[subaccountId]/launchpad"
-, "i18n.cjs"  ],
+    ".next/types/**/*.ts"
+  ],
   "exclude": [
-    "node_modules",
-    ".turbo",
-    "dist"
-  ] // Exclude Turbo and build outputs
+    "node_modules"
+  ]
 }
-// {
-//   "compilerOptions": {
-//     "target": "es5",
-//     "lib": ["dom", "dom.iterable", "esnext"],
-//     "allowJs": true,
-//     "skipLibCheck": true,
-//     "strict": true,
-//     "noEmit": true,
-//     "esModuleInterop": true,
-//     "module": "esnext",
-//     "moduleResolution": "bundler",
-//     "resolveJsonModule": true,
-//     "isolatedModules": true,
-//     "jsx": "preserve",
-//     "incremental": true,
-//     "plugins": [
-//       {
-//         "name": "next"
-//       }
-//     ],
-//     "paths": {
-//       "@/*": ["./src/*"]
-//     }
-//   },
-//   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/(main)/subaccount/[subaccountId]/launchpad"],
-//   "exclude": ["node_modules"]
-// }

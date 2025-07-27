@@ -1,0 +1,1 @@
+export default function LocaleHome() { return <h1>Locale home</h1>; }
