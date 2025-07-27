@@ -13,7 +13,6 @@ export default async function RootLayout({
   params: { locale: string };
 }) {
   // Determine whether the current locale uses right‑to‑left text direction
-  const isArabic = locale === 'ar';
 
   return (
     <ClerkProvider>
@@ -24,8 +23,6 @@ export default async function RootLayout({
           content="width=device-width,initial-scale=1,maximum-scale=5"
         />
         {/* new default description */}
-        <meta name="description" content={defaultDescription} />
-        <link rel="canonical" href={`${siteUrl}/${locale}/`} />
         <link rel="icon" href="/favicon.ico" />
 
         {/* Global WebSite JSON-LD: include all tools */}
