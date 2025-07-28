@@ -3,17 +3,13 @@
 
 import Link from 'next/link';
 import FeatureCard from '@/components/landing/FeatureCard';
-
-import type { LocalizedPillar, LocalizedTool } from '@/lib/data';  // ← update
-
-
-// Lucide icons (extend as your catalogue grows)
+import type { LocalizedPillar, LocalizedTool } from '@/lib/data';  
 import {
   FileText,
   FileCode,
-  FileType2,    // word‑like
-  FileUp,       // pdf‑like
-  Presentation, // ppt‑like
+  FileType2,    
+  FileUp,       
+  Presentation, 
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -64,11 +60,7 @@ export default function PillarTemplate({ locale, pillar }: PillarTemplateProps) 
                   <FeatureCard
                     Icon={Icon}
                     title={tool.name}
-                    desc={
-                      locale === 'ar'
-                        ? 'انقر لاستخدام الأداة'
-                        : 'Click to use the tool'
-                    }
+                    desc={tool.slug}
                     rtl={locale === 'ar'}
                   />
                 </Link>
@@ -81,96 +73,3 @@ export default function PillarTemplate({ locale, pillar }: PillarTemplateProps) 
   );
 }
 
-
-// // components/PillarTemplate.tsx
-// 'use client';
-
-// import Link from 'next/link';
-// import { Pillar } from '@/lib/data';
-
-// import { LocalizedPillar } from '@/lib/data';
-
-// interface PillarTemplateProps {
-//   locale: 'en' | 'ar';
-//   pillar: LocalizedPillar;
-// }
-
-// export default function PillarTemplate({
-//   locale,
-//   pillar,
-// }: PillarTemplateProps) {
-//   const toolsHeading =
-//     locale === 'ar' ? 'الأدوات ضمن هذه الفئة' : 'Tools in this Category';
-
-//   return (
-//     <main className="max-w-4xl mt-16 pt-16 min-h-screen mx-auto px-4 py-8">
-//       <header className="mb-8">
-//         <h1 className="text-4xl font-bold">{pillar.title}</h1>
-//         <p className="mt-2 text-gray-600">{pillar.description}</p>
-//       </header>
-//       <section>
-//         <h2 className="text-2xl font-semibold mb-4">{toolsHeading}</h2>
-//         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-//           {pillar.tools.map((tool) => (
-//             <li key={tool.slug}>
-//               <Link
-//                 href={`/${locale}/tools/${tool.slug}`}
-//                 className="block p-4 border rounded hover:shadow"
-//               >
-//                 {tool.name}
-//               </Link>
-//             </li>
-//           ))}
-//         </ul>
-//       </section>
-//     </main>
-//   );
-// }
-
-
-// // components/PillarTemplate.tsx
-// 'use client'
-
-// import Link from 'next/link'
-// import { Pillar } from '@/lib/data'
-
-// interface PillarTemplateProps {
-//   locale: string        // 'ar' or 'en'
-//   pillar: Pillar
-// }
-
-// export default function PillarTemplate({
-//   locale,
-//   pillar,
-// }: PillarTemplateProps) {
-//   // Simple locale toggle for headings; replace with your i18n library if you have one.
-//   const toolsHeading =
-//     locale === 'ar' ? 'الأدوات ضمن هذه الفئة' : 'Tools in this Category'
-
-//   return (
-//     <main className="max-w-4xl mx-auto px-4 py-8">
-//       {/* Page header */}
-//       <header className="mb-8">
-//         <h1 className="text-4xl font-bold">{pillar.title}</h1>
-//         <p className="mt-2 text-gray-600">{pillar.description}</p>
-//       </header>
-
-//       {/* Tools list */}
-//       <section>
-//         <h2 className="text-2xl font-semibold mb-4">{toolsHeading}</h2>
-//         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-//           {pillar.tools.map((tool) => (
-//             <li key={tool.slug}>
-//               <Link
-//                 href={`/${locale}/tools/${tool.slug}`}
-//                 className="block p-4 border rounded hover:shadow"
-//               >
-//                 {tool.name}
-//               </Link>
-//             </li>
-//           ))}
-//         </ul>
-//       </section>
-//     </main>
-//   )
-// }

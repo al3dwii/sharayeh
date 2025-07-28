@@ -18,7 +18,7 @@ interface Props {
  * Generic marketing card used in FeatureSectionAr.
  * Accepts any Lucide icon.  Hover shadow only on desktop.
  */
-export default function FeatureCard({ Icon, title, desc, rtl }: Props) {
+export default function FeatureCard({ Icon, desc, title, rtl }: Props) {
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
@@ -31,7 +31,6 @@ export default function FeatureCard({ Icon, title, desc, rtl }: Props) {
 
       <div className="space-y-1">
         <h3 className="font-semibold">{title}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
       </div>
     </div>
   );
