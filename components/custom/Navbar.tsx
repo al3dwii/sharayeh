@@ -26,24 +26,25 @@ export default function Navigation() {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
-          <span className="ml-2 text-2xl font-bold text-white">Sharayh</span>
+          <span className="ml-2 text-2xl font-bold text-white">Sharayeh</span>
         </Link>
 
         {/* Main nav */}
         <nav className="hidden md:flex">
           <ul className="flex items-center gap-4 text-white">
-            <li>
-              <Link href="/pricing">الاشتراك</Link>
-            </li>
-            <li>
-              <Link href="/blog">المدونة</Link>
-            </li>
              <li>
               <Link href="/solutions">الحلول</Link>
             </li>
             <li>
               <Link href="/learn">التعلم</Link>
             </li>
+            <li>
+              <Link href="/pricing">الاشتراك</Link>
+            </li>
+            <li>
+              <Link href="/blog">المدونة</Link>
+            </li>
+            
           </ul>
         </nav>
               

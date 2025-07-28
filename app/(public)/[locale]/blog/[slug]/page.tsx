@@ -89,7 +89,9 @@ export default function BlogPostPage({ params }: BlogPostProps) {
         dir={locale === 'ar' ? 'rtl' : 'ltr'}
       >
         <article>
+          <div className="mt-12"> 
           <h1 className={styles.postTitle}>{post.title}</h1>
+          </div>
           <time dateTime={post.date} className={styles.postDate}>
             {new Date(post.date).toLocaleDateString(locale, {
               year: 'numeric',
@@ -98,20 +100,7 @@ export default function BlogPostPage({ params }: BlogPostProps) {
             })}
           </time>
 
-          <div className="bg-blue-200 text-black py-8 px-4 sm:px-6 lg:px-8 my-6">
-            <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-              <h2 className="text-xl sm:text-l font-bold mb-4">
-                اضغط لانشاء عروض بوربوينت احترافية بالذكاء الاصطناعي
-              </h2>
-              <a
-                href="https://sharayeh.com"
-                className="bg-white text-blue-600 font-semibold py-3 px-8 rounded-lg shadow hover:bg-blue-50 transition"
-              >
-                Sharayeh.com
-              </a>
-            </div>
-          </div>
-
+         
           <div
             className={styles.postContent}
             dangerouslySetInnerHTML={{ __html: htmlContent }}

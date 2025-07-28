@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { locale: 'en' | 'a
   const item = await dataSource.findPillar(slug, locale);
   if (!item) throw notFound();
 
-  const title = `${item.title} – Doc2Deck`;
+  const title = `${item.title} – sharayeh`;
   const description = item.description;
   const canonical = `${siteUrl}/${locale}/solutions/${slug}`;
 
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: { locale: 'en' | 'a
       title,
       description,
       url: canonical,
-      siteName: 'Doc2Deck',
+      siteName: 'sharayeh',
       locale,
     },
   };

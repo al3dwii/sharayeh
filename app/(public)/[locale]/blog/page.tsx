@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageParams) {
 
   return {
     title: 'Blog',
-    description: 'Read the latest updates, tips and news from Doc2Deck.',
+    description: 'Read the latest updates, tips and news from sharayeh.',
     alternates: {
       canonical,
       languages: LOCALES.reduce((acc, loc) => {
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageParams) {
       }, {} as Record<string, string>),
     },
     openGraph: {
-      title: 'Blog – Doc2Deck',
+      title: 'Blog – sharayeh',
       description: 'Latest updates, tips and news.',
       url: canonical,
       type: 'website',
@@ -41,7 +41,7 @@ export default function BlogPage({ params }: PageParams) {
 
   return (
     <>
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-6 pt-12">
         <BlogPosts posts={posts} locale={locale} />
       </main>
     </>
