@@ -9,7 +9,6 @@ export function getArVariations(label: string, dir: string): string[] {
     `${label} مجاناً`,
     `${label} بدون برامج`,
     `${label} اون لاين`,
-    `i love ${toExt} ${label}`,   // e.g. "i love PDF تحويل ملف Word"
     `${fromExt} إلى ${toExt} ${base} 2010`, // year variation
   ];
 }

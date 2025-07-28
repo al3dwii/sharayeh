@@ -72,7 +72,7 @@ export default function LandingTemplate({
       )}
 
       {/* Related search terms & variations */}
-      <section className="mt-8 space-y-2">
+      {/* <section className="mt-8 space-y-2">
         <h3 className="text-xl font-bold">
           {isAr ? 'عمليات بحث مشابهة' : 'Related search terms'}
         </h3>
@@ -84,7 +84,7 @@ export default function LandingTemplate({
             </span>
           ))}
         </p>
-      </section>
+      </section> */}
 
       {/* Related converter links (contextual suggestions) */}
       {isAr && related.length > 0 && (
