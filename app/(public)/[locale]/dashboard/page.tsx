@@ -37,11 +37,11 @@ const DashboardPage = async () => {
 
   return (
     <>
-      <div className="m-2 p-2 mt-14">
+      <div className="m-8 p-2 mt-24">
         <UserInfo />
-        <div className="m-2 p-2">
+        {/* <div className="m-2 p-2">
           <CreatePresentation />
-        </div>
+        </div> */}
         <AnalyticsPanel />
         <FileTableWithPagination userFiles={serializedUserFiles} />
       </div>

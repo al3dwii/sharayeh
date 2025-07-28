@@ -1,10 +1,9 @@
 // src/components/CreatePresentation.tsx
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";   // ⬅️  add usePathname
 import CustomModal from "@/components/custom/CustomModal";
 import Loading from "@/components/global/loading";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -17,7 +16,28 @@ import { v4 as uuidv4 } from "uuid";
 import { useUserData } from "@/context/UserContext";
 import { useAuth } from "@clerk/nextjs";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+// // src/components/CreatePresentation.tsx
+
+// "use client";
+
+// import React, { useState, useEffect, useRef } from "react";
+// import axios from "axios";
+// import { useRouter } from "next/navigation";
+// import CustomModal from "@/components/custom/CustomModal";
+// import Loading from "@/components/global/loading";
+// import { Card, CardHeader, CardContent } from "@/components/ui/card";
+// import TemplateModal from "./TemplateModal";
+// import Notifications from "@/components/Notifications";
+// import PresentationForm from "./PresentationForm";
+// import { useProModal } from "@/hooks/useProModal";
+// import { useGlobalStore } from "@/store/useGlobalStore";
+// import { v4 as uuidv4 } from "uuid";
+// import { useUserData } from "@/context/UserContext";
+// import { useAuth } from "@clerk/nextjs";
+
+// export const dynamic = 'force-dynamic';
 
 interface Template {
   id: string;
@@ -26,9 +46,12 @@ interface Template {
   category: string;
 }
 
+
+
 const CreatePresentation: React.FC = () => {
   const userData = useUserData();
   const router = useRouter();
+  const pathname = usePathname();                         // ⬅️  current page
   const { getToken } = useAuth();
 
   // 1. Use the isSuperAdmin flag from userData
@@ -481,6 +504,24 @@ const CreatePresentation: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const openTemplatePicker = () => {
+    // User not logged in → show “Sign‑in / Sign‑up” modal
+    if (!userData) {
+      setModalContent({
+        title: "سجّل الدخول أو أنشئ حسابًا",
+        message: "يلزم تسجيل الدخول حتى تتمكن من اختيار القالب.",
+        actionText: "تسجيل / دخول",
+        // Clerk accepts redirect_url; we URL‑encode the current path
+        actionLink: `/sign-in?redirect_url=${encodeURIComponent(pathname)}`,
+        iconType: "info",
+      });
+      setIsCustomModalOpen(true);
+      return;
+    }
+    // User is logged in → open the real template modal
+    setIsTemplateModalOpen(true);
+  };
+
   return (
     <>
       {/* Render Notifications based on submissionStatus */}
@@ -540,6 +581,22 @@ const CreatePresentation: React.FC = () => {
             )}
 
             <CardContent>
+            <PresentationForm
+              topicValue={topicValue}
+              documentFile={documentFile}
+              selectedTemplate={selectedTemplate}
+              isSubmitting={isSubmitting}
+              isLoading={isLoading}
+              handleTopicChange={handleTopicChange}
+              handleFileChange={handleFileChange}
+              handleSubmit={handleSubmit}
+              onOpenTemplateModal={openTemplatePicker} 
+            />
+          </CardContent>
+
+{/*             
+
+            <CardContent>
               <PresentationForm
                 topicValue={topicValue}
                 documentFile={documentFile}
@@ -551,7 +608,7 @@ const CreatePresentation: React.FC = () => {
                 handleSubmit={handleSubmit}
                 setIsTemplateModalOpen={setIsTemplateModalOpen} // Updated prop
               />
-            </CardContent>
+            </CardContent> */}
           </Card>
         </div>
 
