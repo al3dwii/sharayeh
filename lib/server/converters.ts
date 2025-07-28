@@ -5,29 +5,6 @@ import path from 'path';
 import { CsvRow, Steps, Converter } from '@/lib/types';  // ← shared types
 
 
-/* ───────────── Types ───────────── */
-
-// export interface CsvRow {
-//   slug_en: string;
-//   slug_ar: string;
-//   dir: string;        // e.g. "DOCX→PPT"
-//   label_en: string;   // e.g. "Convert Word to PowerPoint"
-//   label_ar: string;   // e.g. "تحويل ملف وورد إلى بوربوينت"
-//   search_vol: string; // string to avoid Number() pitfalls
-//   icon: string;
-//   avg_time_iso: string;
-//   steps_id: string;
-// }
-
-// export interface Steps {
-//   ar: string[];
-//   en: string[];
-// }
-
-// export interface Converter extends CsvRow {
-//   steps: Steps;
-// }
-
 /* ───────────── Load & cache CSV / JSON ───────────── */
 
 const CSV_PATH = path.join(process.cwd(), 'content/conversions.csv');
