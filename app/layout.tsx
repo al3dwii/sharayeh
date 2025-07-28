@@ -16,7 +16,7 @@ export const metadata = {
 
 export default async function RootLayout({
   children,
-  params: { locale = 'en' },            // ← Next.js injects route params
+  params: { locale = 'ar' },            // ← Next.js injects route params
 }: {
   children: React.ReactNode;
   params: { locale?: string };
