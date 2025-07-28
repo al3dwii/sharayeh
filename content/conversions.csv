@@ -1,5 +1,6 @@
 slug_en,slug_ar,dir,label_en,label_ar,search_vol,icon,avg_time_iso,steps_id
 word-to-powerpoint,تحويل-ملف-وورد-بوربوينت,DOCX→PPT,Convert Word to PowerPoint,تحويل ملف وورد إلى بوربوينت,550,word-ppt.svg,PT30S,word_to_ppt
+powerpoint-to-video,تحويل-بوربوينت-إلى-فيديو,PPT→MP4,Convert PowerPoint to Video,تحويل بوربوينت إلى فيديو,600,ppt-video.svg,PT40S,ppt_to_video,"تحويل البوربوينت إلى فيديو مع الصوت;تحويل بوربوينت إلى فيديو;تعديل ملف بوربوينت بالذكاء الاصطناعي;تحويل بوربوينت 2007 إلى فيديو;تحويل بوربوينت إلى فيديو MP4 اون لاين;تحميل برنامج تحويل بوربوينت إلى فيديو مجانا;تحويل البوربوينت إلى فيديو في الجوال;برنامج تحويل بوربوينت إلى فيديو MP4"
 powerpoint-to-pdf,تحويل-بوربوينت-بي-دي-اف,PPT→PDF,Convert PowerPoint to PDF,تحويل بوربوينت إلى PDF,500,ppt-pdf.svg,PT25S,ppt_to_pdf
 pdf-to-powerpoint,تحويل-بي-دي-اف-بوربوينت,PDF→PPT,Convert PDF to PowerPoint,تحويل PDF إلى بوربوينت,480,pdf-ppt.svg,PT45S,pdf_to_ppt
 powerpoint-to-word,تحويل-بوربوينت-وورد,PPT→DOCX,Convert PowerPoint to Word,تحويل بوربوينت إلى وورد,350,ppt-word.svg,PT40S,ppt_to_word

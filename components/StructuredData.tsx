@@ -1,135 +1,219 @@
 // components/StructuredData.tsx
 import React from 'react';
-import type { ConverterRow } from '@/lib/tools';
-import { siteUrl } from '@/utils/seo'; // single source of truth for hostname
+import type { Converter as ConverterRow } from '@/lib/server/converters';
 
-/* -------------------------------------------------------------------------- */
-/*  Helper: buildHowToSchema                                                  */
-/* -------------------------------------------------------------------------- */
+type Props = { data: Record<string, any> };
 
-/**
- * Build a Schema.org HowTo for this converter page.
- */
-export function buildHowToSchema(
-  row: ConverterRow,
-  locale: 'en' | 'ar'
-): Record<string, unknown> {
-  const pageUrl =
-    locale === 'ar'
-      ? `${siteUrl}/ar/tools/${row.slug_ar}`
-      : `${siteUrl}/en/tools/${row.slug_en}`;
-
-  const name = locale === 'ar' ? row.label_ar : row.label_en;
-  const direction =
-    locale === 'ar'
-      ? row.dir.replace('→', ' إلى ')
-      : row.dir.replace('→', ' to ');
-
-  /* Hand‑crafted variant for the Word→PowerPoint tool in Arabic */
-  if (locale === 'ar' && row.slug_en === 'word-to-powerpoint') {
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      name: 'تحويل ملف وورد إلى بوربوينت',
-      description: 'دليل خطوة بخطوة لتحويل ملف وورد إلى بوربوينت بدون برامج.',
-      totalTime: 'PT30S',
-      supply: [],
-      tool: [],
-      step: [
-        {
-          '@type': 'HowToStep',
-          position: 1,
-          name: 'رفع ملف DOCX',
-          url: `${pageUrl}#step1`,
-          text: 'اضغط زر رفع الملف واختر المستند.',
-        },
-        {
-          '@type': 'HowToStep',
-          position: 2,
-          name: 'التحويل التلقائي',
-          url: `${pageUrl}#step2`,
-          text: 'تبدأ الخدمة تحويل وورد إلى بوربوينت تلقائياً.',
-        },
-        {
-          '@type': 'HowToStep',
-          position: 3,
-          name: 'تنزيل العرض',
-          url: `${pageUrl}#step3`,
-          text: 'نزّل ملف بوربوينت الجاهز.',
-        },
-      ],
-    };
-  }
-
-  /* Default HowTo schema for every other tool */
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name,
-    description:
-      locale === 'ar'
-        ? `دليل خطوة بخطوة لـ ${name} (${direction}).`
-        : `Step‑by‑step guide to ${name} (${direction}).`,
-    totalTime: 'PT30S',
-    supply: [],
-    tool: [],
-    step: [
-      {
-        '@type': 'HowToStep',
-        position: 1,
-        name: locale === 'ar' ? 'رفع الملف' : 'Upload file',
-        url: `${pageUrl}#step1`,
-        text:
-          locale === 'ar'
-            ? 'اضغط زر رفع الملف واختر المستند من جهازك.'
-            : 'Click the upload button and choose your document.',
-      },
-      {
-        '@type': 'HowToStep',
-        position: 2,
-        name: locale === 'ar' ? 'التحويل التلقائي' : 'Automatic convert',
-        url: `${pageUrl}#step2`,
-        text:
-          locale === 'ar'
-            ? 'تبدأ الأداة التحويل تلقائيًا في غضون ثوانٍ.'
-            : 'The converter starts automatically within seconds.',
-      },
-      {
-        '@type': 'HowToStep',
-        position: 3,
-        name: locale === 'ar' ? 'تنزيل الملف' : 'Download result',
-        url: `${pageUrl}#step3`,
-        text:
-          locale === 'ar'
-            ? 'نزّل العرض التقديمي أو المستند المحول فورًا.'
-            : 'Download your converted presentation or document.',
-      },
-    ],
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Component: inject JSON‑LD                                                 */
-/* -------------------------------------------------------------------------- */
-
-interface StructuredDataProps {
-  /** Pre‑built Schema.org object */
-  data: Record<string, unknown>;
-}
-
-/**
- * Renders a single <script type="application/ld+json"> tag.
- * Place it anywhere in your React tree; head or body are both valid.
- */
-export default function StructuredData({ data }: StructuredDataProps) {
+export default function StructuredData({ data }: Props) {
   return (
     <script
       type="application/ld+json"
-      // stringify without whitespace to keep payload tiny
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
 }
+
+/* ---------- Helpers for HowTo & FAQ ---------- */
+
+export function buildHowToSchema(row: ConverterRow, locale: 'en' | 'ar') {
+  const isAr = locale === 'ar';
+  const steps = isAr
+    ? [
+        'التسجيل أو تسجيل الدخول.',
+        'رفع الملف عبر السحب-والإفلات أو زر «اختر ملف».',
+        'اختيار قالب أو تفعيل الاقتراح الذكي.',
+        'تخصيص الشرائح (ألوان، خطوط، شعارات).',
+        'تنزيل ملف PPTX أو مشاركته عبر رابط.',
+      ]
+    : [
+        'Sign up or sign in.',
+        'Upload the file via drag-and-drop or choose file.',
+        'Pick a template or enable smart design.',
+        'Customize slides (colors, fonts, logos).',
+        'Download PPTX or share via link.',
+      ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: isAr ? row.label_ar : row.label_en,
+    inLanguage: locale,
+    step: steps.map((text, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: text,
+    })),
+  };
+}
+
+export function buildFaqSchema(row: ConverterRow, locale: 'en' | 'ar') {
+  const isAr = locale === 'ar';
+  const faq = isAr
+    ? [
+        {
+          q: `ما هو الحد الأقصى لحجم الملف؟`,
+          a: 'حتى 25 م.ب في الخطة المجانية و200 م.ب في المدفوعة.',
+        },
+        {
+          q: 'هل تُحفظ الخطوط العربية واتجاه RTL؟',
+          a: 'نعم، نحافظ على الخطوط واتجاه النص من اليمين إلى اليسار.',
+        },
+      ]
+    : [
+        {
+          q: 'What is the max file size?',
+          a: 'Up to 25 MB on the free plan and 200 MB on paid plans.',
+        },
+        {
+          q: 'Do you preserve fonts and RTL?',
+          a: 'Yes, fonts and right-to-left direction are preserved.',
+        },
+      ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  };
+}
+
+// // components/StructuredData.tsx
+// import React from 'react';
+// import type { ConverterRow } from '@/lib/tools';
+// import { siteUrl } from '@/utils/seo'; // single source of truth for hostname
+
+// /* -------------------------------------------------------------------------- */
+// /*  Helper: buildHowToSchema                                                  */
+// /* -------------------------------------------------------------------------- */
+
+// /**
+//  * Build a Schema.org HowTo for this converter page.
+//  */
+// export function buildHowToSchema(
+//   row: ConverterRow,
+//   locale: 'en' | 'ar'
+// ): Record<string, unknown> {
+//   const pageUrl =
+//     locale === 'ar'
+//       ? `${siteUrl}/ar/tools/${row.slug_ar}`
+//       : `${siteUrl}/en/tools/${row.slug_en}`;
+
+//   const name = locale === 'ar' ? row.label_ar : row.label_en;
+//   const direction =
+//     locale === 'ar'
+//       ? row.dir.replace('→', ' إلى ')
+//       : row.dir.replace('→', ' to ');
+
+//   /* Hand‑crafted variant for the Word→PowerPoint tool in Arabic */
+//   if (locale === 'ar' && row.slug_en === 'word-to-powerpoint') {
+//     return {
+//       '@context': 'https://schema.org',
+//       '@type': 'HowTo',
+//       name: 'تحويل ملف وورد إلى بوربوينت',
+//       description: 'دليل خطوة بخطوة لتحويل ملف وورد إلى بوربوينت بدون برامج.',
+//       totalTime: 'PT30S',
+//       supply: [],
+//       tool: [],
+//       step: [
+//         {
+//           '@type': 'HowToStep',
+//           position: 1,
+//           name: 'رفع ملف DOCX',
+//           url: `${pageUrl}#step1`,
+//           text: 'اضغط زر رفع الملف واختر المستند.',
+//         },
+//         {
+//           '@type': 'HowToStep',
+//           position: 2,
+//           name: 'التحويل التلقائي',
+//           url: `${pageUrl}#step2`,
+//           text: 'تبدأ الخدمة تحويل وورد إلى بوربوينت تلقائياً.',
+//         },
+//         {
+//           '@type': 'HowToStep',
+//           position: 3,
+//           name: 'تنزيل العرض',
+//           url: `${pageUrl}#step3`,
+//           text: 'نزّل ملف بوربوينت الجاهز.',
+//         },
+//       ],
+//     };
+//   }
+
+//   /* Default HowTo schema for every other tool */
+//   return {
+//     '@context': 'https://schema.org',
+//     '@type': 'HowTo',
+//     name,
+//     description:
+//       locale === 'ar'
+//         ? `دليل خطوة بخطوة لـ ${name} (${direction}).`
+//         : `Step‑by‑step guide to ${name} (${direction}).`,
+//     totalTime: 'PT30S',
+//     supply: [],
+//     tool: [],
+//     step: [
+//       {
+//         '@type': 'HowToStep',
+//         position: 1,
+//         name: locale === 'ar' ? 'رفع الملف' : 'Upload file',
+//         url: `${pageUrl}#step1`,
+//         text:
+//           locale === 'ar'
+//             ? 'اضغط زر رفع الملف واختر المستند من جهازك.'
+//             : 'Click the upload button and choose your document.',
+//       },
+//       {
+//         '@type': 'HowToStep',
+//         position: 2,
+//         name: locale === 'ar' ? 'التحويل التلقائي' : 'Automatic convert',
+//         url: `${pageUrl}#step2`,
+//         text:
+//           locale === 'ar'
+//             ? 'تبدأ الأداة التحويل تلقائيًا في غضون ثوانٍ.'
+//             : 'The converter starts automatically within seconds.',
+//       },
+//       {
+//         '@type': 'HowToStep',
+//         position: 3,
+//         name: locale === 'ar' ? 'تنزيل الملف' : 'Download result',
+//         url: `${pageUrl}#step3`,
+//         text:
+//           locale === 'ar'
+//             ? 'نزّل العرض التقديمي أو المستند المحول فورًا.'
+//             : 'Download your converted presentation or document.',
+//       },
+//     ],
+//   };
+// }
+
+// /* -------------------------------------------------------------------------- */
+// /*  Component: inject JSON‑LD                                                 */
+// /* -------------------------------------------------------------------------- */
+
+// interface StructuredDataProps {
+//   /** Pre‑built Schema.org object */
+//   data: Record<string, unknown>;
+// }
+
+// /**
+//  * Renders a single <script type="application/ld+json"> tag.
+//  * Place it anywhere in your React tree; head or body are both valid.
+//  */
+// export default function StructuredData({ data }: StructuredDataProps) {
+//   return (
+//     <script
+//       type="application/ld+json"
+//       // stringify without whitespace to keep payload tiny
+//       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+//     />
+//   );
+// }
 
 // import React from "react";
 // import type { ConverterRow } from "@/lib/tools";
