@@ -1,0 +1,120 @@
+slug_en,slug_ar,dir,label_en,label_ar,search_vol,icon,avg_time_iso,steps_id,intro_ar
+word-to-powerpoint,تحويل-ملف-وورد-بوربوينت,DOCX→PPT,Convert Word to PowerPoint,تحويل ملف وورد إلى بوربوينت,550,word-ppt.svg,PT30S,word_to_ppt
+powerpoint-to-video,تحويل-بوربوينت-إلى-فيديو,PPT→MP4,Convert PowerPoint to Video,تحويل بوربوينت إلى فيديو,600,ppt-video.svg,PT40S,ppt_to_video,"تحويل البوربوينت إلى فيديو مع الصوت;تحويل بوربوينت إلى فيديو;تعديل ملف بوربوينت بالذكاء الاصطناعي;تحويل بوربوينت 2007 إلى فيديو;تحويل بوربوينت إلى فيديو MP4 اون لاين;تحميل برنامج تحويل بوربوينت إلى فيديو مجانا;تحويل البوربوينت إلى فيديو في الجوال;برنامج تحويل بوربوينت إلى فيديو MP4"
+powerpoint-to-pdf,تحويل-بوربوينت-بي-دي-اف,PPT→PDF,Convert PowerPoint to PDF,تحويل بوربوينت إلى PDF,500,ppt-pdf.svg,PT25S,ppt_to_pdf, تحويل عروض بوربوينت إلى ملفات PDF عالية الدقة في ثوانٍ مباشرة من متصفحك، دون تسجيل أو تثبيت أي برامج إضافية، برنامج يدعم اللغة العربية بشكل كامل 
+ نحافظ على كل الخطوط والتنسيقات والرسومات داخل الشرائح، لتضمن نسخة مطابقة للعرض الأصلي تصلح للطباعة والمشاركة الرقمية بلا فقدان للجودة.
+ يدعم الملفات الكبيرة حتى مئتي ميغابايت، ويتوافق مع جميع إصدارات PPT و PPTX على أنظمة ويندوز، ماك، أندرويد، و iOS بدون قيود.
+ pdf-to-powerpoint,تحويل-بي-دي-اف-بوربوينت,PDF→PPT,Convert PDF to PowerPoint,تحويل PDF إلى بوربوينت,480,pdf-ppt.svg,PT45S,pdf_to_ppt
+powerpoint-to-word,تحويل-بوربوينت-وورد,PPT→DOCX,Convert PowerPoint to Word,تحويل بوربوينت إلى وورد,350,ppt-word.svg,PT40S,ppt_to_word
+word-to-pdf,تحويل-وورد-بي-دي-اف,DOCX→PDF,Convert Word to PDF,تحويل وورد إلى PDF,750,word-pdf.svg,PT20S,word_to_pdf
+excel-to-powerpoint,تحويل-اكسل-بوربوينت,XLSX→PPT,Convert Excel to PowerPoint,تحويل اكسل إلى بوربوينت,120,excel-ppt.svg,PT40S,excel_to_ppt
+powerpoint-to-google-slides,تحويل-بوربوينت-جوجل-سلايد,PPT→GSLIDES,Convert PowerPoint to Google Slides,تحويل بوربوينت إلى جوجل سلايد,220,ppt-gslides.svg,PT35S,ppt_to_gslides
+google-slides-to-powerpoint,تحويل-جوجل-سلايد-بوربوينت,GSLIDES→PPT,Convert Google Slides to PowerPoint,تحويل جوجل سلايد إلى بوربوينت,210,gslides-ppt.svg,PT30S,gslides_to_ppt
+powerpoint-to-jpeg,تحويل-بوربوينت-صور,PPT→JPG,Convert PowerPoint to Images,تحويل بوربوينت إلى صور,140,ppt-jpg.svg,PT25S,ppt_to_jpg
+ppt-to-video,تحويل-بوربوينت-فيديو,PPT→MP4,Convert PowerPoint to Video,تحويل بوربوينت إلى فيديو,160,ppt-video.svg,PT90S,ppt_to_video
+markdown-to-powerpoint,تحويل-ماركداون-بوربوينت,DOC→PPT,Convert Markdown to PowerPoint,تحويل ماركداون إلى بوربوينت,3000,default.svg,PT30S,markdown_to_powerpoint
+notion-to-powerpoint,تحويل-نوشن-بوربوينت,DOC→PPT,Convert Notion Page to PowerPoint,تحويل صفحة Notion إلى بوربوينت,2500,default.svg,PT30S,notion_to_powerpoint
+kpi-dashboard-to-slide,تحويل-لوحة-مؤشرات-شرائح,DOC→PPT,Convert KPI Dashboard to Slides,تحويل لوحة مؤشرات إلى شرائح,1800,default.svg,PT30S,kpi_dashboard_to_slide
+syllabus-to-scorm,تحويل-منهج-سكورم,DOC→PPT,Convert Syllabus to SCORM,تحويل منهج إلى SCORM,2200,default.svg,PT30S,syllabus_to_scorm
+course-to-quiz,تحويل-دورة-اختبار,DOC→PPT,Convert Course to Quiz,تحويل دورة إلى اختبار,2100,default.svg,PT30S,course_to_quiz
+ppt-to-arabic,بوربوينت-إلى-عربي,DOC→PPT,Translate PPT to Arabic,ترجمة بوربوينت إلى العربية,3500,default.svg,PT30S,ppt_to_arabic
+ppt-to-english,بوربوينت-إلى-انجليزي,DOC→PPT,Translate PPT to English,ترجمة بوربوينت إلى الإنجليزية,3200,default.svg,PT30S,ppt_to_english
+training-manual-to-slides,تحويل-دليل-تدريب-شرائح,DOC→PPT,Training Manual to Slides,تحويل دليل تدريب إلى شرائح,4200,default.svg,PT30S,training_manual_to_slides
+policy-doc-to-slides,تحويل-سياسة-شرائح,DOC→PPT,Policy Doc to Training Slides,تحويل سياسة إلى شرائح تدريبية,2100,default.svg,PT30S,policy_doc_to_slides
+word-to-arabic-slides,تحويل-وورد-شرائح-عربي,DOC→PPT,Word to Arabic Slides,تحويل وورد إلى شرائح عربية,5000,default.svg,PT30S,word_to_arabic_slides
+ppt-rtl-fix,تصحيح-بوربوينت-rtl,DOC→PPT,Fix RTL Slides,تصحيح تنسيق الشرائح من اليمين إلى اليسار,900,default.svg,PT30S,ppt_rtl_fix
+ppt-brand-kit,بوربوينت-هوية-بصرية,DOC→PPT,Apply Brand Kit to PPT,تطبيق الهوية البصرية على بوربوينت,1100,default.svg,PT30S,ppt_brand_kit
+ppt-analytics,تحليلات-بوربوينت,DOC→PPT,PPT Usage Analytics,تحليلات استخدام بوربوينت,600,default.svg,PT30S,ppt_analytics
+ppt-scorm-example,مثال-بوربوينت-سكورم,DOC→PPT,PPT to SCORM Example,مثال بوربوينت إلى SCORM,500,default.svg,PT30S,ppt_scorm_example
+ppt-video-example,مثال-بوربوينت-فيديو,DOC→PPT,PPT to Video Example,مثال بوربوينت إلى فيديو,500,default.svg,PT30S,ppt_video_example
+google-doc-to-powerpoint,تحويل-مستند-جوجل-بوربوينت,DOC→PPT,Google Doc to PowerPoint,تحويل مستند جوجل إلى بوربوينت,2600,default.svg,PT30S,google_doc_to_powerpoint
+pptx-compress,ضغط-ملف-بوربوينت,DOC→PPT,Compress PPTX Online,ضغط بوربوينت أونلاين,3100,default.svg,PT30S,pptx_compress
+ppt-template-arabic,قوالب-بوربوينت-عربية,DOC→PPT,Arabic PowerPoint Templates,قوالب عربية لبوربوينت,2700,default.svg,PT30S,ppt_template_arabic
+ppt-template-english,قوالب-بوربوينت-انجليزية,DOC→PPT,English PowerPoint Templates,قوالب إنجليزية لبوربوينت,2900,default.svg,PT30S,ppt_template_english
+ppt-ai-design,تصميم-بوربوينت-بالذكاء-الاصطناعي,DOC→PPT,AI PowerPoint Design,تصميم بوربوينت بالذكاء الاصطناعي,4100,default.svg,PT30S,ppt_ai_design
+ppt-voiceover,تعليق-صوتي-بوربوينت,DOC→PPT,Add Voiceover to PPT,إضافة تعليق صوتي إلى بوربوينت,1800,default.svg,PT30S,ppt_voiceover
+ppt-subtitles,ترجمة-شرائح,DOC→PPT,Add Subtitles to Slides,إضافة ترجمات إلى الشرائح,1600,default.svg,PT30S,ppt_subtitles
+ppt-to-html5,بوربوينت-إلى-html5,DOC→PPT,Convert PPT to HTML5,تحويل بوربوينت إلى HTML5,950,default.svg,PT30S,ppt_to_html5
+ppt-to-google-slides,بوربوينت-إلى-جوجل-شرائح,DOC→PPT,Convert PPT to Google Slides,تحويل بوربوينت إلى جوجل شرائح,2200,default.svg,PT30S,ppt_to_google_slides
+ppt-dimensions,مقاسات-بوربوينت,DOC→PPT,Best PPT Dimensions,أفضل مقاسات بوربوينت,800,default.svg,PT30S,ppt_dimensions
+ppt-infographic,انفوجرافيك-بوربوينت,DOC→PPT,Create PPT Infographic,إنشاء انفوجرافيك بوربوينت,2600,default.svg,PT30S,ppt_infographic
+ppt-animation-to-video,تحويل-حركة-فيديو,DOC→PPT,Animation PPT to Video,تحويل الحركة في بوربوينت إلى فيديو,1400,default.svg,PT30S,ppt_animation_to_video
+ppt-explainer-video,فيديو-توضيحي-بوربوينت,DOC→PPT,PowerPoint Explainer Video,فيديو توضيحي بوربوينت,1550,default.svg,PT30S,ppt_explainer_video
+ppt-data-dashboard,لوحة-بيانات-بوربوينت,DOC→PPT,PowerPoint Data Dashboard,لوحة بيانات في بوربوينت,1700,default.svg,PT30S,ppt_data_dashboard
+ppt-gantt-chart,مخطط-جان-بوربوينت,DOC→PPT,Gantt Chart in PPT,مخطط جان في بوربوينت,1850,default.svg,PT30S,ppt_gantt_chart
+ppt-timeline-chart,مخطط-زمني-بوربوينت,DOC→PPT,Timeline Chart in PPT,مخطط زمني بوربوينت,1900,default.svg,PT30S,ppt_timeline_chart
+ppt-financial-ratios,نسب-مالية-بوربوينت,DOC→PPT,Financial Ratios Slides,شرائح نسب مالية,1500,default.svg,PT30S,ppt_financial_ratios
+ppt-kpi-templates,قوالب-kpi-بوربوينت,DOC→PPT,KPI Templates PPT,قوالب KPI بوربوينت,2300,default.svg,PT30S,ppt_kpi_templates
+ppt-learning-objectives,اهداف-تعلم-بوربوينت,DOC→PPT,Learning Objectives Slides,أهداف تعلم في بوربوينت,1200,default.svg,PT30S,ppt_learning_objectives
+ppt-course-outline,مخطط-دورة-بوربوينت,DOC→PPT,Course Outline Slides,مخطط دورة بوربوينت,1100,default.svg,PT30S,ppt_course_outline
+ppt-quiz-template,قالب-اختبار-بوربوينت,DOC→PPT,Quiz Template PPT,قالب اختبار بوربوينت,900,default.svg,PT30S,ppt_quiz_template
+ppt-interactive-quiz,اختبار-تفاعلي-بوربوينت,DOC→PPT,Interactive PPT Quiz,اختبار تفاعلي بوربوينت,950,default.svg,PT30S,ppt_interactive_quiz
+ppt-scorm-cloud,سكورم-كلاود-بوربوينت,DOC→PPT,Send PPT to SCORM Cloud,إرسال بوربوينت إلى SCORM كلاود,800,default.svg,PT30S,ppt_scorm_cloud
+ppt-moodle-import,استيراد-بوربوينت-مودل,DOC→PPT,Import PPT to Moodle,استيراد بوربوينت إلى مودل,850,default.svg,PT30S,ppt_moodle_import
+ppt-lms-export,تصدير-بوربوينت-نظام-تعلم,DOC→PPT,Export PPT to LMS,تصدير بوربوينت إلى نظام تعلم,780,default.svg,PT30S,ppt_lms_export
+ppt-branching-scenarios,سيناريوهات-متفرعة-بوربوينت,DOC→PPT,Branching Scenarios PPT,سيناريوهات متفرعة بوربوينت,650,default.svg,PT30S,ppt_branching_scenarios
+ppt-adaptive-learning,تعلم-تكيفي-بوربوينت,DOC→PPT,Adaptive Learning Slides,شرائح تعلم تكيفي,600,default.svg,PT30S,ppt_adaptive_learning
+ppt-xapi-export,export-xapi-ppt,DOC→PPT,Export PPT to xAPI,تصدير بوربوينت إلى xAPI,550,default.svg,PT30S,ppt_xapi_export
+ppt-ssu,بوربوينت-مؤسسة,DOC→PPT,SSO PowerPoint Portal,بوابة بوربوينت SSO,500,default.svg,PT30S,ppt_ssu
+ppt-sla-monitor,مراقبة-sla-بوربوينت,DOC→PPT,PPT SLA Monitoring,مراقبة SLA بوربوينت,450,default.svg,PT30S,ppt_sla_monitor
+ppt-localize,تعريب-بوربوينت,DOC→PPT,Localize PPT Slides,تعريب شرائح بوربوينت,3100,default.svg,PT30S,ppt_localize
+ppt-accessibility,وصول-ذوي-احتياجات-بوربوينت,DOC→PPT,Accessible PPT Design,تصميم بوربوينت موائم,1250,default.svg,PT30S,ppt_accessibility
+ppt-template-corporate,قالب-بوربوينت-شركات,DOC→PPT,Corporate PPT Template,قالب بوربوينت للشركات,2150,default.svg,PT30S,ppt_template_corporate
+ppt-template-education,قالب-بوربوينت-تعليمي,DOC→PPT,Education PPT Template,قالب بوربوينت تعليمي,2300,default.svg,PT30S,ppt_template_education
+ppt-training-video,فيديو-تدريب-بوربوينت,DOC→PPT,Training Video from PPT,فيديو تدريبي من بوربوينت,1350,default.svg,PT30S,ppt_training_video
+ppt-marketing-video,فيديو-تسويق-بوربوينت,DOC→PPT,Marketing Video PPT,فيديو بوربوينت تسويقي,1550,default.svg,PT30S,ppt_marketing_video
+ppt-rfp-slides,عرض-منصة-عطاءات,DOC→PPT,RFP Response Slides,شرائح رد على عطاء,950,default.svg,PT30S,ppt_rfp_slides
+ppt-investor-deck,عرض-مستثمرين-بوربوينت,DOC→PPT,Investor Deck PPT,عرض بوربوينت للمستثمرين,3500,default.svg,PT30S,ppt_investor_deck
+ppt-pitch-deck,عرض-تقديم-بوربوينت,DOC→PPT,Pitch Deck PPT,عرض تقديمي بوربوينت,3800,default.svg,PT30S,ppt_pitch_deck
+ppt-roadmap-slide,شريحة-خارطة-الطريق,DOC→PPT,Product Roadmap Slide,شريحة خارطة الطريق,1650,default.svg,PT30S,ppt_roadmap_slide
+ppt-okrs,شرائح-أهداف-نتائج,DOC→PPT,OKR Slides,شرائح OKR,1700,default.svg,PT30S,ppt_okrs
+ppt-vs-keynote,بوربوينت-مقابل-كينوت,DOC→PPT,PPT vs Keynote,بوربوينت مقابل كينوت,1300,default.svg,PT30S,ppt_vs_keynote
+ppt-to-prezi,بوربوينت-إلى-بريزي,DOC→PPT,Convert PPT to Prezi,تحويل بوربوينت إلى بريزي,1200,default.svg,PT30S,ppt_to_prezi
+ppt-live-share,مشاركة-حيّة-بوربوينت,DOC→PPT,Live Share PPT,مشاركة بوربوينت حيّة,1400,default.svg,PT30S,ppt_live_share
+ppt-slide-count,عدد-شرائح-بوربوينت,DOC→PPT,Count Slides in PPT,عدد الشرائح في بوربوينت,900,default.svg,PT30S,ppt_slide_count
+ppt-speaker-notes,ملاحظات-المتحدث-بوربوينت,DOC→PPT,Export Speaker Notes,تصدير ملاحظات المتحدث,950,default.svg,PT30S,ppt_speaker_notes
+ppt-watermark-remove,إزالة-علامة-مائية-بوربوينت,DOC→PPT,Remove PPT Watermark,إزالة علامة مائية من بوربوينت,1500,default.svg,PT30S,ppt_watermark_remove
+ppt-white-label,بوربوينت-بدون-علامة,DOC→PPT,White‑Label PPT,بوربوينت بدون علامة تجارية,700,default.svg,PT30S,ppt_white_label
+ppt-api-generate,api-بوربوينت,DOC→PPT,Generate PPT via API,إنشاء بوربوينت عبر API,600,default.svg,PT30S,ppt_api_generate
+ppt-ai-summary,ملخص-ذكاء-اصطناعي-بوربوينت,DOC→PPT,AI Summary Slides,شرائح ملخص ذكاء اصطناعي,2400,default.svg,PT30S,ppt_ai_summary
+ppt-auto-translate,ترجمة-تلقائية-بوربوينت,DOC→PPT,Auto‑translate Slides,ترجمة تلقائية للشرائح,2600,default.svg,PT30S,ppt_auto_translate
+ppt-content-ai,محتوى-ذكاء-اصطناعي-بوربوينت,DOC→PPT,Generate Slide Content AI,إنشاء محتوى شرائح بالذكاء الاصطناعي,2900,default.svg,PT30S,ppt_content_ai
+ppt-photo-gallery,معرض-صور-بوربوينت,DOC→PPT,Photo Gallery PPT,معرض صور بوربوينت,1150,default.svg,PT30S,ppt_photo_gallery
+ppt-risk-register,سجل-مخاطر-بوربوينت,DOC→PPT,Risk Register Slides,شرائح سجل المخاطر,800,default.svg,PT30S,ppt_risk_register
+ppt-sop-template,قالب-إجراءات-بوربوينت,DOC→PPT,SOP Template PPT,قالب إجراءات تشغيل,900,default.svg,PT30S,ppt_sop_template
+ppt-onboarding-kit,مجموعة-تهيئة-بوربوينت,DOC→PPT,Employee Onboarding Kit,مجموعة تهيئة الموظفين,1000,default.svg,PT30S,ppt_onboarding_kit
+ppt-team-charter,ميثاق-فريق-بوربوينت,DOC→PPT,Team Charter Slide,شريحة ميثاق الفريق,850,default.svg,PT30S,ppt_team_charter
+ppt-brand-guidelines,دليل-هوية-بوربوينت,DOC→PPT,Brand Guidelines Slides,شرائح دليل الهوية,900,default.svg,PT30S,ppt_brand_guidelines
+ppt-market-analysis,تحليل-سوق-بوربوينت,DOC→PPT,Market Analysis PPT,تحليل سوق بوربوينت,1250,default.svg,PT30S,ppt_market_analysis
+ppt-swot-template,قالب-swot-بوربوينت,DOC→PPT,SWOT Template PPT,قالب تحليل SWOT,1300,default.svg,PT30S,ppt_swot_template
+ppt-gdpr-compliance,امتثال-gdpr-بوربوينت,DOC→PPT,GDPR Compliance Slides,شرائح امتثال GDPR,650,default.svg,PT30S,ppt_gdpr_compliance
+ppt-security-awareness,وعي-امني-بوربوينت,DOC→PPT,Security Awareness PPT,بوربوينت توعية أمنية,700,default.svg,PT30S,ppt_security_awareness
+ppt-health-safety,سلامة-وصحة-بوربوينت,DOC→PPT,Health & Safety Slides,شرائح صحة وسلامة,750,default.svg,PT30S,ppt_health_safety
+ppt-elearning-export,تصدير-بوربوينت-تعلم-الكتروني,DOC→PPT,PPT eLearning Export,تصدير بوربوينت للتعلم الإلكتروني,800,default.svg,PT30S,ppt_elearning_export
+ppt-h5p-convert,تحويل-h5p-بوربوينت,DOC→PPT,Convert PPT to H5P,تحويل بوربوينت إلى H5P,550,default.svg,PT30S,ppt_h5p_convert
+ppt-lottie,اضافة-lottie-بوربوينت,DOC→PPT,Add Lottie Animations PPT,إضافة رسوم Lottie إلى بوربوينت,500,default.svg,PT30S,ppt_lottie
+ppt-screen-record,تسجيل-شاشة-بوربوينت,DOC→PPT,Screen‑record PPT,تسجيل شاشة بوربوينت,950,default.svg,PT30S,ppt_screen_record
+ppt-audio-sync,مزامنة-صوت-بوربوينت,DOC→PPT,Sync Audio to Slides,مزامنة صوت مع الشرائح,850,default.svg,PT30S,ppt_audio_sync
+ppt-subtitle-ar,ترجمة-عربية-بوربوينت,DOC→PPT,Arabic Subtitles PPT,ترجمة عربية للشرائح,1150,default.svg,PT30S,ppt_subtitle_ar
+ppt-subtitle-en,ترجمة-انجليزية-بوربوينت,DOC→PPT,English Subtitles PPT,ترجمة إنجليزية للشرائح,1100,default.svg,PT30S,ppt_subtitle_en
+ppt-slide-gif,بوربوينت-شرائح-gif,DOC→PPT,Slide to GIF,تحويل شريحة إلى GIF,1250,default.svg,PT30S,ppt_slide_gif
+ppt-video-thumbnail,صورة-مصغرة-فيديو-بوربوينت,DOC→PPT,Generate Video Thumbnail,إنشاء صورة مصغرة للفيديو,650,default.svg,PT30S,ppt_video_thumbnail
+ppt-sso-guide,دليل-sso-بوربوينت,DOC→PPT,PPT SSO Guide,دليل SSO لبوربوينت,400,default.svg,PT30S,ppt_sso_guide
+ppt-xapi-analytics,xapi-تحليلات-بوربوينت,DOC→PPT,xAPI Analytics Slides,تحليلات xAPI بوربوينت,450,default.svg,PT30S,ppt_xapi_analytics
+ppt-sla-report,تقرير-sla-بوربوينت,DOC→PPT,SLA Report PPT,تقرير اتفاقية مستوى الخدمة,350,default.svg,PT30S,ppt_sla_report
+ppt-error-budget,ميزانية-اخطاء-بوربوينت,DOC→PPT,Error Budget Slides,شرائح ميزانية الأخطاء,300,default.svg,PT30S,ppt_error_budget
+ppt-enterprise-api,api-مؤسسة-بوربوينت,DOC→PPT,Enterprise PPT API,API بوربوينت مؤسسة,320,default.svg,PT30S,ppt_enterprise_api
+ppt-data-export,تصدير-بيانات-بوربوينت,DOC→PPT,Export PPT Data,تصدير بيانات بوربوينت,360,default.svg,PT30S,ppt_data_export
+ppt-json-input,بوربوينت-json,DOC→PPT,Generate PPT from JSON,إنشاء بوربوينت من JSON,400,default.svg,PT30S,ppt_json_input
+ppt-latex-input,بوربوينت-latex,DOC→PPT,Generate PPT from LaTeX,إنشاء بوربوينت من LaTeX,380,default.svg,PT30S,ppt_latex_input
+ppt-bulk-convert,تحويل-جماعي-بوربوينت,DOC→PPT,Bulk Convert PPTs,تحويل بوربوينت جماعي,420,default.svg,PT30S,ppt_bulk_convert
+ppt-cli-tool,اداة-cli-بوربوينت,DOC→PPT,PPT CLI Tool,أداة سطر أوامر بوربوينت,450,default.svg,PT30S,ppt_cli_tool
+ppt-sdk,حزمة-تطوير-بوربوينت,DOC→PPT,PPT SDK,حزمة تطوير بوربوينت,480,default.svg,PT30S,ppt_sdk
+ppt-integrations,zapier-بوربوينت,DOC→PPT,PPT Zapier Integration,تكامل بوربوينت مع Zapier,500,default.svg,PT30S,ppt_integrations
+ppt-ai-avatar,افاتار-ذكاء-اصطناعي-بوربوينت,DOC→PPT,AI Avatar Slides,شرائح أفاتار بالذكاء الاصطناعي,900,default.svg,PT30S,ppt_ai_avatar
+ppt-avatar-lip-sync,زامن-شفاه-افاتار,DOC→PPT,Avatar Lip‑sync PPT,تزامن شفاه أفاتار بوربوينت,650,default.svg,PT30S,ppt_avatar_lip_sync
+ppt-text-to-speech,تحويل-نص-صوت-بوربوينت,DOC→PPT,Text‑to‑Speech Slides,تحويل النص إلى صوت بوربوينت,950,default.svg,PT30S,ppt_text_to_speech
+doc-ai-formatting,تنسيق-ملف-وورد-بالذكاء-الاصطناعي,DOC→DOC,Word Formatting with AI,تنسيق ملف وورد بالذكاء الاصطناعي,0,default.svg,PT30S,doc_ai_formatting
+ppt-ai-powerpoint,بوربوينت-بالذكاء-الاصطناعي,PPT→PPT,AI‑Powered PowerPoint,بوربوينت بالذكاء الاصطناعي,0,default.svg,PT30S,ppt_ai_powerpoint
+doc-ai-design,تصميم-ملف-وورد-بالذكاء-الاصطناعي,DOC→DOC,Word Design with AI,تصميم ملف وورد بالذكاء الاصطناعي,0,default.svg,PT30S,doc_ai_design
+

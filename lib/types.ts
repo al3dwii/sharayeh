@@ -1,5 +1,6 @@
 // lib/types.ts
 export interface CsvRow {
+  intro_ar?: string;
   slug_en: string;
   slug_ar: string;
   dir: string;
