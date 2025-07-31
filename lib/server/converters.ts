@@ -57,22 +57,28 @@ export const getConverters = (): Converter[] =>
   }));
 
 /** Find a single converter by its English slug (used in dynamic routes). */
-export const getConverter = (slug_en: string): Converter | undefined =>
-  getConverters().find((c) => c.slug_en === slug_en);
+/**
+ * Find a single converter by slug.
+ *
+ * Accepts either the English slug (e.g. "word-to-powerpoint") or
+ * the Arabic slug (e.g. "تحويل-وورد-بوربوينت").
+ */
+export const getConverter = (slug: string): Converter | undefined =>
+  getConverters().find((c) => c.slug_en === slug || c.slug_ar === slug);
 
 /**
  * Find up to `limit` converters related to the given slug.
  * A converter is considered related if it shares either the "from" or "to" file extension.
  */
-export function getRelatedConverters(slug_en: string, limit = 4): Converter[] {
+export function getRelatedConverters(slug: string, limit = 4): Converter[] {
   const all = getConverters();
-  const current = all.find((c) => c.slug_en === slug_en);
+  const current = all.find((c) => c.slug_en === slug || c.slug_ar === slug);
   if (!current) return [];
 
   const [fromExt, toExt] = current.dir.split('→');
   const others = all.filter(
     (c) =>
-      c.slug_en !== slug_en &&
+      c.slug_en !== current.slug_en &&
       (c.dir.includes(fromExt) || c.dir.includes(toExt))
   );
 

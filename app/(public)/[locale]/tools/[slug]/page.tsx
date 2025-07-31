@@ -32,7 +32,10 @@ const converters = getConverters(); // one CSV/JSON read at build time
 
 export async function generateStaticParams() {
   return LOCALES.flatMap((locale) =>
-    converters.map((c) => ({ locale, slug: c.slug_en }))
+    converters.map((c) => ({
+      locale,
+      slug: locale === 'ar' ? c.slug_ar : c.slug_en,
+    }))
   );
 }
 
@@ -57,7 +60,9 @@ export async function generateMetadata({
     ? `أداة سحابية مجانية وسهلة ${row.label_ar} – حوّل ملفات ${fromExt} إلى ${toExt} في ثوانٍ مع الحفاظ على التنسيق والصور والخطوط.`
     : `Free online tool for ${row.label_en}. Convert ${fromExt} to ${toExt} in seconds and keep fonts, images and formatting intact.`;
 
-  const canonical = `${siteUrl}/${locale}/tools/${row.slug_en}`;
+  const canonical = `${siteUrl}/${locale}/tools/${
+    isAr ? row.slug_ar : row.slug_en
+  }`;
 
   const keywords = isAr
     ? [
@@ -113,7 +118,7 @@ export default async function Page({ params }: { params: PageParams }) {
   if (!row) return notFound();
 
   // Show related for both languages — not only Arabic
-  const related: ConverterRow[] = getRelatedConverters(params.slug);
+  const related: ConverterRow[] = getRelatedConverters(row.slug_en);
 
   // SoftwareApplication schema (per tool)
   const softwareJsonLd = {
@@ -123,7 +128,9 @@ export default async function Page({ params }: { params: PageParams }) {
     alternateName: row.label_ar,
     applicationCategory: 'FileConversionTool',
     operatingSystem: 'All',
-    url: `${siteUrl}/${params.locale}/tools/${row.slug_en}`,
+    url: `${siteUrl}/${params.locale}/tools/${
+      params.locale === 'ar' ? row.slug_ar : row.slug_en
+    }`,
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -153,7 +160,9 @@ export default async function Page({ params }: { params: PageParams }) {
         '@type': 'ListItem',
         position: 3,
         name: params.locale === 'ar' ? row.label_ar : row.label_en,
-        item: `${siteUrl}/${params.locale}/tools/${row.slug_en}`,
+        item: `${siteUrl}/${params.locale}/tools/${
+          params.locale === 'ar' ? row.slug_ar : row.slug_en
+        }`,
       },
     ],
   };
