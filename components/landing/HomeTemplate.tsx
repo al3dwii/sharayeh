@@ -36,13 +36,13 @@ export default function HomeTemplate({ locale }: Props) {
       </section> */}
 
       {/* FEATURE GRID */}
-      <section className="mt-2 mb-2 m-4 grid gap-4 md:grid-cols-4">
+      <section className="mt-4 mb-4 m-8 grid gap-4 md:grid-cols-4">
         {t.features.map(({ icon, title, desc }) => {
           const Icon = (require('lucide-react') as any)[icon] as LucideIcon;
           return (
             <div
               key={title}
-              className="flex flex-col items-start gap-4 rounded-2xl border p-6 shadow-sm hover:shadow-md"
+              className="flex flex-col items-start gap-4 bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md"
             >
               <span className="rounded-full border p-3">
                 <Icon className="size-5" aria-hidden />
