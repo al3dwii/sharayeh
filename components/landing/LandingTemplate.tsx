@@ -76,6 +76,10 @@ export default function LandingTemplate({
       {/* Related converter links (contextual suggestions) */}
       {isAr && related.length > 0 && (
         <section className="mt-12" dir="rtl">
+
+      <script src="https://widget.senja.io/widget/004b216b-7496-4544-943b-fada94eb906d/platform.js" type="text/javascript" async></script>
+<div className="senja-embed" data-id="004b216b-7496-4544-943b-fada94eb906d" data-mode="shadow" data-lazyload="false"></div>
+
           <h3 className="text-xl font-bold">تم البحث أيضاً عن</h3>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {related.map((c) => (

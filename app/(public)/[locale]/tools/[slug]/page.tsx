@@ -164,9 +164,7 @@ export default async function Page({ params }: { params: PageParams }) {
       <StructuredData data={softwareJsonLd} />
       <StructuredData data={breadcrumbJsonLd} />
       <Breadcrumbs locale={params.locale} slug={params.slug} />
-      <script src="https://widget.senja.io/widget/004b216b-7496-4544-943b-fada94eb906d/platform.js" type="text/javascript" async></script>
-<div className="senja-embed" data-id="004b216b-7496-4544-943b-fada94eb906d" data-mode="shadow" data-lazyload="false"></div>
-
+      
       <LandingTemplate locale={params.locale} row={row} related={related} />
     </>
   );
