@@ -40,7 +40,7 @@ export async function GET() {
   /* 3 ─ Tools */
   for (const { slug_en, slug_ar } of getConverters()) {
     sm.write({ url: `/en/tools/${slug_en}`, changefreq: 'monthly', priority: 0.7 });
-    sm.write({ url: `/ar/tools/${slug_ar}`, changefreq: 'monthly', priority: 0.7 });
+    sm.write({ url: `/ar/tools/${slug_en}`, changefreq: 'monthly', priority: 0.7 });
   }
 
   /* 4 ─ Solutions (index + each pillar) */
