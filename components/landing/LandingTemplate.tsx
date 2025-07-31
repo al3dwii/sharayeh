@@ -84,7 +84,7 @@ export default function LandingTemplate({
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {related.map((c) => (
               <li key={c.slug_en}>
-                <Link href={`/ar/tools/${c.slug_en}`}>{c.label_ar}</Link>
+                <Link href={`/ar/tools/${c.slug_ar}`}>{c.label_ar}</Link>
               </li>
             ))}
           </ul>

@@ -26,7 +26,9 @@ export default async function Breadcrumbs({
     },
     {
       name: locale === 'ar' ? row.label_ar : row.label_en,
-      url: `${siteUrl}/${locale}/tools/${row.slug_en}`,
+      url: `${siteUrl}/${locale}/tools/${
+        locale === 'ar' ? row.slug_ar : row.slug_en
+      }`,
     },
   ];
 
