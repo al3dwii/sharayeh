@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useRouter, usePathname } from "next/navigation";   // ⬅️  add usePathname
 import CustomModal from "@/components/custom/CustomModal";
 import Loading from "@/components/global/loading";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -15,6 +14,8 @@ import { useGlobalStore } from "@/store/useGlobalStore";
 import { v4 as uuidv4 } from "uuid";
 import { useUserData } from "@/context/UserContext";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,17 @@ const CreatePresentation: React.FC = () => {
   const userData = useUserData();
   const router = useRouter();
   const pathname = usePathname();                         // ⬅️  current page
+  const search = useSearchParams();
+
+  // locale = "ar" | "en" (default to "en" if missing)
+  const locale = (pathname?.split("/")[1] === "ar") ? "ar" : "en";
+
+  // Preserve querystring on redirect, if you want:
+  const currentPath = pathname + (search?.toString() ? `?${search!.toString()}` : "");
+
+  const authLink = (slug: "sign-in" | "sign-up") =>
+    `/${locale}/${slug}?redirect_url=${encodeURIComponent(currentPath || "/")}`;
+
   const { getToken } = useAuth();
 
   // 1. Use the isSuperAdmin flag from userData
@@ -199,7 +211,7 @@ const CreatePresentation: React.FC = () => {
           title: "غير مصرح",
           message: "يرجى تسجيل الدخول لإكمال العملية.",
           actionText: "تسجيل الدخول",
-          actionLink: "/sign-in",
+          actionLink: authLink("sign-in"),   // or authLink("sign-in")
           iconType: "error",
         });
         setIsCustomModalOpen(true);
@@ -288,7 +300,7 @@ const CreatePresentation: React.FC = () => {
             title: "غير مصرح",
             message: "يرجى تسجيل الدخول لإكمال العملية.",
             actionText: "تسجيل الدخول",
-            actionLink: "/sign-in",
+            actionLink: authLink("sign-in"),   // or authLink("sign-in")
             iconType: "error",
           });
           setIsCustomModalOpen(true);
@@ -353,7 +365,7 @@ const CreatePresentation: React.FC = () => {
             title: "غير مصرح",
             message: "يرجى تسجيل الدخول لإكمال العملية.",
             actionText: "تسجيل الدخول",
-            actionLink: "/sign-in",
+            actionLink: authLink("sign-in"),   // or authLink("sign-in")
             iconType: "error",
           });
           setIsCustomModalOpen(true);
@@ -380,7 +392,7 @@ const CreatePresentation: React.FC = () => {
                   title: "غير مصرح",
                   message: "يرجى تسجيل الدخول لإكمال العملية.",
                   actionText: "تسجيل الدخول",
-                  actionLink: "/sign-in",
+                  actionLink: authLink("sign-in"),   // or authLink("sign-in")
                   iconType: "error",
                 });
                 setIsCustomModalOpen(true);
@@ -512,7 +524,8 @@ const CreatePresentation: React.FC = () => {
         message: "يلزم تسجيل الدخول حتى تتمكن من اختيار القالب.",
         actionText: "تسجيل / دخول",
         // Clerk accepts redirect_url; we URL‑encode the current path
-        actionLink: `/sign-in?redirect_url=${encodeURIComponent(pathname)}`,
+        actionLink: authLink("sign-in"),   // or authLink("sign-in")
+
         iconType: "info",
       });
       setIsCustomModalOpen(true);
