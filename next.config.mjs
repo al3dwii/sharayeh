@@ -10,6 +10,16 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  images: {
+    // If you're on Next 13.1+ use remotePatterns (recommended)
+    remotePatterns: [
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      // add any others you use:
+      { protocol: 'https', hostname: 'drive.google.com' }, // if you ever embed direct links
+    ],
+    // For older projects: domains: ['lh3.googleusercontent.com', 'drive.google.com'],
+  },
+
   // 1) Redirect any un‑prefixed /blog or /tools requests into /ar/…
   //    (since defaultLocale is 'ar' and we're always prefixing)
   async redirects() {
@@ -27,6 +37,9 @@ const nextConfig = {
     ];
   },
 };
+
+
+
 
 const withNextIntl = createNextIntlPlugin({
   locales: ['ar', 'en'],

@@ -26,13 +26,10 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
+  matcher: ['/', '/pricing', '/(en|ar)/:path*', '/api/:path*']
+
   // make sure middleware runs on /pricing, /en/*, /ar/*, etc.
-  matcher: [
-    "/",             
-    "/pricing",      
-    "/(en|ar)",      
-    "/(en|ar)/:path*", 
-  ],
+ 
 };
 
 
