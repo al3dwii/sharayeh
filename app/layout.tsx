@@ -12,6 +12,12 @@ const RTL_LOCALES = ['ar', 'he', 'fa', 'ur'];
 export const metadata = {
   title: { default: siteName, template: `%s | ${siteName}` },
   description: defaultDescription,
+  metadataBase: new URL(siteUrl),
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default async function RootLayout({
@@ -32,6 +38,27 @@ export default async function RootLayout({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
+
+        {/* Global Organization Schema */}
+        <StructuredData
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: siteName,
+            url: siteUrl,
+            logo: `${siteUrl}/logo.png`,
+            sameAs: [
+              'https://twitter.com/sharayeh',
+              'https://www.facebook.com/sharayeh',
+              'https://www.linkedin.com/company/sharayeh',
+            ],
+            contactPoint: {
+              '@type': 'ContactPoint',
+              contactType: 'Customer Support',
+              availableLanguage: ['English', 'Arabic'],
+            },
+          }}
+        />
 
         {/* Global WebSite schema */}
         <StructuredData
