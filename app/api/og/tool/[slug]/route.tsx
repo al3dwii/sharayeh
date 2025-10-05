@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { getConverter } from '@/lib/server/converters';
 import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
@@ -9,13 +8,17 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   const { slug } = params;
-  const tool = getConverter(slug);
-
-  if (!tool) {
-    return new Response('Not found', { status: 404 });
-  }
-
-  const [from, to] = tool.dir.split('→');
+  
+  // Format the slug for display
+  const toolName = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  
+  // Extract format from slug (e.g., "word-to-pdf" -> "WORD" and "PDF")
+  const parts = slug.split('-to-');
+  const from = parts[0]?.toUpperCase() || '';
+  const to = parts[1]?.toUpperCase() || '';
 
   return new ImageResponse(
     (
@@ -55,7 +58,7 @@ export async function GET(
             padding: '0 40px',
           }}
         >
-          {tool.label_en}
+          {toolName}
         </div>
 
         {/* Conversion Arrow */}
