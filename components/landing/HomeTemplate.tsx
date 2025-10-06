@@ -11,6 +11,7 @@ import { Footer } from "@/components/custom/footer";
 import  Hero  from "@/components/custom/hero";
 import Hvideo from "@/components/custom/homevid";
 import { Faqs } from "@/components/custom/faqs";
+import { QuickAnswer, KeyStats } from '@/components/ai/AIComponents';
 
 
 type Props = { locale: (typeof LOCALES)[number] };
@@ -23,6 +24,29 @@ export default function HomeTemplate({ locale }: Props) {
     <main dir={isAr ? 'rtl' : 'ltr'} className="mt-8 mx-auto ">
       {/* HERO */}
       <Hero locale={locale} />
+
+      {/* AI-OPTIMIZED QUICK ANSWER */}
+      <section className="container mx-auto px-4 mt-8">
+        <QuickAnswer
+          question={isAr ? 'ما هي شرايح؟' : 'What is Sharayeh?'}
+          answer={
+            isAr
+              ? 'شرايح هي منصة مدعومة بالذكاء الاصطناعي تقدم أكثر من 30 أداة متخصصة لتحويل المستندات وتحسين الملفات. حول الملفات، وأنشئ العروض التقديمية، وحسّن ملفات PDF - كل ذلك مجانًا دون الحاجة للتسجيل.'
+              : 'Sharayeh is an AI-powered platform offering 30+ specialized tools for document conversion, file optimization, and content automation. Convert files, create presentations, and optimize PDFs—all free with no registration required.'
+          }
+          steps={
+            isAr
+              ? ['ارفع ملفك', 'اختر نوع التحويل', 'حمّل الملف المحول']
+              : ['Upload your file', 'Choose conversion type', 'Download converted file']
+          }
+          keyFacts={[
+            { label: isAr ? 'الأدوات' : 'Tools', value: '30+' },
+            { label: isAr ? 'المستخدمون' : 'Users', value: '2.3M+' },
+            { label: isAr ? 'التقييم' : 'Rating', value: '4.8/5' },
+            { label: isAr ? 'السرعة' : 'Speed', value: '< 10s' },
+          ]}
+        />
+      </section>
 
       {/* <section className="text-center pb-16space-y-6">
         <h1 className="text-4xl font-extrabold">{t.hero.title}</h1>
@@ -55,6 +79,46 @@ export default function HomeTemplate({ locale }: Props) {
       </section>
           
      <Hvideo src="/ge44.mp4" className="lg:w-2/3 m-auto bg-gray-200 flex flex-col md:flex-row justify-around items-center gap-2 p-4 md:p-2 relative" />
+      
+      {/* AI-OPTIMIZED KEY STATISTICS */}
+      <section className="container mx-auto px-4 my-12">
+        <KeyStats
+          title={isAr ? 'إحصائيات المنصة' : 'Platform Statistics'}
+          stats={[
+            {
+              label: isAr ? 'إجمالي التحويلات' : 'Total Conversions',
+              value: '5.7M+',
+              description: isAr ? 'ملفات تمت معالجتها بنجاح' : 'Files processed successfully',
+            },
+            {
+              label: isAr ? 'متوسط السرعة' : 'Average Speed',
+              value: '< 10s',
+              description: isAr ? 'لكل تحويل' : 'Per conversion',
+            },
+            {
+              label: isAr ? 'تقييم المستخدمين' : 'User Rating',
+              value: '4.8/5',
+              description: isAr ? 'بناءً على 1,247 مراجعة' : 'Based on 1,247 reviews',
+            },
+            {
+              label: isAr ? 'وقت التشغيل' : 'Uptime',
+              value: '99.9%',
+              description: isAr ? 'توافر الخدمة' : 'Service availability',
+            },
+            {
+              label: isAr ? 'الدول' : 'Countries',
+              value: '150+',
+              description: isAr ? 'مستخدمون حول العالم' : 'Users worldwide',
+            },
+            {
+              label: isAr ? 'اللغات' : 'Languages',
+              value: '2',
+              description: isAr ? 'العربية والإنجليزية' : 'Arabic & English',
+            },
+          ]}
+        />
+      </section>
+
       <Faqs /> 
 
       <section className="bg-secondary w-full flex flex-col md:flex-row justify-around items-center gap-2 p-20 relative">
