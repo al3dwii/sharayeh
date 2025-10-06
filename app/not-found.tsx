@@ -1,5 +1,8 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { siteUrl } from '@/utils/seo';
+import { Footer } from '@/components/custom/footer';
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export const metadata = {
   title: '404 - Page Not Found | Sharayeh',
@@ -12,8 +15,60 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="text-center">
+    <div className="flex min-h-screen flex-col">
+      {/* Top Navigation Bar */}
+      <nav className="border-b bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          {/* Logo */}
+          <Link href="/ar" className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="Sharayeh Logo" 
+              width={40} 
+              height={40}
+            />
+            <span className="text-xl font-semibold">Sharayeh</span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/ar" className="text-gray-600 hover:text-gray-900 transition">
+              الرئيسية
+            </Link>
+            <Link href="/en" className="text-gray-600 hover:text-gray-900 transition">
+              Home
+            </Link>
+            <Link href="/ar/pricing" className="text-gray-600 hover:text-gray-900 transition">
+              الأسعار
+            </Link>
+          </div>
+
+          {/* User Button or Sign In */}
+          <div className="flex items-center gap-4">
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 transition"
+              >
+                تسجيل الدخول
+              </Link>
+              <Link
+                href="/sign-up"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition"
+              >
+                التسجيل
+              </Link>
+            </SignedOut>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="flex flex-1 items-center justify-center px-4 py-16">
+        <div className="text-center">
         <h1 className="mb-4 text-6xl font-bold text-gray-900 dark:text-gray-100">
           404
         </h1>
@@ -55,7 +110,11 @@ export default function NotFound() {
             </Link>
           </div>
         </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Structured Data for 404 */}
       <script
