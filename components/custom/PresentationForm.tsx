@@ -33,12 +33,12 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
   onOpenTemplateModal,                      // ✅ destructure the new prop
 }) => {
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="w-full">
       <fieldset disabled={isSubmitting || isLoading} className="w-full">
         {/* --- file upload --- */}
-        <div className="flex m-auto w-5/6 flex-col lg:flex-row justify-between">
-          <div className="flex justify-center p-2 m-auto">
-            <div className="mb-4 flex-1 lg:ml-2">
+        <div className="flex m-auto w-full max-w-2xl flex-col px-4 sm:px-6">
+          <div className="flex justify-center p-2 w-full">
+            <div className="mb-4 w-full">
               <input
                 type="file"
                 name="document"
@@ -46,18 +46,18 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
                 accept=".docx"
                 onChange={handleFileChange}
                 disabled={topicValue !== ""}
-                className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 text-sm sm:text-base leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
               />
             </div>
           </div>
         </div>
 
         {/* --- choose template button --- */}
-        <div className="mb-4 flex justify-center">
+        <div className="mb-4 flex justify-center px-4">
           <button
             type="button"
             onClick={onOpenTemplateModal}     // ✅ use the callback
-            className="md:w-1/4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+            className="w-full max-w-md sm:max-w-sm bg-gray-200 text-gray-800 text-sm sm:text-base py-2 sm:py-3 px-4 rounded hover:bg-gray-300 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
           >
             {selectedTemplate
               ? `تم اختيار القالب: ${selectedTemplate.name}`
@@ -66,10 +66,10 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
         </div>
 
         {/* --- submit button --- */}
-        <div className="flex justify-center">
+        <div className="flex justify-center px-4">
           <button
             type="submit"
-            className="md:w-1/4 center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out"
+            className="w-full max-w-md sm:max-w-sm bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm sm:text-base py-2 sm:py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting || isLoading}
           >
             {isSubmitting ? <Loading /> : "إرسال"}

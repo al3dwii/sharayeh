@@ -39,7 +39,7 @@ export default function Converter({
   }
 
   return (
-     <div className="m-2 p-2">
+     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2">
           <CreatePresentation />
         </div>
   );

@@ -13,13 +13,13 @@ export default function PlanWrapper({ children }: PlanWrapperProps) {
   const plan = useUserPlan();
   return (
     <>
-      {plan === 'Free' && 
+      {/* {plan === 'Free' && 
 
       <div className="b-8">
 
       <WatermarkRibbon />
         </div>
-      }
+      } */}
     
       {children}
     </>

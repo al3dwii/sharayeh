@@ -40,12 +40,12 @@ export default function LandingTemplate({
     : getEnVariations(row.label_en, row.dir);
 
   return (
-    <main className="container mt-16 pt-16 min-h-screen mx-auto py-12 space-y-12">
-      <header className="text-center space-y-3">
-        <h1 className="text-3xl font-bold">
+    <main className="container mt-12 sm:mt-16 pt-12 sm:pt-16 min-h-screen mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
+      <header className="text-center space-y-2 sm:space-y-3" dir={isAr ? 'rtl' : 'ltr'}>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">
           {isAr ? row.label_ar : row.label_en}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-muted-foreground">
           {dirLabel(row, isAr)}
         </p>
       </header>
@@ -75,16 +75,21 @@ export default function LandingTemplate({
 
       {/* Related converter links (contextual suggestions) */}
       {isAr && related.length > 0 && (
-        <section className="mt-12" dir="rtl">
+        <section className="mt-8 sm:mt-12 px-4" dir="rtl">
 
       <script src="https://widget.senja.io/widget/004b216b-7496-4544-943b-fada94eb906d/platform.js" type="text/javascript" async></script>
 <div className="senja-embed" data-id="004b216b-7496-4544-943b-fada94eb906d" data-mode="shadow" data-lazyload="false"></div>
 
-          <h3 className="text-xl font-bold">تم البحث أيضاً عن</h3>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <h3 className="text-lg sm:text-xl font-bold mb-4">تم البحث أيضاً عن</h3>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {related.map((c) => (
-              <li key={c.slug_en}>
-                <Link href={`/ar/tools/${c.slug_en}`}>{c.label_ar}</Link>
+              <li key={c.slug_en} className="text-sm sm:text-base">
+                <Link 
+                  href={`/ar/tools/${c.slug_en}`}
+                  className="hover:underline hover:text-blue-600 transition-colors"
+                >
+                  {c.label_ar}
+                </Link>
               </li>
             ))}
           </ul>

@@ -59,7 +59,8 @@ const CreatePresentation: React.FC = () => {
   const locale = (pathname?.split("/")[1] === "ar") ? "ar" : "en";
 
   // Preserve querystring on redirect, if you want:
-  const currentPath = pathname + (search?.toString() ? `?${search!.toString()}` : "");
+  const searchString = search ? search.toString() : "";
+  const currentPath = pathname + (searchString ? `?${searchString}` : "");
 
   const authLink = (slug: "sign-in" | "sign-up") =>
     `/${locale}/${slug}?redirect_url=${encodeURIComponent(currentPath || "/")}`;
