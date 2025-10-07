@@ -118,12 +118,7 @@ const CreatePresentation: React.FC = () => {
   const MAX_TOPIC_LENGTH = 50;
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
   const ALLOWED_FILE_TYPES = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-    "image/svg+xml",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
   const generateUniqueName = (): string => {
@@ -179,14 +174,7 @@ const CreatePresentation: React.FC = () => {
     e.preventDefault();
 
     if (!userData) {
-      setModalContent({
-        title: "سجّل الدخول أو أنشئ حسابًا",
-        message: "يلزم تسجيل الدخول لإرسال الملف ومعالجته.",
-        actionText: "تسجيل / دخول",
-        actionLink: authLink("sign-in"),
-        iconType: "info",
-      });
-      setIsCustomModalOpen(true);
+      router.push("/sign-in");
       return;
     }
 
@@ -530,7 +518,21 @@ const CreatePresentation: React.FC = () => {
   }, []);
 
   const openTemplatePicker = () => {
-    // Allow anyone to open the template modal without authentication
+    // User not logged in → show “Sign‑in / Sign‑up” modal
+    if (!userData) {
+      setModalContent({
+        title: "سجّل الدخول أو أنشئ حسابًا",
+        message: "يلزم تسجيل الدخول حتى تتمكن من اختيار القالب.",
+        actionText: "تسجيل / دخول",
+        // Clerk accepts redirect_url; we URL‑encode the current path
+        actionLink: authLink("sign-in"),   // or authLink("sign-in")
+
+        iconType: "info",
+      });
+      setIsCustomModalOpen(true);
+      return;
+    }
+    // User is logged in → open the real template modal
     setIsTemplateModalOpen(true);
   };
 

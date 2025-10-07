@@ -284,7 +284,7 @@ const Notifications: React.FC<NotificationsProps> = ({ status }) => {
         break;
 
       case 'invalid-file-type':
-        displayWarningToast('نوع الملف غير صالح. يرجى تحميل ملف .docx.');
+        displayWarningToast('نوع الملف غير صالح. يرجى تحميل ملف صورة (JPG, PNG, GIF, WEBP, SVG).');
         break;
 
       case 'insufficient-credits':

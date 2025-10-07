@@ -1,4 +1,3 @@
-"use client"
 import Link from 'next/link';
 import { getAllTools } from '@/lib/tools';
 import StructuredData from '@/components/StructuredData';

@@ -27,17 +27,13 @@ export async function GET(req: NextRequest) {
   try {
     console.log('🔍 Incoming GET request to /api/templates');
 
-    // 1. Authenticate the User
+    // 1. Authenticate the User (Optional - Allow guest access to free templates)
     const { userId } = getAuth(req);
-    console.log('👤 Authenticated User ID:', userId);
-
-    if (!userId) {
-      console.log('Response: Unauthorized - Missing userId');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    console.log('👤 Authenticated User ID:', userId || 'Guest User');
 
     // 2. Determine User Tier Using the Utility Function
-    const userTier: Tier = await getHighestUserTier(userId);
+    // If no userId, default to 'free' tier
+    const userTier: Tier = userId ? await getHighestUserTier(userId) : 'free';
     console.log('🟢 Resolved User Tier:', userTier);
 
     // 3. Map Tier to Google Drive Folder IDs
