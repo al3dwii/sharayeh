@@ -11,10 +11,11 @@
     "add:converter": "tsx scripts/add-converter.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.705.0",
+    "@aws-sdk/client-s3": "^3.901.0",
+    "@aws-sdk/s3-request-presigner": "^3.901.0",
     "@clerk/clerk-sdk-node": "^5.0.74",
     "@clerk/localizations": "^3.17.2",
-    "@clerk/nextjs": "^6.25.4",
+    "@clerk/nextjs": "^5.7.1",
     "@clerk/themes": "^1.7.20",
     "@clerk/types": "^4.62.1",
     "@google-cloud/pubsub": "^4.8.0",

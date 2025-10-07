@@ -2,10 +2,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
-import { google } from 'googleapis';
-import { db } from '@/lib/db';
-import { pricingPlans, Plan } from '@/utils/planConfig';
-import { getHighestUserTier } from '@/utils/getHighestUserTier'; // Import the utility function
+import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getHighestUserTier } from '@/utils/getHighestUserTier';
 
 interface Template {
   id: string;
@@ -15,13 +15,19 @@ interface Template {
 }
 
 export const dynamic = 'force-dynamic';
-
-
-export const runtime = 'nodejs'; // Ensure Node.js runtime
-
+export const runtime = 'nodejs';
 
 // Define a union type for user tiers
 type Tier = 'free' | 'standard' | 'premium';
+
+// Initialize S3 Client
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+  },
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,102 +37,109 @@ export async function GET(req: NextRequest) {
     const { userId } = getAuth(req);
     console.log('👤 Authenticated User ID:', userId || 'Guest User');
 
-    // 2. Determine User Tier Using the Utility Function
-    // If no userId, default to 'free' tier
+    // 2. Determine User Tier
     const userTier: Tier = userId ? await getHighestUserTier(userId) : 'free';
     console.log('🟢 Resolved User Tier:', userTier);
 
-    // 3. Map Tier to Google Drive Folder IDs
-    const FOLDER_IDS: Record<Tier, string> = {
-      free: process.env.FREE_TEMPLATES_FOLDER_ID || '',
-      standard: process.env.STANDARD_TEMPLATES_FOLDER_ID || '',
-      premium: process.env.PREMIUM_TEMPLATES_FOLDER_ID || '',
+    // 3. Map Tier to S3 Folder Prefixes
+    const FOLDER_PREFIXES: Record<Tier, string> = {
+      free: process.env.FREE_TEMPLATES_FOLDER || 'free',
+      standard: process.env.STANDARD_TEMPLATES_FOLDER || 'standard',
+      premium: process.env.PREMIUM_TEMPLATES_FOLDER || 'premium',
     };
 
-    const folderId = FOLDER_IDS[userTier];
-    console.log('🔍 Resolved Folder ID:', folderId);
+    const folderPrefix = FOLDER_PREFIXES[userTier];
+    const bucketName = process.env.AWS_S3_BUCKET_NAME || 'isharayeh';
+    
+    console.log('🔍 Resolved S3 Folder Prefix:', folderPrefix);
+    console.log('🪣 S3 Bucket:', bucketName);
 
-    if (!folderId) {
-      console.log('⚠️ Webhook URL not configured for tier:', userTier);
+    if (!folderPrefix) {
+      console.log('⚠️ Folder prefix not configured for tier:', userTier);
       return NextResponse.json(
-        { error: `No folder ID configured for tier: ${userTier}` },
+        { error: `No folder prefix configured for tier: ${userTier}` },
         { status: 500 }
       );
     }
 
-    // 4. Initialize Google Drive API
-    const drive = google.drive({
-      version: 'v3',
-      auth: process.env.GOOGLE_API_KEY,
+    // 4. List objects in S3 to find categories (subfolders)
+    const listCommand = new ListObjectsV2Command({
+      Bucket: bucketName,
+      Prefix: `${folderPrefix}/`,
+      Delimiter: '/',
     });
 
-    // 5. Fetch Sub-Folders (Categories) Within This Tier's Folder
-    const foldersResponse = await drive.files.list({
-      q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder'`,
-      fields: 'files(id, name)',
-    });
-
-    const categories =
-      foldersResponse.data.files?.map((folder) => ({
-        name: folder.name!.toLowerCase(),
-        folderId: folder.id,
-      })) || [];
+    const listResponse = await s3Client.send(listCommand);
+    
+    // Extract category folders from CommonPrefixes
+    const categories = (listResponse.CommonPrefixes || [])
+      .map((prefix) => {
+        const categoryName = prefix.Prefix?.replace(`${folderPrefix}/`, '').replace('/', '');
+        return categoryName ? { name: categoryName.toLowerCase(), prefix: prefix.Prefix } : null;
+      })
+      .filter((cat): cat is { name: string; prefix: string } => cat !== null);
 
     console.log('📂 Retrieved Categories:', categories);
 
-  
-
-    // 6. For Each Category Sub-Folder, Fetch Presentation Files
+    // 5. For Each Category, Fetch Template Files
     let templates: Template[] = [];
+    
     for (const category of categories) {
       console.log(`🔍 Fetching templates for category: ${category.name}`);
 
-      const response = await drive.files.list({
-        q: `mimeType='application/vnd.google-apps.presentation' and '${category.folderId}' in parents`,
-        fields: 'files(id, name, thumbnailLink)',
+      const categoryListCommand = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: category.prefix,
       });
-      // 2. default
-      const files = response.data.files ?? [];
 
-      // 3. filter out any missing ids/names
-      const validFiles = files.filter(
-        (f): f is { id: string; name: string; thumbnailLink?: string } =>
-          typeof f.id === 'string' && typeof f.name === 'string'
+      const categoryResponse = await s3Client.send(categoryListCommand);
+      const files = categoryResponse.Contents || [];
+
+      // Filter for .pptx files only
+      const pptxFiles = files.filter(
+        (file) => file.Key && (file.Key.endsWith('.pptx') || file.Key.endsWith('.ppt'))
       );
 
+      for (const file of pptxFiles) {
+        if (!file.Key) continue;
 
-      const categoryTemplates: Template[] = validFiles.map((file) => ({
+        const fileName = file.Key.split('/').pop() || file.Key;
+        const fileNameWithoutExt = fileName.replace(/\.(pptx|ppt)$/, '');
 
-      // const categoryTemplates: Template[] =
-      //   response.data.files?.map((file) => ({
-          id: file.id,
-          name: file.name,
-          preview: file.thumbnailLink || '',
+        // Generate a signed URL for the file (valid for 1 hour)
+        const getObjectCommand = new GetObjectCommand({
+          Bucket: bucketName,
+          Key: file.Key,
+        });
+        
+        const signedUrl = await getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 });
+
+        templates.push({
+          id: file.Key, // Use S3 key as ID
+          name: fileNameWithoutExt,
+          preview: signedUrl, // Use signed URL as preview (can be thumbnail if you generate them)
           category: category.name,
-        })) || [];
+        });
+      }
 
-      templates = templates.concat(categoryTemplates);
-      console.log(`✅ Retrieved ${categoryTemplates.length} templates for category: ${category.name}`);
+      console.log(`✅ Retrieved ${pptxFiles.length} templates for category: ${category.name}`);
     }
 
-    // 7. Return All Templates in JSON
+    // 6. Return All Templates
     console.log('📊 Total Templates Retrieved:', templates.length);
     return NextResponse.json({ templates });
+    
   } catch (error: any) {
-    console.error('❌ Error fetching templates:', error);
+    console.error('❌ Error fetching templates from S3:', error);
 
-    // Enhanced Error Handling
-    if (error.response) {
-      // Errors from Google Drive API
-      console.error('⚠️ Google Drive API Response Status:', error.response.status);
-      console.error('⚠️ Google Drive API Response Data:', error.response.data);
-    } else if (error.request) {
-      // No response received from Google Drive API
-      console.error('⚠️ No response received from Google Drive API.');
-    } else {
-      // Other errors
-      console.error('⚠️ Error setting up Google Drive API request:', error.message);
+    if (error.$metadata) {
+      console.error('⚠️ AWS S3 Error:', {
+        statusCode: error.$metadata.httpStatusCode,
+        requestId: error.$metadata.requestId,
+      });
     }
+    
+    console.error('⚠️ Error details:', error.message);
 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
