@@ -1,7 +1,7 @@
 // /src/app/api/templates/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     console.log('🔍 Incoming GET request to /api/templates');
 
     // 1. Authenticate the User (Optional - for future tier-based features)
-    const { userId } = getAuth(req);
+    const { userId } = auth();
     console.log('👤 Authenticated User ID:', userId || 'Guest User');
 
     // 2. All users see all templates (no tier restrictions)
