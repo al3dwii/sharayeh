@@ -11,6 +11,7 @@ interface Template {
   name: string;
   preview: string;
   category: string;
+  downloadUrl?: string; // S3 signed URL for downloading the actual PPTX file
 }
 
 export const dynamic = 'force-dynamic';
@@ -81,18 +82,19 @@ export async function GET(req: NextRequest) {
         const fileName = file.Key.split('/').pop() || file.Key;
         const fileNameWithoutExt = fileName.replace(/\.(pptx|ppt)$/, '');
 
-        // Generate a signed URL for the file (valid for 1 hour)
+        // Generate a signed URL for the file download (valid for 1 hour)
         const getObjectCommand = new GetObjectCommand({
           Bucket: bucketName,
           Key: file.Key,
         });
         
-        const signedUrl = await getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 });
+        const downloadUrl = await getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 });
 
         templates.push({
           id: file.Key, // Use S3 key as ID
           name: fileNameWithoutExt,
-          preview: signedUrl, // Use signed URL as preview (can be thumbnail if you generate them)
+          preview: '/logo.png', // Use placeholder image for now (TODO: generate thumbnails)
+          downloadUrl: downloadUrl, // Add download URL for later use
           category: category.name,
         });
       }
