@@ -19,7 +19,7 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   // 1) protect everything except our public routes
   if (!isPublicRoute(req)) {
-    await auth.protect();
+    auth().protect();
   }
   // 2) then run your i18n middleware
   return intlMiddleware(req);
