@@ -12,12 +12,17 @@ export async function GET() {
     if (!process.env.AWS_ACCESS_KEY_ID) missingVars.push('AWS_ACCESS_KEY_ID');
     if (!process.env.AWS_SECRET_ACCESS_KEY) missingVars.push('AWS_SECRET_ACCESS_KEY');
     if (!process.env.AWS_S3_BUCKET_NAME) missingVars.push('AWS_S3_BUCKET_NAME');
+    
+    // Debug: Show partial credentials to identify which account is being used
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
+    const accessKeyPreview = accessKeyId ? `${accessKeyId.substring(0, 8)}...${accessKeyId.substring(accessKeyId.length - 4)}` : 'not set';
 
     if (missingVars.length > 0) {
       return NextResponse.json({
         success: false,
         error: 'Missing environment variables',
         missing: missingVars,
+        accessKeyPreview,
         available: {
           AWS_REGION: !!process.env.AWS_REGION,
           AWS_ACCESS_KEY_ID: !!process.env.AWS_ACCESS_KEY_ID,
@@ -49,6 +54,7 @@ export async function GET() {
       config: {
         region: process.env.AWS_REGION,
         bucket: process.env.AWS_S3_BUCKET_NAME,
+        accessKeyPreview, // Show which credentials are being used
         hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
         hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
       },
@@ -59,6 +65,9 @@ export async function GET() {
     });
 
   } catch (error: any) {
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
+    const accessKeyPreview = accessKeyId ? `${accessKeyId.substring(0, 8)}...${accessKeyId.substring(accessKeyId.length - 4)}` : 'not set';
+    
     return NextResponse.json({
       success: false,
       error: error.message || 'Unknown error',
@@ -67,6 +76,7 @@ export async function GET() {
       config: {
         region: process.env.AWS_REGION,
         bucket: process.env.AWS_S3_BUCKET_NAME,
+        accessKeyPreview, // Show which credentials failed
         hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
         hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
       }

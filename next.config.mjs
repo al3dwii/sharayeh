@@ -14,8 +14,9 @@ const nextConfig = {
     // If you're on Next 13.1+ use remotePatterns (recommended)
     remotePatterns: [
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
-      // add any others you use:
-      { protocol: 'https', hostname: 'drive.google.com' }, // if you ever embed direct links
+      { protocol: 'https', hostname: 'drive.google.com' },
+      { protocol: 'https', hostname: 'isharayeh.s3.eu-north-1.amazonaws.com' }, // S3 thumbnails
+      { protocol: 'https', hostname: '*.s3.*.amazonaws.com' }, // All S3 regions
     ],
     // For older projects: domains: ['lh3.googleusercontent.com', 'drive.google.com'],
   },
