@@ -43,7 +43,7 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
                 type="file"
                 name="document"
                 id="document"
-                accept=".docx"
+                accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/svg+xml,.jpg,.jpeg,.png,.gif,.webp,.svg"
                 onChange={handleFileChange}
                 disabled={topicValue !== ""}
                 className="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 text-sm sm:text-base leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
