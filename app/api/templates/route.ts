@@ -84,8 +84,21 @@ export async function GET(req: NextRequest) {
         const fileName = file.Key.split('/').pop() || file.Key;
         const fileNameWithoutExt = fileName.replace(/\.(pptx|ppt)$/, '');
 
-        // Use placeholder for preview (thumbnail generation can be added later)
-        const previewUrl = '/logo.png';
+        // Check if thumbnail exists (same path but .png extension)
+        const thumbnailKey = file.Key.replace(/\.(pptx|ppt)$/, '.png');
+        let previewUrl = '/logo.png'; // Default fallback
+
+        // Generate signed URL for thumbnail
+        try {
+          const thumbnailCommand = new GetObjectCommand({
+            Bucket: bucketName,
+            Key: thumbnailKey,
+          });
+          previewUrl = await getSignedUrl(s3Client, thumbnailCommand, { expiresIn: 3600 });
+        } catch (error: any) {
+          // Thumbnail doesn't exist, use fallback
+          console.log(`  ⚠️  No thumbnail for ${file.Key}, using fallback`);
+        }
 
         // Generate a signed URL for the file download (valid for 1 hour)
         const getObjectCommand = new GetObjectCommand({
