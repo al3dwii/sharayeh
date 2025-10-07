@@ -163,11 +163,10 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
                     fill
                     sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                     style={{ objectFit: 'contain' }}
+                    unoptimized
                     onError={e => {
                       (e.currentTarget as HTMLImageElement).src = '/logo.png';
                     }}
-                    placeholder="blur"
-                    blurDataURL="/logo.png"
                   />
                 </div>
                 <div className="p-2">
