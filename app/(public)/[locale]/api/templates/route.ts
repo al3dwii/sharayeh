@@ -86,16 +86,16 @@ export async function GET(req: NextRequest) {
         const thumbnailKey = file.Key.replace(/\.(pptx|ppt)$/, '.png');
         let previewUrl = '/logo.png'; // Default fallback
 
+        // Generate signed URL for thumbnail (if it exists in S3, the URL will work)
         try {
-          // Try to get thumbnail
           const thumbnailCommand = new GetObjectCommand({
             Bucket: bucketName,
             Key: thumbnailKey,
           });
           previewUrl = await getSignedUrl(s3Client, thumbnailCommand, { expiresIn: 3600 });
-        } catch (error) {
-          // Thumbnail doesn't exist, use fallback
-          console.log(`  ℹ️  No thumbnail for ${file.Key}, using fallback`);
+        } catch (error: any) {
+          // Failed to generate signed URL, use fallback
+          console.log(`  ⚠️  Error generating thumbnail URL for ${file.Key}:`, error.message);
         }
 
         // Generate a signed URL for the file download (valid for 1 hour)
