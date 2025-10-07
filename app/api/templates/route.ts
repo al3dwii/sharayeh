@@ -31,7 +31,14 @@ export async function GET(req: NextRequest) {
     console.log('🔍 Incoming GET request to /api/templates');
 
     // 1. Authenticate the User (Optional - for future tier-based features)
-    const { userId } = auth();
+    // Wrap auth() in try-catch to handle unauthenticated users gracefully
+    let userId: string | null = null;
+    try {
+      const authResult = auth();
+      userId = authResult.userId;
+    } catch (error) {
+      console.log('⚠️ Auth check failed, treating as guest user');
+    }
     console.log('👤 Authenticated User ID:', userId || 'Guest User');
 
     // 2. All users see all templates (no tier restrictions)
