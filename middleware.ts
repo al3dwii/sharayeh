@@ -13,14 +13,15 @@ const isPublicRoute = createRouteMatcher([
   "/pricing",        // bare pricing
   "/(en|ar)",        // /en or /ar
   "/(en|ar)/pricing" ,// /en/pricing or /ar/pricing
-  "/:locale(en|ar)/:path*" 
+  "/:locale(en|ar)/:path*",
+  "/api/:path*"      // API routes are public (handle auth inside each route)
 ]);
 
 // Skip i18n middleware for API routes (they don't need locale prefixes)
 const isApiRoute = createRouteMatcher(['/api/:path*']);
 
 export default clerkMiddleware(async (auth, req) => {
-  // 1) protect everything except our public routes
+  // 1) protect everything except our public routes (including API routes)
   if (!isPublicRoute(req)) {
     auth().protect();
   }

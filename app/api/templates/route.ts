@@ -30,16 +30,11 @@ export async function GET(req: NextRequest) {
   try {
     console.log('🔍 Incoming GET request to /api/templates');
 
-    // 1. Authenticate the User (Optional - for future tier-based features)
-    // Wrap auth() in try-catch to handle unauthenticated users gracefully
-    let userId: string | null = null;
-    try {
-      const authResult = auth();
-      userId = authResult.userId;
-    } catch (error) {
-      console.log('⚠️ Auth check failed, treating as guest user');
-    }
-    console.log('👤 Authenticated User ID:', userId || 'Guest User');
+    // 1. Get user info (optional - allows both authenticated and guest users)
+    // Note: auth() doesn't throw errors in Clerk v6, it just returns null userId for guests
+    const authResult = auth();
+    const userId = authResult?.userId || null;
+    console.log('👤 User ID:', userId || 'Guest User');
 
     // 2. All users see all templates (no tier restrictions)
     const bucketName = process.env.AWS_S3_BUCKET_NAME || 'isharayeh';
