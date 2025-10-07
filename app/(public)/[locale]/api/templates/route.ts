@@ -5,7 +5,6 @@ import { getAuth } from '@clerk/nextjs/server';
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getHighestUserTier } from '@/utils/getHighestUserTier';
 
 interface Template {
   id: string;
@@ -16,9 +15,6 @@ interface Template {
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-// Define a union type for user tiers
-type Tier = 'free' | 'standard' | 'premium';
 
 // Initialize S3 Client
 const s3Client = new S3Client({
@@ -33,39 +29,18 @@ export async function GET(req: NextRequest) {
   try {
     console.log('🔍 Incoming GET request to /api/templates');
 
-    // 1. Authenticate the User (Optional - Allow guest access to free templates)
+    // 1. Authenticate the User (Optional - for future tier-based features)
     const { userId } = getAuth(req);
     console.log('👤 Authenticated User ID:', userId || 'Guest User');
 
-    // 2. Determine User Tier
-    const userTier: Tier = userId ? await getHighestUserTier(userId) : 'free';
-    console.log('🟢 Resolved User Tier:', userTier);
-
-    // 3. Map Tier to S3 Folder Prefixes
-    const FOLDER_PREFIXES: Record<Tier, string> = {
-      free: process.env.FREE_TEMPLATES_FOLDER || 'free',
-      standard: process.env.STANDARD_TEMPLATES_FOLDER || 'standard',
-      premium: process.env.PREMIUM_TEMPLATES_FOLDER || 'premium',
-    };
-
-    const folderPrefix = FOLDER_PREFIXES[userTier];
+    // 2. All users see all templates (no tier restrictions)
     const bucketName = process.env.AWS_S3_BUCKET_NAME || 'isharayeh';
     
-    console.log('🔍 Resolved S3 Folder Prefix:', folderPrefix);
     console.log('🪣 S3 Bucket:', bucketName);
 
-    if (!folderPrefix) {
-      console.log('⚠️ Folder prefix not configured for tier:', userTier);
-      return NextResponse.json(
-        { error: `No folder prefix configured for tier: ${userTier}` },
-        { status: 500 }
-      );
-    }
-
-    // 4. List objects in S3 to find categories (subfolders)
+    // 3. List category folders at root level (business, education, children, collection)
     const listCommand = new ListObjectsV2Command({
       Bucket: bucketName,
-      Prefix: `${folderPrefix}/`,
       Delimiter: '/',
     });
 
@@ -74,7 +49,7 @@ export async function GET(req: NextRequest) {
     // Extract category folders from CommonPrefixes
     const categories = (listResponse.CommonPrefixes || [])
       .map((prefix) => {
-        const categoryName = prefix.Prefix?.replace(`${folderPrefix}/`, '').replace('/', '');
+        const categoryName = prefix.Prefix?.replace('/', '');
         return categoryName ? { name: categoryName.toLowerCase(), prefix: prefix.Prefix } : null;
       })
       .filter((cat): cat is { name: string; prefix: string } => cat !== null);
@@ -132,6 +107,10 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error('❌ Error fetching templates from S3:', error);
 
+    // Check if AWS credentials are configured
+    const hasCredentials = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
+    console.error('⚠️ AWS Credentials configured:', hasCredentials);
+
     if (error.$metadata) {
       console.error('⚠️ AWS S3 Error:', {
         statusCode: error.$metadata.httpStatusCode,
@@ -140,8 +119,18 @@ export async function GET(req: NextRequest) {
     }
     
     console.error('⚠️ Error details:', error.message);
+    console.error('⚠️ Error name:', error.name);
 
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // Return more detailed error in development
+    const isDev = process.env.NODE_ENV === 'development';
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      ...(isDev && {
+        details: error.message,
+        hasCredentials,
+        errorName: error.name,
+      })
+    }, { status: 500 });
   }
 }
 
