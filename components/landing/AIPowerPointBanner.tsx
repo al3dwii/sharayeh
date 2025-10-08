@@ -23,7 +23,7 @@ export default function AIPowerPointBanner({ locale, currentSlug }: AIPowerPoint
 
   return (
     <div 
-      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg sticky top-0 z-40"
       dir={isAr ? 'rtl' : 'ltr'}
     >
       <div className="container mx-auto px-4 sm:px-6">
