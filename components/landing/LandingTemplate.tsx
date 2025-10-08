@@ -45,7 +45,7 @@ export default function LandingTemplate({
       {/* AI PowerPoint Creation Banner - Shows on all tools except create-powerpoint-with-ai */}
       <AIPowerPointBanner locale={locale} currentSlug={row.slug_en} />
       
-      <main className="container mt-4 sm:mt-6 pt-12 sm:pt-16 min-h-screen mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
+      <main className="container pt-[180px] min-h-screen mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
         <header className="text-center space-y-2 sm:space-y-3" dir={isAr ? 'rtl' : 'ltr'}>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">
             {isAr ? row.label_ar : row.label_en}
