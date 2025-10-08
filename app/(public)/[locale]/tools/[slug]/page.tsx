@@ -52,7 +52,8 @@ export async function generateMetadata({
   const isAr = locale === 'ar';
   const [fromExt, toExt] = row.dir.split('→');
 
-  // Special handling for pptx-view-online with optimized Arabic keywords
+  // Special handling for specific tools with custom SEO
+  const isCreatePowerPointOnline = slug === 'create-powerpoint-with-ai';
   const isPptxViewOnline = slug === 'pptx-view-online';
   
   const title = isAr ? `${row.label_ar} | Sharayeh` : `${row.label_en} | Sharayeh`;
@@ -60,35 +61,71 @@ export async function generateMetadata({
   let description: string;
   let keywords: string[];
 
-  if (isPptxViewOnline) {
+  if (isCreatePowerPointOnline) {
+    // Primary keywords for CREATE PowerPoint online (user intent: create/make)
     description = isAr
-      ? `بوربوينت اون لاين مجاني - افتح وشاهد ملفات بوربوينت اونلاين مباشرة من المتصفح دون تثبيت برامج. برنامج عرض بوربوينت أونلاين يدعم PPTX وPPT على جميع الأجهزة.`
-      : `Free PowerPoint viewer online - Open and view PPTX and PPT files directly in your browser without installing software. View PowerPoint presentations online on any device.`;
+      ? `بوربوينت اون لاين مجاني - انشئ وصمم عروض بوربوينت اونلاين احترافية باستخدام الذكاء الاصطناعي دون تثبيت برامج. اصنع عرض تقديمي بوربوينت في ثوانٍ من المتصفح.`
+      : `Free PowerPoint online - Create and design professional PowerPoint presentations with AI without installing software. Make PowerPoint presentations in seconds from your browser.`;
     
     keywords = isAr
       ? [
           'بوربوينت اون لاين',
           'بوربوينت اونلاين',
-          'عرض بوربوينت اونلاين',
+          'انشاء بوربوينت اون لاين',
+          'عمل بوربوينت اونلاين',
+          'تصميم بوربوينت اون لاين',
           'برنامج بوربوينت اون لاين',
-          'فتح بوربوينت اونلاين',
-          'مشاهدة بوربوينت اون لاين',
-          'بوربوينت أون لاين مجاني',
-          'PowerPoint viewer online',
-          'عرض PPTX اونلاين',
-          'فتح ملفات بوربوينت بدون برنامج',
+          'صنع بوربوينت اونلاين',
+          'إنشاء عرض تقديمي اون لاين',
+          'بوربوينت اون لاين مجاني',
+          'PowerPoint online maker',
+          'create PowerPoint online',
+          'الذكاء الاصطناعي بوربوينت',
           row.label_ar,
         ]
       : [
-          'PowerPoint online viewer',
+          'PowerPoint online',
+          'create PowerPoint online',
+          'PowerPoint maker online',
+          'make PowerPoint online free',
+          'PowerPoint online creator',
+          'design PowerPoint online',
+          'PowerPoint online free',
+          'AI PowerPoint maker',
+          'PowerPoint presentation maker',
+          'create presentation online',
+          row.label_en,
+        ];
+  } else if (isPptxViewOnline) {
+    // Keywords for VIEW PowerPoint online (user intent: view/open/read)
+    description = isAr
+      ? `عرض بوربوينت - افتح وشاهد ملفات PPTX وPPT عبر الإنترنت مجاناً دون تثبيت برامج. قارئ بوربوينت لفتح ومشاهدة العروض التقديمية على جميع الأجهزة.`
+      : `View PowerPoint - Open and view PPTX and PPT files online for free without installing software. PowerPoint viewer to open and read presentations on any device.`;
+    
+    keywords = isAr
+      ? [
+          'عرض بوربوينت',
+          'فتح بوربوينت',
+          'مشاهدة بوربوينت',
+          'قارئ بوربوينت',
+          'فتح ملفات PPTX',
+          'عرض PPTX',
+          'PowerPoint viewer',
+          'فتح ملفات بوربوينت بدون برنامج',
+          'مشاهدة عروض بوربوينت',
+          'قراءة بوربوينت',
+          row.label_ar,
+        ]
+      : [
+          'PowerPoint viewer online',
           'view PowerPoint online',
+          'open PowerPoint online',
           'PPTX viewer online',
           'PPT viewer online',
-          'open PowerPoint online',
-          'PowerPoint presentation viewer',
-          'free PowerPoint viewer',
-          'view PPTX online',
-          'PowerPoint online free',
+          'PowerPoint reader online',
+          'open PPTX online',
+          'view presentations online',
+          'PowerPoint file viewer',
           row.label_en,
         ];
   } else {
