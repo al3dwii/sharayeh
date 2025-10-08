@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import Balancer from "react-wrap-balancer";
 
 import { toast } from 'sonner';
