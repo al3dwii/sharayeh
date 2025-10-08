@@ -124,6 +124,7 @@ const CreatePresentation: React.FC = () => {
     "image/gif",
     "image/webp",
     "image/svg+xml",
+    "text/html",
   ];
 
   const generateUniqueName = (): string => {
