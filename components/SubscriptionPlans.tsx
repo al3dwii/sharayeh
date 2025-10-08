@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "@/i18n/navigation";
 import axios from 'axios';
 import { toast } from 'sonner';
 import PlanCard from './PlanCard';

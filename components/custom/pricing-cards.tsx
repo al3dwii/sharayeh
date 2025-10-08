@@ -3,7 +3,7 @@
 "use client";
 
 import { ReactElement } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Balancer from "react-wrap-balancer";
 import  Button from "@/components/ui/Button2";
 import * as Icons from "@/components/custom/icons";

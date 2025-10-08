@@ -1,10 +1,9 @@
 
 "use client";
 
-import Link from "next/link";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Montserrat } from "next/font/google";
 import { LayoutDashboard, Settings, PackageCheckIcon, LogOut, SubscriptIcon } from "lucide-react"; // Import LogOut icon
-import { usePathname, useRouter } from "next/navigation";
 import {cn} from '@/components/ui/cn';
 
 import { Tajawal } from "next/font/google";
@@ -53,7 +52,7 @@ export const Sidebar = () => {
   const handleLogout = async () => {
     try {
       await signOut(); // Sign out the user
-      router.push("/login"); // Redirect to the login page after logout
+      router.push("/"); // Redirect to the home page after logout
     } catch (error) {
       console.error("Error signing out:", error);
       // Optionally, display an error message to the user

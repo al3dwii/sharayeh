@@ -1,7 +1,7 @@
 'use client';
 
 import { LucideIcon } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { HOME_EN, HOME_AR, HomeCopy } from '@/content/home';
 import { LOCALES } from '@/utils/i18n';
 
