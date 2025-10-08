@@ -52,27 +52,66 @@ export async function generateMetadata({
   const isAr = locale === 'ar';
   const [fromExt, toExt] = row.dir.split('→');
 
+  // Special handling for pptx-view-online with optimized Arabic keywords
+  const isPptxViewOnline = slug === 'pptx-view-online';
+  
   const title = isAr ? `${row.label_ar} | Sharayeh` : `${row.label_en} | Sharayeh`;
 
-  const description = isAr
-    ? `أداة سحابية مجانية وسهلة ${row.label_ar} – حوّل ملفات ${fromExt} إلى ${toExt} في ثوانٍ مع الحفاظ على التنسيق والصور والخطوط.`
-    : `Free online tool for ${row.label_en}. Convert ${fromExt} to ${toExt} in seconds and keep fonts, images and formatting intact.`;
+  let description: string;
+  let keywords: string[];
+
+  if (isPptxViewOnline) {
+    description = isAr
+      ? `بوربوينت اون لاين مجاني - افتح وشاهد ملفات بوربوينت اونلاين مباشرة من المتصفح دون تثبيت برامج. برنامج عرض بوربوينت أونلاين يدعم PPTX وPPT على جميع الأجهزة.`
+      : `Free PowerPoint viewer online - Open and view PPTX and PPT files directly in your browser without installing software. View PowerPoint presentations online on any device.`;
+    
+    keywords = isAr
+      ? [
+          'بوربوينت اون لاين',
+          'بوربوينت اونلاين',
+          'عرض بوربوينت اونلاين',
+          'برنامج بوربوينت اون لاين',
+          'فتح بوربوينت اونلاين',
+          'مشاهدة بوربوينت اون لاين',
+          'بوربوينت أون لاين مجاني',
+          'PowerPoint viewer online',
+          'عرض PPTX اونلاين',
+          'فتح ملفات بوربوينت بدون برنامج',
+          row.label_ar,
+        ]
+      : [
+          'PowerPoint online viewer',
+          'view PowerPoint online',
+          'PPTX viewer online',
+          'PPT viewer online',
+          'open PowerPoint online',
+          'PowerPoint presentation viewer',
+          'free PowerPoint viewer',
+          'view PPTX online',
+          'PowerPoint online free',
+          row.label_en,
+        ];
+  } else {
+    description = isAr
+      ? `أداة سحابية مجانية وسهلة ${row.label_ar} – حوّل ملفات ${fromExt} إلى ${toExt} في ثوانٍ مع الحفاظ على التنسيق والصور والخطوط.`
+      : `Free online tool for ${row.label_en}. Convert ${fromExt} to ${toExt} in seconds and keep fonts, images and formatting intact.`;
+
+    keywords = isAr
+      ? [
+          `${fromExt} إلى ${toExt}`,
+          `تحويل ${fromExt} إلى ${toExt} أونلاين`,
+          `أداة ${row.label_ar}`,
+          row.label_ar,
+        ]
+      : [
+          `${fromExt} to ${toExt}`,
+          `${fromExt}-to-${toExt} online converter`,
+          `free ${row.label_en} tool`,
+          row.label_en,
+        ];
+  }
 
   const canonical = `${siteUrl}/${locale}/tools/${row.slug_en}`;
-
-  const keywords = isAr
-    ? [
-        `${fromExt} إلى ${toExt}`,
-        `تحويل ${fromExt} إلى ${toExt} أونلاين`,
-        `أداة ${row.label_ar}`,
-        row.label_ar,
-      ]
-    : [
-        `${fromExt} to ${toExt}`,
-        `${fromExt}-to-${toExt} online converter`,
-        `free ${row.label_en} tool`,
-        row.label_en,
-      ];
 
   return {
     title,
