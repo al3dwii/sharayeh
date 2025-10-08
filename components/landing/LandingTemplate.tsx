@@ -10,6 +10,7 @@ import LandingCopyAr from '@/components/landing/LandingCopyAr';
 import LandingCopyEn from '@/components/landing/LandingCopyEn';
 import FaqAr from '@/components/landing/FaqAr';
 import { FaqEn } from '@/components/FaqEn';
+import AIPowerPointBanner from '@/components/landing/AIPowerPointBanner';
 import Link from 'next/link';
 import type { Converter as ConverterRow } from '@/lib/server/converters';
 import { buildHowToSchema } from '@/components/StructuredData';
@@ -40,15 +41,19 @@ export default function LandingTemplate({
     : getEnVariations(row.label_en, row.dir);
 
   return (
-    <main className="container mt-12 sm:mt-16 pt-12 sm:pt-16 min-h-screen mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
-      <header className="text-center space-y-2 sm:space-y-3" dir={isAr ? 'rtl' : 'ltr'}>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">
-          {isAr ? row.label_ar : row.label_en}
-        </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          {dirLabel(row, isAr)}
-        </p>
-      </header>
+    <>
+      {/* AI PowerPoint Creation Banner - Shows on all tools except create-powerpoint-with-ai */}
+      <AIPowerPointBanner locale={locale} currentSlug={row.slug_en} />
+      
+      <main className="container mt-12 sm:mt-16 pt-12 sm:pt-16 min-h-screen mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8 sm:space-y-12">
+        <header className="text-center space-y-2 sm:space-y-3" dir={isAr ? 'rtl' : 'ltr'}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">
+            {isAr ? row.label_ar : row.label_en}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {dirLabel(row, isAr)}
+          </p>
+        </header>
 
       {/* Converter component */}
       <Converter
@@ -100,11 +105,9 @@ export default function LandingTemplate({
       <StructuredData data={buildHowToSchema(row, locale)} />
 
     </main>
+    </>
   );
 }
-
-// // components/landing/LandingTemplate.tsx
-// 'use client';
 
 // import dynamic from 'next/dynamic';
 // import Link from 'next/link';
