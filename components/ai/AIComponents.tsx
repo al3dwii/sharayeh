@@ -112,8 +112,6 @@ export function KeyStats({ title = 'Key Statistics', stats, className }: KeyStat
         'rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 my-8',
         className
       )}
-      itemScope
-      itemType="https://schema.org/Dataset"
     >
       <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
         <span className="text-2xl">📊</span>
@@ -125,7 +123,7 @@ export function KeyStats({ title = 'Key Statistics', stats, className }: KeyStat
             key={index}
             className="flex flex-col p-4 rounded-lg bg-gray-50 dark:bg-gray-800"
           >
-            <div className="text-3xl font-bold text-primary mb-1" itemProp="value">
+            <div className="text-3xl font-bold text-primary mb-1">
               {stat.value}
             </div>
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
